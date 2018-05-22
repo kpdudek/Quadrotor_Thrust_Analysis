@@ -28,7 +28,7 @@ for iN = 12000:20000
     T_mat = [T_mat;Ti];
 end
 
-disp('Linear system solution')
+fprintf('<< Linear system solution >>\n')
 coef = omega_mat\T_mat;
 ct = coef(1);
 dct = coef(2);
@@ -48,7 +48,7 @@ for j = 1:4
     omega_ave(j,3) = sum(omega_mat(j:4:end,3))/(6000-4750);
 end
 
-disp('Averaging solution')
+fprintf('\n<< Averaging solution >>\n')
 out = omega_ave\T_ave';
 print_coefficients('combined',out)
 av_ct = out(1);
@@ -72,7 +72,7 @@ for iN = 12000:20000
     T_mat = [T_mat;Ti];
 end
 
-disp('Independent Values')
+fprintf('\n<< Independent Values >>\n')
 out = omega_mat\T_mat;
 print_coefficients('all',out)
 % disp(out)
