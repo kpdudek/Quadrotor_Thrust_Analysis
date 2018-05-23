@@ -106,10 +106,10 @@ cq3 = out(11);
 cq4 = out(12);
 
 function use_coefficients(coef,coef_ave,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1)
+T_plot = [];
+T_av_plot = [];
 %fig = figure('Visible','on','Name','Check Coefficients');
 for i = 1:len_n1
-    T_plot = [];
-    T_av_plot = [];
     ct = coef(1,i);
     dct = coef(2, i);
     cq = coef(3,i);

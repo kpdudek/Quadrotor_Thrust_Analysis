@@ -6,26 +6,21 @@ file = 'R2_2018_05_01_Thrust_Acro';
 [ffz,ftx,fty,ftz,t_sl] = ATI_AXIA80_LOG_Processor_V2(file);
 [o2_init_1,ty_init_1] = find_peaks(o2,tp,fty,t_sl);
 
-%Beginning of the signal analysis
+%
 s1=condition(o2_init_1);
 s2=condition(ty_init_1);
 
-%Setup of variables for use in looping for best resample and offset
 p=50:3:160;
 q=10;
 lags=-250:250;
 Np=length(p);
 Nlags=length(lags);
 
-%Empty matrix to contain correlation between data
 scores=zeros(Np,Nlags);
 
-%Running data to find best correlation and the indexes for offset and lag
 run_max = 0;
 run_ip = 0;
 run_iLag = 0;
-
-%Looping to find correlation at varying offsets and lags
 for ip=1:Np
     for iLags=1:Nlags
         score = align_score(s1,s2,p(ip),q,lags(iLags));
@@ -38,9 +33,9 @@ for ip=1:Np
     end
 end
 
-%Processing the output of the looping
 [resamp,offset] = surf_scores(scores,run_ip,run_iLag,p,lags);
 check_alignment(s1,s2,resamp,q,offset)
+
 [a_fz,a_tx,a_ty,a_tz,a_o1,a_o2,a_o3,a_o4] = aligned_data(ffz,ftx,fty,ftz,o1,o2,o3,o4,resamp,offset,q);
 
 %Conditions the aligned data and then plots both for a visual check
