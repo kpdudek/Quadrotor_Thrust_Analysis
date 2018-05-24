@@ -20,6 +20,12 @@ use_coefficients(coef,coef_ave,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1)
 plot_coefficients(coef,coef_ave)
 
 print_stars()
+%Calculate and plot coefficients for the entire data set assuming combined
+%coefficients
+combined_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz)
+
+%Stars for clarity
+print_stars()
 
 %Furthering the calculations, here a larger matrix is created that solves
 %for the coefficients of each motor
@@ -127,17 +133,62 @@ t = 1:length(coef(1,:));
 tab = uitab('Title','Coefficients');
 ax = axes(tab);
 coef_plot = plot(ax,t,coef(1,:),'b',t,coef(2,:),'k',t,coef(3,:),'r',t,coef_ave(1,:),'b--+',t,coef_ave(2,:),'k--',t,coef_ave(3,:),'r--');
-legend(coef_plot,'Ct','dCt','cq','Ct','dCt','cq')
+legend(coef_plot,'Ct','dCt','cq','ave_Ct','ave_dCt','ave_cq')
+
+% tab2 = uitab('Title','Average Coefficients');
+% ax_average = axes(tab2);
+% coef_ave_plot = plot(ax_average,t,coef_ave(1,:),t,coef_ave(2,:),t,coef_ave(3,:));
+% legend(coef_ave_plot,'Ct','dCt','cq')
 
 tab2 = uitab('Title','dct/ct');
 ax2 = axes(tab2);
 coef_plot2 = plot(ax2,t,coef(1,:),'b',t,coef(2,:),'k',t,(coef(2,:)./coef(1,:)),'r');
 legend(coef_plot2,'ct','dct','dct/ct')
 
-% tab2 = uitab('Title','Average Coefficients');
-% ax_average = axes(tab2);
-% coef_ave_plot = plot(ax_average,t,coef_ave(1,:),t,coef_ave(2,:),t,coef_ave(3,:));
-% legend(coef_ave_plot,'Ct','dCt','cq')
+function combined_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz)
+omega_mat = [];
+T_mat = [];
+
+for iN = 1:length(omega)
+    osq = omega(:,iN).^2;
+    Ti = T(:,iN);
+    mat_o = [sum(osq),0,0;0,osq(1)-osq(2)+osq(3)-osq(4),0;0,-osq(1)+osq(2)+osq(3)-osq(4),0;0,0,-osq(1)+osq(2)-osq(3)+osq(4)];
+    %mat_T = Ti;
+    
+    omega_mat = [omega_mat;mat_o];
+    T_mat = [T_mat;Ti];
+end
+
+%Solve for coefficients
+coef = omega_mat\T_mat;
+fprintf('\n<< Linear system solution for entire data set >>\n')
+print_coefficients('combined',coef)
+
+%Lets use the calculated coefficient matrix to solve for the F/Ts and compare to experimental results
+
+T_plot = [];
+
+ct = coef(1);
+dct = coef(2);
+cq = coef(3);
+
+coef_mat = [ct,ct,ct,ct;dct,-dct,dct,-dct;-dct,dct,dct,-dct;-cq,cq,-cq,cq];
+
+for iN = 1:length(omega)
+    osq = omega(:,iN).^2;
+    T = coef_mat * osq;
+   
+    T_plot = [T_plot,T];
+end
+figure('Visible','on','Name','Check Coefficients Over Whole Set')
+title = sprintf('Matrix Determined over entire set');
+mat_det = uitab('Title',title);
+mat_ax = axes(mat_det);
+
+time = 1:length(T_plot(1,:));
+
+mat = plot(mat_ax,time,T_plot(1,:),time,T_plot(2,:),time,T_plot(3,:),time,T_plot(4,:),time,a_fz,time,a_tx,time,a_ty,time,a_tz);
+legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
 
 function independent_coef = independent_coefficients(omega,T,n1,n2,len_n1)
 independent_coef = [];
