@@ -126,13 +126,18 @@ t = 1:length(coef(1,:));
 
 tab = uitab('Title','Coefficients');
 ax = axes(tab);
-coef_plot = plot(ax,t,coef(1,:),t,coef(2,:),t,coef(3,:));
-legend(coef_plot,'Ct','dCt','cq')
+coef_plot = plot(ax,t,coef(1,:),'b',t,coef(2,:),'k',t,coef(3,:),'r',t,coef_ave(1,:),'b--+',t,coef_ave(2,:),'k--',t,coef_ave(3,:),'r--');
+legend(coef_plot,'Ct','dCt','cq','Ct','dCt','cq')
 
-tab2 = uitab('Title','Average Coefficients');
-ax_average = axes(tab2);
-coef_ave_plot = plot(ax_average,t,coef_ave(1,:),t,coef_ave(2,:),t,coef_ave(3,:));
-legend(coef_ave_plot,'Ct','dCt','cq')
+tab2 = uitab('Title','dct/ct');
+ax2 = axes(tab2);
+coef_plot2 = plot(ax2,t,coef(1,:),'b',t,coef(2,:),'k',t,(coef(2,:)./coef(1,:)),'r');
+legend(coef_plot2,'ct','dct','dct/ct')
+
+% tab2 = uitab('Title','Average Coefficients');
+% ax_average = axes(tab2);
+% coef_ave_plot = plot(ax_average,t,coef_ave(1,:),t,coef_ave(2,:),t,coef_ave(3,:));
+% legend(coef_ave_plot,'Ct','dCt','cq')
 
 function independent_coef = independent_coefficients(omega,T,n1,n2,len_n1)
 independent_coef = [];
@@ -212,6 +217,9 @@ tab_cq = uitab('Title','CQ');
 ax_cq = axes(tab_cq);
 plot(ax_cq,t,independent_coef(9,:),t,independent_coef(10,:),t,independent_coef(11,:),t,independent_coef(12,:));
 
+tab_div = uitab('Title','dct/ct');
+ax_div = axes(tab_div);
+plot(ax_div,t,(independent_coef(8,:)./independent_coef(4,:)),t,(independent_coef(7,:)./independent_coef(3,:)),t,(independent_coef(6,:)./independent_coef(2,:)),t,(independent_coef(5,:)./independent_coef(1,:)));
 
 function print_stars()
 fprintf('\n*************************************************************\n')
