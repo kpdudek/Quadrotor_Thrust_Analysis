@@ -1,7 +1,7 @@
 function POC_tracks_alignment
 %Loads the file, then calls functions to process the raw data before signal
 %analysis can occur
-file = 'R2_2018_05_01_Thrust_Acro';
+file = 'R2_2018_05_25_Thrust_Acro';
 [o1,o2,o3,o4,tp] = PX4_CSV_Plotter_V2(file);
 [ffz,ftx,fty,ftz,t_sl] = ATI_AXIA80_LOG_Processor_V2(file);
 [o2_init_1,ty_init_1] = find_peaks(o2,tp,fty,t_sl);
@@ -50,7 +50,7 @@ a_ty_p = condition(a_ty);
 plot(a_fz_p)
 hold on
 plot(a_ty_p)
-save([mfilename '_data_2018_05_01'],'a_fz','a_tx','a_ty','a_tz','a_o1','a_o2','a_o3','a_o4')
+save([mfilename '_data_2018_05_25'],'a_fz','a_tx','a_ty','a_tz','a_o1','a_o2','a_o3','a_o4')
 
 
 
@@ -129,7 +129,7 @@ ax_s2 = axes(tab_s2);
 %sr2 = max(t2)/length(t2);
 plot(ax_s2,t2,s2)
 hold on
-[pks2,locs2] = findpeaks(s2,'MinPeakHeight',.05,'MinPeakDistance',45);
+[pks2,locs2] = findpeaks(s2,'MinPeakHeight',.05,'MinPeakDistance',60);
 plot(ax_s2,t2(locs2),pks2,'ko')
 
 o2_init = s1(1:(locs1(3)+20));
