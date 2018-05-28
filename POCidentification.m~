@@ -13,7 +13,11 @@ len_n2 = length(n2);
 
 %Solves for the coefficients and then uses them to check theoretical versus
 %actual. This is where we see if it is truly a linear system
-[coef,coef_ave] = combined_coefficients(omega,T,n1,n2,len_n1,len_n2);
+coef = combined_coefficients(omega,T,n1,n2,len_n1,len_n2);
+
+print_stars()
+
+coef_ave = average_combined_coefficients(omega,T,n1,n2,len_n1,len_n2);
 use_coefficients(coef,coef_ave,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1)
 plot_coefficients(coef,coef_ave)
 
@@ -34,12 +38,15 @@ print_stars()
 independent_coef = independent_coefficients(omega,T,n1,n2,len_n1);
 use_independent(independent_coef,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1)
 plot_independent_coef(independent_coef)
-independent_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz)
 
 %Stars for clarity
 print_stars()
 
 independent_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz)
+
+print_stars()
+
+average_independent_coefficients(omega,T,n1,n2,len_n1)
 
 
 
@@ -50,46 +57,54 @@ T = [a_fz;a_tx;a_ty;a_tz];
 
 %Calculates the coefficient matricies assuming they are uniform throughout
 %the 4 motors. 
-function [coef,coef_ave] = combined_coefficients(omega,T,n1,n2,len_n1,len_n2)
-omega_mat = [];
-T_mat = [];
-
+function coef = combined_coefficients(omega,T,n1,n2,len_n1,len_n2)
+coef = [];
 for i = 1:len_n1
+    omega_mat = [];
+    T_mat = [];
     for iN = n1(i):n2(i)
         osq = omega(:,iN).^2;
         Ti = T(:,iN);
         mat_o = [sum(osq),0,0;0,osq(1)-osq(2)+osq(3)-osq(4),0;0,-osq(1)+osq(2)+osq(3)-osq(4),0;0,0,-osq(1)+osq(2)-osq(3)+osq(4)];
         %mat_T = Ti;
         
-        omega_mat(end+1:end+4,(3*i-2):(i*3)) = mat_o;
-        T_mat(end+1:end+4,i) = Ti;
+        omega_mat = [omega_mat;mat_o];
+        T_mat = [T_mat;Ti];
     end
+    %looping and solving for coefficients at each horizontal
+    fprintf('\n<< Linear system solution for %d - %d >>\n',n1(i),n2(i))
+    coef = [coef,(omega_mat\T_mat)];
+    print_coefficients('combined',coef(:,i))
 end
 
-%looping and solving for coefficients at each horizontal
-coef = [];
-for j = 1:len_n1
-    fprintf('\n<< Linear system solution for %d - %d >>\n',n1(j),n2(j))
-    coef = [coef,(omega_mat(:,(3*j-2):(3*j))\T_mat(:,j))];
-    print_coefficients('combined',coef(:,j))
-end
-
-print_stars()
-%Looping and using the average method to solve for coefficients at each
+%Using the average method to solve for coefficients at each
 %horizontal
+function coef_ave = average_combined_coefficients(omega,T,n1,n2,len_n1,len_n2)
 coef_ave = [];
 for m = 1:len_n1
+    omega_mat = [];
+    T_mat = [];
+    T_ave = [];
+    omega_ave = [];
+    for iN = n1(m):n2(m)
+        osq = omega(:,iN).^2;
+        Ti = T(:,iN);
+        mat_o = [sum(osq),0,0;0,osq(1)-osq(2)+osq(3)-osq(4),0;0,-osq(1)+osq(2)+osq(3)-osq(4),0;0,0,-osq(1)+osq(2)-osq(3)+osq(4)];
+        %mat_T = Ti;
+        
+        omega_mat = [omega_mat;mat_o];
+        T_mat = [T_mat;Ti];
+    end
     denominator = n2(m) - n1(m);
     for k = 1:4
-        T_ave(k,m) = sum(T_mat(k:4:end,m))/(denominator);
-        omega_index = (3*m-2);
-        omega_ave(k,omega_index) = sum(omega_mat(k:4:end,omega_index))/(denominator);
-        omega_ave(k,omega_index+1) = sum(omega_mat(k:4:end,omega_index+1))/(denominator);
-        omega_ave(k,omega_index+2) = sum(omega_mat(k:4:end,omega_index+2))/(denominator);
+        T_ave(k,1) = sum(T_mat(k:4:end))/(denominator);
+        omega_ave(k,1) = sum(omega_mat(k:4:end,1))/(denominator);
+        omega_ave(k,2) = sum(omega_mat(k:4:end,2))/(denominator);
+        omega_ave(k,3) = sum(omega_mat(k:4:end,3))/(denominator);
     end
     
     fprintf('\n<< Averaging solution for %d - %d >>\n',n1(m),n2(m))
-    coef_ave = [coef_ave,(omega_ave(:,(3*m-2):(3*m))\T_ave(:,m))];
+    coef_ave = [coef_ave,(omega_ave\T_ave)];
     print_coefficients('combined',coef_ave(:,m))
 end
 
@@ -188,8 +203,8 @@ for iN = 1:length(omega)
    
     T_plot = [T_plot,T];
 end
-figure('Visible','on','Name','Check Coefficients Over Whole Set')
-title = sprintf('Matrix Determined over entire set');
+figure('Visible','on','Name','Check Combined Coefficients Over Whole Set')
+title = sprintf('Combined Matrix Determined over entire set');
 mat_det = uitab('Title',title);
 mat_ax = axes(mat_det);
 
@@ -218,6 +233,45 @@ for i = 1:len_n1
     fprintf('\n<< Independent Values for %d - %d >>\n',n1(i),n2(i))
     independent_coef = [independent_coef,(omega_mat\T_mat)];
     print_coefficients('all',independent_coef(:,i))
+end
+
+function average_independent_coefficients(omega,T,n1,n2,len_n1)
+ave_independent_coef = [];
+for i = 1:len_n1
+    omega_mat = [];
+    T_mat = [];
+    for iN = n1(i):n2(i)
+        osq = omega(:,iN).^2;
+        Ti = T(:,iN);
+        mat_o = [osq(1),osq(2),osq(3),osq(4),0,0,0,0,0,0,0,0;
+            0,0,0,0,osq(1),-osq(2),osq(3),-osq(4),0,0,0,0;
+            0,0,0,0,-osq(1),osq(2),osq(3),-osq(4),0,0,0,0;
+            0,0,0,0,0,0,0,0,-osq(1),osq(2),-osq(3),osq(4)];
+        
+        omega_mat = [omega_mat;mat_o];
+        T_mat = [T_mat;Ti];
+    end
+    
+    denominator = n2(i) - n1(i);
+    for k = 1:4
+        T_ave(k,1) = sum(T_mat(k:4:end))/(denominator);
+        omega_ave(k,1) = sum(omega_mat(k:4:end,1))/(denominator);
+        omega_ave(k,2) = sum(omega_mat(k:4:end,2))/(denominator);
+        omega_ave(k,3) = sum(omega_mat(k:4:end,3))/(denominator);
+        omega_ave(k,4) = sum(omega_mat(k:4:end,4))/(denominator);
+        omega_ave(k,5) = sum(omega_mat(k:4:end,5))/(denominator);
+        omega_ave(k,6) = sum(omega_mat(k:4:end,6))/(denominator);
+        omega_ave(k,7) = sum(omega_mat(k:4:end,7))/(denominator);
+        omega_ave(k,8) = sum(omega_mat(k:4:end,8))/(denominator);
+        omega_ave(k,9) = sum(omega_mat(k:4:end,9))/(denominator);
+        omega_ave(k,10) = sum(omega_mat(k:4:end,10))/(denominator);
+        omega_ave(k,11) = sum(omega_mat(k:4:end,11))/(denominator);
+        omega_ave(k,12) = sum(omega_mat(k:4:end,12))/(denominator);
+    end
+    
+    fprintf('\n<< Average Independent Values for %d - %d >>\n',n1(i),n2(i))
+    ave_independent_coef = [ave_independent_coef,(omega_ave\T_ave)];
+    print_coefficients('all',ave_independent_coef(:,i))
 end
 
 function use_independent(independent_coef,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1)
@@ -299,17 +353,26 @@ end
 %Solve for coefficients
 coef = omega_mat\T_mat;
 fprintf('\n<< Independent Linear system solution for entire data set >>\n')
-print_coefficients('combined',coef)
+print_coefficients('all',coef)
 
 %Lets use the calculated coefficient matrix to solve for the F/Ts and compare to experimental results
 
 T_plot = [];
 
-ct = coef(1);
-dct = coef(2);
-cq = coef(3);
+ct1 = coef(1);
+ct2 = coef(2);
+ct3 = coef(3);
+ct4 = coef(4);
+dct1 = coef(5);
+dct2 = coef(6);
+dct3 = coef(7);
+dct4 = coef(8);
+cq1 = coef(9);
+cq2 = coef(10);
+cq3 = coef(11);
+cq4 = coef(12);
 
-coef_mat = [ct,ct,ct,ct;dct,-dct,dct,-dct;-dct,dct,dct,-dct;-cq,cq,-cq,cq];
+coef_mat = [ct1,ct2,ct3,ct4;dct1,-dct2,dct3,-dct4;-dct1,dct2,dct3,-dct4;-cq1,cq2,-cq3,cq4];
 
 for iN = 1:length(omega)
     osq = omega(:,iN).^2;
@@ -317,8 +380,8 @@ for iN = 1:length(omega)
    
     T_plot = [T_plot,T];
 end
-figure('Visible','on','Name','Check Coefficients Over Whole Set')
-title = sprintf('Matrix Determined over entire set');
+figure('Visible','on','Name','Check Independent Coefficients Over Whole Set')
+title = sprintf('Independent Matrix Determined over entire set');
 mat_det = uitab('Title',title);
 mat_ax = axes(mat_det);
 
