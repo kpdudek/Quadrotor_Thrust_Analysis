@@ -4,7 +4,7 @@ function POC_tracks_alignment
 file = 'R2_2018_05_25_Thrust_Acro';
 [o1,o2,o3,o4,tp] = PX4_CSV_Plotter_V2(file);
 [ffz,ftx,fty,ftz,t_sl] = ATI_AXIA80_LOG_Processor_V2(file);
-[o2_init_1,ty_init_1] = find_peaks(o2,tp,fty,t_sl);
+[o2_init_1,ty_init_1,locs2] = find_peaks(o2,tp,fty,t_sl);
 
 %Beginning of the signal analysis
 s1=condition(o2_init_1);
@@ -41,7 +41,7 @@ end
 %Processing the output of the looping
 [resamp,offset] = surf_scores(scores,run_ip,run_iLag,p,lags);
 check_alignment(s1,s2,resamp,q,offset)
-[a_fz,a_tx,a_ty,a_tz,a_o1,a_o2,a_o3,a_o4] = aligned_data(ffz,ftx,fty,ftz,o1,o2,o3,o4,resamp,offset,q);
+[a_fz,a_tx,a_ty,a_tz,a_o1,a_o2,a_o3,a_o4] = aligned_data(ffz,ftx,fty,ftz,o1,o2,o3,o4,offset,locs2);
 
 %Conditions the aligned data and then plots both for a visual check
 figure('Visible','on','Name','Aligned')
@@ -56,7 +56,7 @@ save([mfilename '_data_2018_05_25'],'a_fz','a_tx','a_ty','a_tz','a_o1','a_o2','a
 
 %Both data sets are the same length. This crops the lagging data set to align the
 %data, and then crops the end of the other to maintain # of points
-function [a_fz,a_tx,a_ty,a_tz,a_o1,a_o2,a_o3,a_o4] = aligned_data(ffz,ftx,fty,ftz,o1,o2,o3,o4,resamp,offset,q)
+function [a_fz,a_tx,a_ty,a_tz,a_o1,a_o2,a_o3,a_o4] = aligned_data(ffz,ftx,fty,ftz,o1,o2,o3,o4,offset,locs2)
 FT_length = length(ffz);
 rotor_length = length(o1);
 so1 = resample(o1,FT_length,rotor_length);
@@ -64,32 +64,32 @@ so2 = resample(o2,FT_length,rotor_length);
 so3 = resample(o3,FT_length,rotor_length);
 so4 = resample(o4,FT_length,rotor_length);
 if offset > 0
-    a_fz = ffz(offset+1:end);
-    a_tx = ftx(offset+1:end);
-    a_ty = fty(offset+1:end);
-    a_tz = ftz(offset+1:end);
-    a_o1 = so1(1:end-offset);
-    a_o2 = so2(1:end-offset);
-    a_o3 = so3(1:end-offset);
-    a_o4 = so4(1:end-offset);
+    a_fz = ffz((offset+1)+(locs2(3)+300):end);
+    a_tx = ftx(offset+1+(locs2(3)+300):end);
+    a_ty = fty(offset+1+(locs2(3)+300):end);
+    a_tz = ftz(offset+1+(locs2(3)+300):end);
+    a_o1 = so1(1+(locs2(3)+300):end-offset);
+    a_o2 = so2(1+(locs2(3)+300):end-offset);
+    a_o3 = so3(1+(locs2(3)+300):end-offset);
+    a_o4 = so4(1+(locs2(3)+300):end-offset);
 elseif offset < 0
-    a_fz = ffz(1:end+offset);
-    a_tx = ftx(1:end+offset);
-    a_ty = fty(1:end+offset);
-    a_tz = ftz(1:end+offset);
-    a_o1 = so1(-offset+1:end);
-    a_o2 = so2(-offset+1:end);
-    a_o3 = so3(-offset+1:end);
-    a_o4 = so4(-offset+1:end);
+    a_fz = ffz(1+(locs2(3)+300):end+offset);
+    a_tx = ftx(1+(locs2(3)+300):end+offset);
+    a_ty = fty(1+(locs2(3)+300):end+offset);
+    a_tz = ftz(1+(locs2(3)+300):end+offset);
+    a_o1 = so1((-offset+1)+(locs2(3)+300):end);
+    a_o2 = so2((-offset+1)+(locs2(3)+300):end);
+    a_o3 = so3((-offset+1)+(locs2(3)+300):end);
+    a_o4 = so4((-offset+1)+(locs2(3)+300):end);
 else
-    a_fz = ffz;
-    a_tx = ftx;
-    a_ty = fty;
-    a_tz = ftz;
-    a_o1 = so1;
-    a_o2 = so2;
-    a_o3 = so3;
-    a_o4 = so4;
+    a_fz = ffz((locs2(3)+300):end);
+    a_tx = ftx((locs2(3)+300):end);
+    a_ty = fty((locs2(3)+300):end);
+    a_tz = ftz((locs2(3)+300):end);
+    a_o1 = so1((locs2(3)+300):end);
+    a_o2 = so2((locs2(3)+300):end);
+    a_o3 = so3((locs2(3)+300):end);
+    a_o4 = so4((locs2(3)+300):end);
 end
         
 %Pulls out the best offset and resample rate from the looping
@@ -113,7 +113,7 @@ plot(s2_max)
 hold off
 
 %Isolates the manual bumps for use in alignment
-function [o2_init,ty_init] = find_peaks(s1,t1,s2,t2)
+function [o2_init,ty_init,locs2] = find_peaks(s1,t1,s2,t2)
 figure('Visible','on','Name','Peaks')
 
 tab_s1 = uitab('Title','Actuator Output 1');
@@ -132,8 +132,8 @@ hold on
 [pks2,locs2] = findpeaks(s2,'MinPeakHeight',.05,'MinPeakDistance',60);
 plot(ax_s2,t2(locs2),pks2,'ko')
 
-o2_init = s1(1:(locs1(3)+20));
-ty_init = s2(1:(locs2(3)+200));
+o2_init = s1(1:(locs1(3)+30));
+ty_init = s2(1:(locs2(3)+300));
 
 %Calls resample and lag signals
 function [s1_lag, s2_lag]=align_signals(s1,s2,p,q,lag)

@@ -1,36 +1,45 @@
 function POCidentification
 %Loads output of POC_tracks_alignment
-load('POC_tracks_alignment_data_2018_05_01.mat')
+load('POC_tracks_alignment_data_2018_05_25.mat')
 
 %Takes the data input, and forms the matricies used in future calculations
 [omega,T] = create_matricies(a_o1,a_o2,a_o3,a_o4,a_fz,a_tx,a_ty,a_tz);
 
 %Span to calculate coefficients over
-n1 = [1971,11000,21000,27600,34000];
-n2 = [10000,20000,27000,33000,41000];
+n1 = [1534,5753,16140,17420,22740,24210,28580,29600];
+n2 = [3082,15730,17100,22630,24160,28510,29390,34450];
 len_n1 = length(n1);
 len_n2 = length(n2);
 
 %Solves for the coefficients and then uses them to check theoretical versus
 %actual. This is where we see if it is truly a linear system
-%[coef,coef_ave] = combined_coefficients(omega,T,n1,n2,len_n1,len_n2);
-%use_coefficients(coef,coef_ave,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1)
-
-%Plot coefficients to check for trends
-%plot_coefficients(coef,coef_ave)
-
-%Calculate and plot coefficients for the entire data set assuming combined
-%coefficients
-combined_whole_dataset(omega,T)
+[coef,coef_ave] = combined_coefficients(omega,T,n1,n2,len_n1,len_n2);
+use_coefficients(coef,coef_ave,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1)
+plot_coefficients(coef,coef_ave)
 
 %Stars for clarity
 print_stars()
+
+%Calculate and plot coefficients for the entire data set assuming combined
+%coefficients
+combined_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz)
+
+
+%Stars for clarity
+print_stars()
+
 
 %Furthering the calculations, here a larger matrix is created that solves
 %for the coefficients of each motor
 independent_coef = independent_coefficients(omega,T,n1,n2,len_n1);
 use_independent(independent_coef,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1)
-%plot_independent_coef(independent_coef)
+plot_independent_coef(independent_coef)
+independent_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz)
+
+%Stars for clarity
+print_stars()
+
+independent_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz)
 
 
 
@@ -160,7 +169,7 @@ end
 
 %Solve for coefficients
 coef = omega_mat\T_mat;
-fprintf('\n<< Linear system solution for entire data set >>\n')
+fprintf('\n<< Combined Linear system solution for entire data set >>\n')
 print_coefficients('combined',coef)
 
 %Lets use the calculated coefficient matrix to solve for the F/Ts and compare to experimental results
@@ -179,8 +188,8 @@ for iN = 1:length(omega)
    
     T_plot = [T_plot,T];
 end
-figure('Visible','on','Name','Check Coefficients')
-title = sprintf('Matrix Determined %d - %d',n1(i),n2(i));
+figure('Visible','on','Name','Check Coefficients Over Whole Set')
+title = sprintf('Matrix Determined over entire set');
 mat_det = uitab('Title',title);
 mat_ax = axes(mat_det);
 
@@ -188,7 +197,6 @@ time = 1:length(T_plot(1,:));
 
 mat = plot(mat_ax,time,T_plot(1,:),time,T_plot(2,:),time,T_plot(3,:),time,T_plot(4,:),time,a_fz,time,a_tx,time,a_ty,time,a_tz);
 legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
-
 
 function independent_coef = independent_coefficients(omega,T,n1,n2,len_n1)
 independent_coef = [];
@@ -209,7 +217,7 @@ for i = 1:len_n1
     
     fprintf('\n<< Independent Values for %d - %d >>\n',n1(i),n2(i))
     independent_coef = [independent_coef,(omega_mat\T_mat)];
-    print_coefficients('all',independent_coef)
+    print_coefficients('all',independent_coef(:,i))
 end
 
 function use_independent(independent_coef,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1)
@@ -271,6 +279,53 @@ plot(ax_cq,t,independent_coef(9,:),t,independent_coef(10,:),t,independent_coef(1
 tab_div = uitab('Title','dct/ct');
 ax_div = axes(tab_div);
 plot(ax_div,t,(independent_coef(8,:)./independent_coef(4,:)),t,(independent_coef(7,:)./independent_coef(3,:)),t,(independent_coef(6,:)./independent_coef(2,:)),t,(independent_coef(5,:)./independent_coef(1,:)));
+
+function independent_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz)
+omega_mat = [];
+T_mat = [];
+
+for iN = 1:length(omega)
+    osq = omega(:,iN).^2;
+    Ti = T(:,iN);
+    mat_o = [osq(1),osq(2),osq(3),osq(4),0,0,0,0,0,0,0,0;
+            0,0,0,0,osq(1),-osq(2),osq(3),-osq(4),0,0,0,0;
+            0,0,0,0,-osq(1),osq(2),osq(3),-osq(4),0,0,0,0;
+            0,0,0,0,0,0,0,0,-osq(1),osq(2),-osq(3),osq(4)];
+    
+    omega_mat = [omega_mat;mat_o];
+    T_mat = [T_mat;Ti];
+end
+
+%Solve for coefficients
+coef = omega_mat\T_mat;
+fprintf('\n<< Independent Linear system solution for entire data set >>\n')
+print_coefficients('combined',coef)
+
+%Lets use the calculated coefficient matrix to solve for the F/Ts and compare to experimental results
+
+T_plot = [];
+
+ct = coef(1);
+dct = coef(2);
+cq = coef(3);
+
+coef_mat = [ct,ct,ct,ct;dct,-dct,dct,-dct;-dct,dct,dct,-dct;-cq,cq,-cq,cq];
+
+for iN = 1:length(omega)
+    osq = omega(:,iN).^2;
+    T = coef_mat * osq;
+   
+    T_plot = [T_plot,T];
+end
+figure('Visible','on','Name','Check Coefficients Over Whole Set')
+title = sprintf('Matrix Determined over entire set');
+mat_det = uitab('Title',title);
+mat_ax = axes(mat_det);
+
+time = 1:length(T_plot(1,:));
+
+mat = plot(mat_ax,time,T_plot(1,:),time,T_plot(2,:),time,T_plot(3,:),time,T_plot(4,:),time,a_fz,time,a_tx,time,a_ty,time,a_tz);
+legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
 
 function print_stars()
 fprintf('\n*************************************************************\n')
