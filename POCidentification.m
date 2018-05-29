@@ -1,13 +1,13 @@
 function POCidentification
 %Loads output of POC_tracks_alignment
-load('POC_tracks_alignment_data_2018_05_25.mat')
+load('POC_tracks_alignment_data_2018_05_29.mat')
 
 %Takes the data input, and forms the matricies used in future calculations
 [omega,T] = create_matricies(a_o1,a_o2,a_o3,a_o4,a_fz,a_tx,a_ty,a_tz);
 
 %Span to calculate coefficients over
-n1 = [1534,5753,16140,17420,22740,24210,28580,29600];
-n2 = [3082,15730,17100,22630,24160,28510,29390,34450];
+n1 = [433,5436,9098,19960,24500,28370];
+n2 = [5148,8945,19690,24120,27990,31500];
 len_n1 = length(n1);
 len_n2 = length(n2);
 
