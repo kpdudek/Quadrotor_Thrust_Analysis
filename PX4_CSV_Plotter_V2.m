@@ -289,3 +289,4 @@ tab_all = uitab('Title','All Motors');
 ax_all = axes(tab_all);
 plot(ax_all,tp,o1,'r',tp,o2,'k',tp,o3,'b',tp,o4,'g');
 legend(ax_all,'Motor 1','Motor 2','Motor 3','Motor 4');
+
