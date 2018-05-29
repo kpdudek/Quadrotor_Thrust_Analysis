@@ -1,13 +1,13 @@
 function POCidentification
 %Loads output of POC_tracks_alignment
-load('POC_tracks_alignment_data_2018_05_29.mat')
+load('POC_tracks_alignment_data_2018_05_29_Manual.mat')
 
 %Takes the data input, and forms the matricies used in future calculations
 [omega,T] = create_matricies(a_o1,a_o2,a_o3,a_o4,a_fz,a_tx,a_ty,a_tz);
 
 %Span to calculate coefficients over
-n1 = [433,5436,9098,19960,24500,28370];
-n2 = [5148,8945,19690,24120,27990,31500];
+n1 = [412,5319,8990,12210,16120,19440,23270];
+n2 = [4858,8598,12100,15960,19180,22980,25790];
 len_n1 = length(n1);
 len_n2 = length(n2);
 
@@ -55,8 +55,7 @@ function [omega,T] = create_matricies(a_o1,a_o2,a_o3,a_o4,a_fz,a_tx,a_ty,a_tz)
 omega = [a_o1;a_o2;a_o3;a_o4];
 T = [a_fz;a_tx;a_ty;a_tz];
 
-%Calculates the coefficient matricies assuming they are uniform throughout
-%the 4 motors. 
+%Calculates the coefficients using matricies for each point along the horizontal 
 function coef = combined_coefficients(omega,T,n1,n2,len_n1,len_n2)
 coef = [];
 for i = 1:len_n1
@@ -77,8 +76,8 @@ for i = 1:len_n1
     print_coefficients('combined',coef(:,i))
 end
 
-%Using the average method to solve for coefficients at each
-%horizontal
+%Calculates the combined coefficients using the averave values of w and t
+%over the horizontals
 function coef_ave = average_combined_coefficients(omega,T,n1,n2,len_n1,len_n2)
 coef_ave = [];
 for m = 1:len_n1
@@ -108,6 +107,8 @@ for m = 1:len_n1
     print_coefficients('combined',coef_ave(:,m))
 end
 
+%Uses the coefficients from each horizontal to solve for the F/Ts at given
+%omegas
 function use_coefficients(coef,coef_ave,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1)
 %fig = figure('Visible','on','Name','Check Coefficients');
 for i = 1:len_n1
@@ -149,6 +150,8 @@ for i = 1:len_n1
     legend(av,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
 end
 
+%Plots the coefficients at each horizontal to check for trends. Also
+%divides dct by ct to solve for d. d should be ~13cm
 function plot_coefficients(coef,coef_ave)
 figure('Visible','on','Name','Plotted Coefficients')
 t = 1:length(coef(1,:));
@@ -168,6 +171,7 @@ ax2 = axes(tab2);
 coef_plot2 = plot(ax2,t,coef(1,:),'b',t,coef(2,:),'k',t,(coef(2,:)./coef(1,:)),'r');
 legend(coef_plot2,'ct','dct','dct/ct')
 
+%Solves for the coefficients using the entire data set
 function combined_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz)
 omega_mat = [];
 T_mat = [];
@@ -213,6 +217,8 @@ time = 1:length(T_plot(1,:));
 mat = plot(mat_ax,time,T_plot(1,:),time,T_plot(2,:),time,T_plot(3,:),time,T_plot(4,:),time,a_fz,time,a_tx,time,a_ty,time,a_tz);
 legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
 
+
+%Solves for the coeffients of each motor using a matrix at each data point
 function independent_coef = independent_coefficients(omega,T,n1,n2,len_n1)
 independent_coef = [];
 for i = 1:len_n1
@@ -277,6 +283,8 @@ for i = 1:len_n1
     print_coefficients('all',ave_independent_coef(:,i))
 end
 
+%Uses the coefficients for each motor to solve for the F/Ts at a given
+%omega
 function use_independent(independent_coef,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1)
 
 for i = 1:len_n1
@@ -317,6 +325,8 @@ for i = 1:len_n1
     
 end
 
+%Plots the independent coeffients to check for trends. Also divides dct by
+%ct to solve for d. d should be ~13cm
 function plot_independent_coef(independent_coef)
 figure('Visible','on','Name','Plotted Independent Coefficients')
 t = 1:length(independent_coef(1,:));
@@ -337,6 +347,7 @@ tab_div = uitab('Title','dct/ct');
 ax_div = axes(tab_div);
 plot(ax_div,t,(independent_coef(8,:)./independent_coef(4,:)),t,(independent_coef(7,:)./independent_coef(3,:)),t,(independent_coef(6,:)./independent_coef(2,:)),t,(independent_coef(5,:)./independent_coef(1,:)));
 
+%Solves for the independent coefficients using the entire data set
 function independent_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz)
 omega_mat = [];
 T_mat = [];
@@ -393,6 +404,7 @@ time = 1:length(T_plot(1,:));
 mat = plot(mat_ax,time,T_plot(1,:),time,T_plot(2,:),time,T_plot(3,:),time,T_plot(4,:),time,a_fz,time,a_tx,time,a_ty,time,a_tz);
 legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
 
+%Prints a line of asteriscs for output separation
 function print_stars()
 fprintf('\n*************************************************************\n')
 
