@@ -48,7 +48,7 @@ independent_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz)
 %Stars for clarity
 print_stars()
 
-average_independent_coefficients(omega,T,n1,n2,len_n1)
+%average_independent_coefficients(omega,T,n1,n2,len_n1)
 
 
 
@@ -146,10 +146,11 @@ for i = 1:len_n1
     time = 1:length(T_plot(1,:));
     
     mat = plot(mat_ax,time,T_plot(1,:),time,T_plot(2,:),time,T_plot(3,:),time,T_plot(4,:),time,a_fz,time,a_tx,time,a_ty,time,a_tz);
-    rectangle(mat_ax,'Position',[(n1(i)-200) (T_plot(1,1)-2) ((n2(i)-n1(i)) + 400) (abs(T_plot(1,end)-T_plot(1,1))+4)])
+    rectangle(mat_ax,'Position',[(n1(i)-350) (a_fz(n1(i))-3) ((n2(i)-n1(i))+700) (abs((a_fz(n2(i)))-(a_fz(n1(i))))+6)],'EdgeColor','r')
     legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
     
     av = plot(av_ax,time,T_av_plot(1,:),time,T_av_plot(2,:),time,T_av_plot(3,:),time,T_av_plot(4,:),time,a_fz,time,a_tx,time,a_ty,time,a_tz);
+    rectangle(av_ax,'Position',[(n1(i)-350) (a_fz(n1(i))-3) ((n2(i)-n1(i))+700) (abs((a_fz(n2(i)))-(a_fz(n1(i))))+6)],'EdgeColor','r')
     legend(av,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
 end
 
@@ -325,6 +326,7 @@ for i = 1:len_n1
     time = 1:length(T_plot(1,:));
     
     mat = plot(mat_ax,time,T_plot(1,:),time,T_plot(2,:),time,T_plot(3,:),time,T_plot(4,:),time,a_fz,time,a_tx,time,a_ty,time,a_tz);
+    rectangle(mat_ax,'Position',[(n1(i)-350) (a_fz(n1(i))-3) ((n2(i)-n1(i))+700) (abs((a_fz(n2(i)))-(a_fz(n1(i))))+6)],'EdgeColor','r')
     legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
     
 end

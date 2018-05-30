@@ -1,13 +1,13 @@
 function POCidentification
 %Loads output of POC_tracks_alignment
-load('POC_tracks_alignment_data_2018_05_29_Manual.mat')
+load('POC_tracks_alignment_data_2018_05_25.mat')
 
 %Takes the data input, and forms the matricies used in future calculations
 [omega,T] = create_matricies(a_o1,a_o2,a_o3,a_o4,a_fz,a_tx,a_ty,a_tz);
 
 %Span to calculate coefficients over
-n1 = [412,5319,8990,12210,16120,19440,23270];
-n2 = [4858,8598,12100,15960,19180,22980,25790];
+n1 = [1534,5753,16140,17420,22740,24210,28580,29600];
+n2 = [3082,15730,17100,22630,24160,28510,29390,34450];
 len_n1 = length(n1);
 len_n2 = length(n2);
 
@@ -15,6 +15,7 @@ len_n2 = length(n2);
 %actual. This is where we see if it is truly a linear system
 coef = combined_coefficients(omega,T,n1,n2,len_n1,len_n2);
 
+%Stars for clarity
 print_stars()
 
 coef_ave = average_combined_coefficients(omega,T,n1,n2,len_n1,len_n2);
@@ -35,18 +36,19 @@ print_stars()
 
 %Furthering the calculations, here a larger matrix is created that solves
 %for the coefficients of each motor
-independent_coef = independent_coefficients(omega,T,n1,n2,len_n1);
-use_independent(independent_coef,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1)
-plot_independent_coef(independent_coef)
+% independent_coef = independent_coefficients(omega,T,n1,n2,len_n1);
+% use_independent(independent_coef,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1)
+% plot_independent_coef(independent_coef)
 
 %Stars for clarity
 print_stars()
 
-independent_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz)
+%independent_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz)
 
+%Stars for clarity
 print_stars()
 
-average_independent_coefficients(omega,T,n1,n2,len_n1)
+%average_independent_coefficients(omega,T,n1,n2,len_n1)
 
 
 
@@ -144,9 +146,11 @@ for i = 1:len_n1
     time = 1:length(T_plot(1,:));
     
     mat = plot(mat_ax,time,T_plot(1,:),time,T_plot(2,:),time,T_plot(3,:),time,T_plot(4,:),time,a_fz,time,a_tx,time,a_ty,time,a_tz);
+    rectangle(mat_ax,'Position',[(n1(i)-350) (a_fz(n1(i))-3) ((n2(i)-n1(i))+700) (abs((a_fz(n2(i)))-(a_fz(n1(i))))+6)],'EdgeColor','r')
     legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
     
     av = plot(av_ax,time,T_av_plot(1,:),time,T_av_plot(2,:),time,T_av_plot(3,:),time,T_av_plot(4,:),time,a_fz,time,a_tx,time,a_ty,time,a_tz);
+    rectangle(av_ax,'Position',[(n1(i)-350) (a_fz(n1(i))-3) ((n2(i)-n1(i))+700) (abs((a_fz(n2(i)))-(a_fz(n1(i))))+6)],'EdgeColor','r')
     legend(av,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
 end
 
@@ -216,6 +220,7 @@ time = 1:length(T_plot(1,:));
 
 mat = plot(mat_ax,time,T_plot(1,:),time,T_plot(2,:),time,T_plot(3,:),time,T_plot(4,:),time,a_fz,time,a_tx,time,a_ty,time,a_tz);
 legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
+
 
 
 %Solves for the coeffients of each motor using a matrix at each data point
@@ -321,6 +326,7 @@ for i = 1:len_n1
     time = 1:length(T_plot(1,:));
     
     mat = plot(mat_ax,time,T_plot(1,:),time,T_plot(2,:),time,T_plot(3,:),time,T_plot(4,:),time,a_fz,time,a_tx,time,a_ty,time,a_tz);
+    rectangle(mat_ax,'Position',[(n1(i)-350) (a_fz(n1(i))-3) ((n2(i)-n1(i))+700) (abs((a_fz(n2(i)))-(a_fz(n1(i))))+6)],'EdgeColor','r')
     legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
     
 end
