@@ -1,19 +1,43 @@
 function lsnonlintest
-A=randn(100,2);
-xTrue=[2e-3;0.1];
-x0=[1e-3;0.2];
+load('POCidentification_all_coefs_2018_05_31_Manual.mat')
+xRecovered = [];
 
-yMeasured=model(A,xTrue)+1e-6*randn(size(A,1),1);
+for i = 1:length(coef)
+    ct = coef(1,i);
+    d = coef(2,i)/coef(1,i);
+    
+    coef_0 = [ct;d];
+    FT_true = T;%(:,i);
+    
+    %FTmeasured = model(omega,coef);
+    xRecovered = [xRecovered,(lsqnonlin(@(x) residuals(FT_true,omega,x),coef_0))];
+    fprintf('Estimated: ct = %e -- d = %f\nFitted: ct = %e -- d = %f\n',ct,d,xRecovered(1),xRecovered(2))
+end
 
-xRecovered=lsqnonlin(@(x) residuals(yMeasured,A,x),x0);
+ct = coef(1,:);
+d = coef(2,:)./coef(1,:);
+len = 1:length(xRecovered(1,:));
+plot(len,xRecovered(1,:),'r:+',len,xRecovered(2,:),'k:+',len,ct,'r',len,d,'k')
+legend('LS Ct','LS d','Calculated Ct','Calculated d')
 
-disp([x0 xRecovered xTrue])
 
+function f=residuals(FT_true,omega,x)
+f = [];
+for i = 1:length(omega)
+    f = [f,(FT_true(1:3,i)-model(omega(:,i),x))];
+end
 
-function f=residuals(y,A,x)
-f=y-model(A,x);
+function ft = model(omega,x)
+ft = [];
 
-function y=model(A,x)
-cT=x(1);
+ct=x(1);
 d=x(2);
-y=A*[cT;cT*d];
+dct = ct*d;
+
+coef_mat = [ct,ct,ct,ct;dct,-dct,dct,-dct;-dct,dct,dct,-dct];
+ft = (coef_mat*omega);
+
+% for i = 1:length(omega)
+%     ft = [ft,(coef_mat*omega(:,i))];
+% end
+
