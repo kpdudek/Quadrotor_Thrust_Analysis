@@ -1,14 +1,14 @@
 function POCidentification
 %Loads output of POC_tracks_alignment
-load('POC_tracks_alignment_data_2018_05_25.mat')
+load('POC_tracks_alignment_data_2018_05_31_Manual.mat')
 
 %Takes the data input, and forms the matricies used in future calculations
 [omega,T] = create_matricies(a_o1,a_o2,a_o3,a_o4,a_fz,a_tx,a_ty,a_tz);
 
 %Span to calculate coefficients over
-load('POCidentification_test_span_2018_05_25.mat')
-%n1 = [1971,11000,21000,27600,34000];
-%n2 = [10000,20000,27000,33000,41000];
+%load('POCidentification_test_span_2018_05_25.mat')
+n1 = [1101,6792,8087,9469,10860];
+n2 = [6452,7879,9338,10750,12290];
 len_n1 = length(n1);
 len_n2 = length(n2);
 
@@ -55,9 +55,9 @@ print_stars()
 
 
 
-savefig(figures,'Figures_POC_tracks_alignment_data_2018_05_29.fig')
-save([mfilename '_all_coefs_2018_05_25.mat'],'coef','coef_ave','independent_coef')
-%save([mfilename '_test_span_2018_05_25.mat'],'n1','n2')
+%savefig(figures,'Figures_POC_tracks_alignment_data_2018_05_29.fig')
+save([mfilename '_all_coefs_2018_05_31_Manual.mat'],'coef','coef_ave','independent_coef')
+save([mfilename '_test_span_2018_05_31_Manual.mat'],'n1','n2')
 
 
 
@@ -154,7 +154,7 @@ for i = 1:len_n1
     
     time = 1:length(T_plot(1,:));
     
-    mat = plot(mat_ax,time,T_plot(1,:),':',time,T_plot(2,:),':',time,T_plot(3,:),':',time,T_plot(4,:),':',time,a_fz,time,a_tx,time,a_ty,time,a_tz);
+    mat = plot(mat_ax,time,T_plot(1,:),'r:',time,T_plot(2,:),'k:',time,T_plot(3,:),'g:',time,T_plot(4,:),'b:',time,a_fz,'r',time,a_tx,'k',time,a_ty,'g',time,a_tz,'b');
     rectangle(mat_ax,'Position',[(n1(i)-350) (a_fz(n1(i))-3) ((n2(i)-n1(i))+700) (abs((a_fz(n2(i)))-(a_fz(n1(i))))+6)],'EdgeColor','r')
     legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
     
@@ -227,7 +227,7 @@ mat_ax = axes(mat_det);
 
 time = 1:length(T_plot(1,:));
 
-mat = plot(mat_ax,time,T_plot(1,:),time,T_plot(2,:),time,T_plot(3,:),time,T_plot(4,:),time,a_fz,time,a_tx,time,a_ty,time,a_tz);
+mat = plot(mat_ax,time,T_plot(1,:),'r:',time,T_plot(2,:),'k:',time,T_plot(3,:),'g:',time,T_plot(4,:),'b:',time,a_fz,'r',time,a_tx,'k',time,a_ty,'g',time,a_tz,'b');
 legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
 
 
@@ -334,7 +334,7 @@ for i = 1:len_n1
     
     time = 1:length(T_plot(1,:));
     
-    mat = plot(mat_ax,time,T_plot(1,:),time,T_plot(2,:),time,T_plot(3,:),time,T_plot(4,:),time,a_fz,time,a_tx,time,a_ty,time,a_tz);
+    mat = plot(mat_ax,time,T_plot(1,:),'r:',time,T_plot(2,:),'k:',time,T_plot(3,:),'g:',time,T_plot(4,:),'b:',time,a_fz,'r',time,a_tx,'k',time,a_ty,'g',time,a_tz,'b');
     rectangle(mat_ax,'Position',[(n1(i)-350) (a_fz(n1(i))-3) ((n2(i)-n1(i))+700) (abs((a_fz(n2(i)))-(a_fz(n1(i))))+6)],'EdgeColor','r')
     legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
     
@@ -416,7 +416,7 @@ mat_ax = axes(mat_det);
 
 time = 1:length(T_plot(1,:));
 
-mat = plot(mat_ax,time,T_plot(1,:),time,T_plot(2,:),time,T_plot(3,:),time,T_plot(4,:),time,a_fz,time,a_tx,time,a_ty,time,a_tz);
+mat = plot(mat_ax,time,T_plot(1,:),'r:',time,T_plot(2,:),'k:',time,T_plot(3,:),'g:',time,T_plot(4,:),'b:',time,a_fz,'r',time,a_tx,'k',time,a_ty,'g',time,a_tz,'b');
 legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
 
 %Prints a line of asteriscs for output separation
