@@ -288,3 +288,4 @@ Tzs = torque_plot(time_index,3);
 
 fprintf("\n\t<< F/T's at time %.4f(s) >>\n\tFx = %f Fy = %f Fz = %f\n\tTx = %f Ty = %f Tz = %f\n\n",t,Fxs,Fys,Fzs,Txs,Tys,Tzs);
 end
+

@@ -6,10 +6,13 @@ load('POC_tracks_alignment_data_2018_05_25.mat')
 [omega,T] = create_matricies(a_o1,a_o2,a_o3,a_o4,a_fz,a_tx,a_ty,a_tz);
 
 %Span to calculate coefficients over
-n1 = [1534,5753,16140,17420,22740,24210,28580,29600];
-n2 = [3082,15730,17100,22630,24160,28510,29390,34450];
+load('POCidentification_test_span_2018_05_25.mat')
+%n1 = [1971,11000,21000,27600,34000];
+%n2 = [10000,20000,27000,33000,41000];
 len_n1 = length(n1);
 len_n2 = length(n2);
+
+figures = [];
 
 %Solves for the coefficients and then uses them to check theoretical versus
 %actual. This is where we see if it is truly a linear system
@@ -19,15 +22,15 @@ coef = combined_coefficients(omega,T,n1,n2,len_n1,len_n2);
 print_stars()
 
 coef_ave = average_combined_coefficients(omega,T,n1,n2,len_n1,len_n2);
-use_coefficients(coef,coef_ave,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1)
-plot_coefficients(coef,coef_ave)
+figures = use_coefficients(coef,coef_ave,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1,figures);
+figures = plot_coefficients(coef,coef_ave,figures);
 
 %Stars for clarity
 print_stars()
 
 %Calculate and plot coefficients for the entire data set assuming combined
 %coefficients
-combined_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz)
+figures = combined_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz,figures);
 
 
 %Stars for clarity
@@ -37,18 +40,24 @@ print_stars()
 %Furthering the calculations, here a larger matrix is created that solves
 %for the coefficients of each motor
 independent_coef = independent_coefficients(omega,T,n1,n2,len_n1);
-use_independent(independent_coef,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1)
-plot_independent_coef(independent_coef)
+figures = use_independent(independent_coef,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1,figures);
+figures = plot_independent_coef(independent_coef,figures);
 
 %Stars for clarity
 print_stars()
 
-independent_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz)
+figures = independent_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz,figures);
 
 %Stars for clarity
 print_stars()
 
 %average_independent_coefficients(omega,T,n1,n2,len_n1)
+
+
+
+savefig(figures,'Figures_POC_tracks_alignment_data_2018_05_29.fig')
+save([mfilename '_all_coefs_2018_05_25.mat'],'coef','coef_ave','independent_coef')
+%save([mfilename '_test_span_2018_05_25.mat'],'n1','n2')
 
 
 
@@ -111,7 +120,7 @@ end
 
 %Uses the coefficients from each horizontal to solve for the F/Ts at given
 %omegas
-function use_coefficients(coef,coef_ave,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1)
+function figures = use_coefficients(coef,coef_ave,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1,figures)
 %fig = figure('Visible','on','Name','Check Coefficients');
 for i = 1:len_n1
     T_plot = [];
@@ -135,7 +144,7 @@ for i = 1:len_n1
         T_plot = [T_plot,T];
         T_av_plot = [T_av_plot,T_av];
     end
-    figure('Visible','on','Name','Check Coefficients')
+    figures(end+1) = figure('Visible','on','Name','Check Coefficients');
     title = sprintf('Matrix Determined %d - %d',n1(i),n2(i));
     mat_det = uitab('Title',title);
     mat_ax = axes(mat_det);
@@ -145,7 +154,7 @@ for i = 1:len_n1
     
     time = 1:length(T_plot(1,:));
     
-    mat = plot(mat_ax,time,T_plot(1,:),time,T_plot(2,:),time,T_plot(3,:),time,T_plot(4,:),time,a_fz,time,a_tx,time,a_ty,time,a_tz);
+    mat = plot(mat_ax,time,T_plot(1,:),':',time,T_plot(2,:),':',time,T_plot(3,:),':',time,T_plot(4,:),':',time,a_fz,time,a_tx,time,a_ty,time,a_tz);
     rectangle(mat_ax,'Position',[(n1(i)-350) (a_fz(n1(i))-3) ((n2(i)-n1(i))+700) (abs((a_fz(n2(i)))-(a_fz(n1(i))))+6)],'EdgeColor','r')
     legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
     
@@ -156,8 +165,8 @@ end
 
 %Plots the coefficients at each horizontal to check for trends. Also
 %divides dct by ct to solve for d. d should be ~13cm
-function plot_coefficients(coef,coef_ave)
-figure('Visible','on','Name','Plotted Coefficients')
+function figures = plot_coefficients(coef,coef_ave,figures)
+figures(end+1) = figure('Visible','on','Name','Plotted Coefficients');
 t = 1:length(coef(1,:));
 
 tab = uitab('Title','Coefficients');
@@ -176,7 +185,7 @@ coef_plot2 = plot(ax2,t,coef(1,:),'b',t,coef(2,:),'k',t,(coef(2,:)./coef(1,:)),'
 legend(coef_plot2,'ct','dct','dct/ct')
 
 %Solves for the coefficients using the entire data set
-function combined_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz)
+function figures = combined_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz,figures)
 omega_mat = [];
 T_mat = [];
 
@@ -211,7 +220,7 @@ for iN = 1:length(omega)
    
     T_plot = [T_plot,T];
 end
-figure('Visible','on','Name','Check Combined Coefficients Over Whole Set')
+figures(end+1) = figure('Visible','on','Name','Check Combined Coefficients Over Whole Set');
 title = sprintf('Combined Matrix Determined over entire set');
 mat_det = uitab('Title',title);
 mat_ax = axes(mat_det);
@@ -290,7 +299,7 @@ end
 
 %Uses the coefficients for each motor to solve for the F/Ts at a given
 %omega
-function use_independent(independent_coef,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1)
+function figures = use_independent(independent_coef,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1,figures)
 
 for i = 1:len_n1
     
@@ -318,7 +327,7 @@ for i = 1:len_n1
         T_plot = [T_plot,T];
     end
     
-    figure('Visible','on','Name','Check Independent Coefficients')
+    figures(end+1) = figure('Visible','on','Name','Check Independent Coefficients');
     title = sprintf('Matrix Determined %d - %d',n1(i),n2(i));
     mat_det = uitab('Title',title);
     mat_ax = axes(mat_det);
@@ -333,8 +342,8 @@ end
 
 %Plots the independent coeffients to check for trends. Also divides dct by
 %ct to solve for d. d should be ~13cm
-function plot_independent_coef(independent_coef)
-figure('Visible','on','Name','Plotted Independent Coefficients')
+function figures = plot_independent_coef(independent_coef,figures)
+figures(end+1) = figure('Visible','on','Name','Plotted Independent Coefficients');
 t = 1:length(independent_coef(1,:));
 
 tab_ct = uitab('Title','CT');
@@ -354,7 +363,7 @@ ax_div = axes(tab_div);
 plot(ax_div,t,(independent_coef(8,:)./independent_coef(4,:)),t,(independent_coef(7,:)./independent_coef(3,:)),t,(independent_coef(6,:)./independent_coef(2,:)),t,(independent_coef(5,:)./independent_coef(1,:)));
 
 %Solves for the independent coefficients using the entire data set
-function independent_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz)
+function figures = independent_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz,figures)
 omega_mat = [];
 T_mat = [];
 
@@ -400,7 +409,7 @@ for iN = 1:length(omega)
    
     T_plot = [T_plot,T];
 end
-figure('Visible','on','Name','Check Independent Coefficients Over Whole Set')
+figures(end+1) = figure('Visible','on','Name','Check Independent Coefficients Over Whole Set');
 title = sprintf('Independent Matrix Determined over entire set');
 mat_det = uitab('Title',title);
 mat_ax = axes(mat_det);
