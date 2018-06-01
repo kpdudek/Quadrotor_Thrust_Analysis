@@ -1,14 +1,14 @@
 function POCidentification
 %Loads output of POC_tracks_alignment
-load('POC_tracks_alignment_data_2018_05_29.mat')
+load('POC_tracks_alignment_data_2018_06_01_4Corners_Acro.mat')
 
 %Takes the data input, and forms the matricies used in future calculations
 [omega,T] = create_matricies(a_o1,a_o2,a_o3,a_o4,a_fz,a_tx,a_ty,a_tz);
 
 %Span to calculate coefficients over
-load('POCidentification_test_span_2018_05_29.mat')
-%n1 = [1101,6792,8087,9469,10860];
-%n2 = [6452,7879,9338,10750,12290];
+%load('POCidentification_test_span_2018_06_01_4Corners_Acro.mat')
+n1 = [599,4661,8307,12470,16980];
+n2 = [4535,7954,12120,16740,20880];
 len_n1 = length(n1);
 len_n2 = length(n2);
 
@@ -56,8 +56,8 @@ print_stars()
 
 
 %savefig(figures,'Figures_POC_tracks_alignment_data_2018_05_29.fig')
-save([mfilename '_all_coefs_2018_05_29.mat'],'coef','coef_ave','independent_coef','omega','T')
-%save([mfilename '_test_span_2018_05_29_Manual.mat'],'n1','n2')
+save([mfilename '_all_coefs_2018_06_01_4Corners_Acro.mat'],'coef','coef_ave','independent_coef','omega','T')
+save([mfilename '_test_span_2018_06_01_4Corners_Acro.mat'],'n1','n2')
 
 
 

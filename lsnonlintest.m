@@ -1,5 +1,5 @@
 function lsnonlintest
-load('POCidentification_all_coefs_2018_05_31_Manual.mat')
+load('POCidentification_all_coefs_2018_06_01_4Corners_Acro.mat')
 fitted_coefs = [];
 
 for i = 1:length(coef)
@@ -40,7 +40,6 @@ dct = ct*d;
 coef_mat = [ct,ct,ct,ct;dct,-dct,dct,-dct;-dct,dct,dct,-dct];
 ft = (coef_mat*omega);
 
-
 function use_LS_values(fitted_coefs,omega,T)
 FT_true = T;
 T_fit = [];
@@ -56,6 +55,10 @@ end
 len = 1:length(omega);
 figure('Visible','on')
 plot(len,T_fit(1,:),'r:',len,T_fit(2,:),'k:',len,T_fit(3,:),'g:',len,FT_true(1,:),'r',len,FT_true(2,:),'k',len,FT_true(3,:),'g')
+
+
+
+
 % for i = 1:length(omega)
 %     ft = [ft,(coef_mat*omega(:,i))];
 % end

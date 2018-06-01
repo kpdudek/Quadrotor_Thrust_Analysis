@@ -1,7 +1,7 @@
 function POC_tracks_alignment
 %Loads the file, then calls functions to process the raw data before signal
 %analysis can occur
-file = 'R2_2018_05_31_Thrust_Manual';
+file = 'R2_2018_06_01_4Corners_Acro';
 [o1,o2,o3,o4,tp] = PX4_CSV_Plotter_V2(file);
 [ffz,ftx,fty,ftz,t_sl] = ATI_AXIA80_LOG_Processor_V2(file);
 [o2_init_1,ty_init_1,locs2] = find_peaks(o2,tp,fty,t_sl);
@@ -50,7 +50,7 @@ a_ty_p = condition(a_ty);
 plot(a_fz_p)
 hold on
 plot(a_ty_p)
-save([mfilename '_data_2018_05_31_Manual'],'a_fz','a_tx','a_ty','a_tz','a_o1','a_o2','a_o3','a_o4')
+save([mfilename '_data_2018_06_01_4Corners_Acro'],'a_fz','a_tx','a_ty','a_tz','a_o1','a_o2','a_o3','a_o4')
 
 
 
@@ -64,23 +64,23 @@ so2 = resample(o2,FT_length,rotor_length);
 so3 = resample(o3,FT_length,rotor_length);
 so4 = resample(o4,FT_length,rotor_length);
 if offset > 0
-    a_fz = ffz((offset+1)+(locs2(2)+300):end);
-    a_tx = ftx(offset+1+(locs2(2)+300):end);
-    a_ty = fty(offset+1+(locs2(2)+300):end);
-    a_tz = ftz(offset+1+(locs2(2)+300):end);
-    a_o1 = so1(1+(locs2(2)+300):end-offset);
-    a_o2 = so2(1+(locs2(2)+300):end-offset);
-    a_o3 = so3(1+(locs2(2)+300):end-offset);
-    a_o4 = so4(1+(locs2(2)+300):end-offset);
+    a_fz = ffz((offset+1)+(locs2(3)+300):end);
+    a_tx = ftx(offset+1+(locs2(3)+300):end);
+    a_ty = fty(offset+1+(locs2(3)+300):end);
+    a_tz = ftz(offset+1+(locs2(3)+300):end);
+    a_o1 = so1(1+(locs2(3)+300):end-offset);
+    a_o2 = so2(1+(locs2(3)+300):end-offset);
+    a_o3 = so3(1+(locs2(3)+300):end-offset);
+    a_o4 = so4(1+(locs2(3)+300):end-offset);
 elseif offset < 0
-    a_fz = ffz(1+(locs2(2)+300):end+offset);
-    a_tx = ftx(1+(locs2(2)+300):end+offset);
-    a_ty = fty(1+(locs2(2)+300):end+offset);
-    a_tz = ftz(1+(locs2(2)+300):end+offset);
-    a_o1 = so1((-offset+1)+(locs2(2)+300):end);
-    a_o2 = so2((-offset+1)+(locs2(2)+300):end);
-    a_o3 = so3((-offset+1)+(locs2(2)+300):end);
-    a_o4 = so4((-offset+1)+(locs2(2)+300):end);
+    a_fz = ffz(1+(locs2(3)+300):end+offset);
+    a_tx = ftx(1+(locs2(3)+300):end+offset);
+    a_ty = fty(1+(locs2(3)+300):end+offset);
+    a_tz = ftz(1+(locs2(3)+300):end+offset);
+    a_o1 = so1((-offset+1)+(locs2(3)+300):end);
+    a_o2 = so2((-offset+1)+(locs2(3)+300):end);
+    a_o3 = so3((-offset+1)+(locs2(3)+300):end);
+    a_o4 = so4((-offset+1)+(locs2(3)+300):end);
 else
     a_fz = ffz((locs2(3)+300):end);
     a_tx = ftx((locs2(3)+300):end);
@@ -121,7 +121,7 @@ ax_s1 = axes(tab_s1);
 %sr1 = max(t1)/length(t1);
 plot(ax_s1,t1,s1)
 hold on
-[pks1,locs1] = findpeaks(s1,'MinPeakHeight',1350,'MinPeakDistance',5);
+[pks1,locs1] = findpeaks(s1,'MinPeakHeight',1300,'MinPeakDistance',5);
 plot(ax_s1,t1(locs1),pks1,'ko')
 
 tab_s2 = uitab('Title','Filtered Force Y');
@@ -132,8 +132,8 @@ hold on
 [pks2,locs2] = findpeaks(s2,'MinPeakHeight',.1,'MinPeakDistance',60);
 plot(ax_s2,t2(locs2),pks2,'ko')
 
-o2_init = s1(1:(locs1(2)+60));
-ty_init = s2(1:(locs2(2)+400));
+o2_init = s1(1:(locs1(3)+60));
+ty_init = s2(1:(locs2(3)+400));
 
 %Calls resample and lag signals
 function [s1_lag, s2_lag]=align_signals(s1,s2,p,q,lag)
