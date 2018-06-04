@@ -68,20 +68,18 @@ len_coef = length(coef);
 ave_omega_array = zeros(4,len_coef);
 ave_omega = zeros(1,len_coef);
 for i = 1:len_coef
-    ave_omega_array(1,i) = mean(omega(1,n1(i):n2(i)));
-    ave_omega_array(2,i) = mean(omega(2,n1(i):n2(i)));
-    ave_omega_array(3,i) = mean(omega(3,n1(i):n2(i)));
-    ave_omega_array(4,i) = mean(omega(4,n1(i):n2(i)));
+    ave_omega_array(1,i) = ave(omega(1,n1(i):n2(i)));
+    ave_omega_array(2,i) = ave(omega(2,n1(i):n2(i)));
+    ave_omega_array(3,i) = ave(omega(3,n1(i):n2(i)));
+    ave_omega_array(4,i) = ave(omega(4,n1(i):n2(i)));
 end
 
 for j = 1:len_coef
-    ave_omega(j) = mean(ave_omega_array(:,j));
+    ave_omega(j) = ave(ave_omega_array(:,i));
 end
 
 figure('Visible','on')
-plot(ave_omega,coef(1,:))
-xlabel('Omega')
-ylabel('ct')
+plot(0,0,ave_omega
 
 
 
