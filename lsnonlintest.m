@@ -79,9 +79,30 @@ for j = 1:len_coef
 end
 
 figure('Visible','on')
-plot(ave_omega,coef(1,:))
+%plot(ave_omega,coef(1,:))
 xlabel('Omega')
 ylabel('ct')
+
+
+%ct = beta*log(x-gamma);
+%x(1) = beta;
+%x(2) = gamma;
+
+x0 = [.000006,1000];
+fun = @(x,data) x(1)*log(data-x(2));
+fit = lsqcurvefit(fun,x0,ave_omega,coef(1,:));
+fprintf('beta = %e\ngamma = %e\n',fit(1),fit(2))
+
+x1 = [.000006,1000,2];
+fun2 = @(x,data) x(1)./(1+(1./(data-x(2)).^x(3)));
+fit2 = lsqcurvefit(fun2,x1,ave_omega,coef(1,:));
+fprintf('beta = %e\ngamma = %e\npower = %e\n',fit2(1),fit2(2),fit2(3))
+
+plot(ave_omega,coef(1,:),ave_omega,fit(1)*log(ave_omega-fit(2)),ave_omega,fit2(1)./(1+(1./(ave_omega-fit2(2)).^fit2(3))),ave_omega,(2.089*10^-13).*ave_omega.^2.179,ave_omega,(2.2233514*10^-6)./(1+10245.12196*exp(-.0072175656.*ave_omega)))
+legend('cT','log Fitted cT','exponential Fitted','Power Fit','Log Fit')
+
+
+
 
 
 
