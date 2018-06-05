@@ -1,6 +1,6 @@
 function lsnonlintest
-load('POCidentification_all_coefs_2018_06_01_4Corners_Acro.mat')
-load('POCidentification_test_span_2018_06_01_4Corners_Acro.mat')
+load('POCidentification_all_coefs_2018_06_05_4Corners_Manual.mat')
+load('POCidentification_test_span_2018_06_05_4Corners_Manual.mat')
 
 fitted_coefs = [];
 
