@@ -1,12 +1,12 @@
 function POCidentification
 %Loads output of POC_tracks_alignment
-load('POC_tracks_alignment_data_2018_06_05_4Corners_Acro.mat')
+load('POC_tracks_alignment_data_2018_06_01_4Corners_Acro.mat')
 
 %Takes the data input, and forms the matricies used in future calculations
 [omega,T] = create_matricies(a_o1,a_o2,a_o3,a_o4,a_fz,a_tx,a_ty,a_tz);
 
 %Span to calculate coefficients over
-load('POCidentification_test_span_2018_06_05_4Corners_Acro.mat')
+load('POCidentification_test_span_2018_06_01_4Corners_Acro.mat')
 % n1 = [679,6309,10380,13000,15320,18310];
 % n2 = [6281,9902,12380,14890,17410,27520];
 len_n1 = length(n1);
@@ -54,12 +54,12 @@ print_stars()
 %average_independent_coefficients(omega,T,n1,n2,len_n1)
 
 
-[indep_discr_coef,discreet_coef] = discreet_coefs(omega,T,n1,n2);
+discreet_coef = discreet_coefs(omega,T,n1,n2);
 
 
-%savefig(figures,'Figures_POC_tracks_alignment_data_2018_06_05_4Corners_Acro.fig')
-save([mfilename '_all_coefs_2018_06_05_4Corners_Acro.mat'],'coef','coef_ave','independent_coef','discreet_coef','indep_discr_coef','omega','T')
-%save([mfilename '_test_span_2018_06_05_4Corners_Acro.mat'],'n1','n2')
+%savefig(figures,'Figures_POC_tracks_alignment_data_2018_06_01_4Corners_Acro.fig')
+save([mfilename '_all_coefs_2018_06_01_4Corners_Acro.mat'],'coef','coef_ave','independent_coef','discreet_coef','omega','T')
+%save([mfilename '_test_span_2018_06_01_4Corners_Acro.mat'],'n1','n2')
 
 
 
@@ -234,6 +234,7 @@ legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Forc
 
 
 
+
 %Solves for the coeffients of each motor using a matrix at each data point
 function independent_coef = independent_coefficients(omega,T,n1,n2,len_n1)
 independent_coef = [];
@@ -257,7 +258,8 @@ for i = 1:len_n1
     print_coefficients('all',independent_coef(:,i))
 end
 
-%%%%%YIELDS WEIRD OUTPUT
+%Yields no useable output, since single matrix cannot determine all
+%independent coefficients
 function average_independent_coefficients(omega,T,n1,n2,len_n1)
 ave_independent_coef = [];
 for i = 1:len_n1
@@ -423,8 +425,9 @@ legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Forc
 
 
 
+
 %Calculates the coefficients at each data instance
-function [indep_discr_coef,discreet_coef] = discreet_coefs(omega,T,n1,n2)
+function discreet_coef = discreet_coefs(omega,T,n1,n2)
 discreet_coef = [];
 for i = n1(1):n2(end)
     osq = omega(:,i).^2;
@@ -434,29 +437,8 @@ for i = n1(1):n2(end)
     discreet_coef = [discreet_coef,coefs];
 end
 
-
-indep_discr_coef = [];
-% for j = 1:length(omega)
-%     osq = omega(:,j).^2;
-%     i_Ti = T(:,j);
-%     i_mat_o = [osq(1),osq(2),osq(3),osq(4),0,0,0,0,0,0,0,0;
-%         0,0,0,0,osq(1),-osq(2),osq(3),-osq(4),0,0,0,0;
-%         0,0,0,0,-osq(1),osq(2),osq(3),-osq(4),0,0,0,0;
-%         0,0,0,0,0,0,0,0,-osq(1),osq(2),-osq(3),osq(4)];
-%     i_coefs = i_mat_o\i_Ti;
-%     
-%     indep_discr_coef = [indep_discr_coef,i_coefs];
-% end
-
 %Prints a line of asteriscs for output separation
 function print_stars()
 fprintf('\n*************************************************************\n')
 
-
-
-% [U,S,V] = svd(omega_mat,'econ');
-% s = diag(S);
-% d = U'*T_mat;
-% coef2 = V*([d(1:3)./s(1:3)]); %;zeros(length(T_mat)-3,1)])
-% disp(coef2)
 
