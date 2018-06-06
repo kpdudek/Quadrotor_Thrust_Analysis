@@ -4,20 +4,20 @@ load('POCidentification_test_span_2018_06_06_Circles_Acro.mat')
 
 fitted_coefs = [];
 
-% for i = 1:length(coef)
-%     ct = coef(1,i);
-%     d = coef(2,i)/coef(1,i);
-%     
-%     coef_0 = [ct;d];
-%     FT_true = T;
-%     
-%     fitted_coefs = [fitted_coefs,(lsqnonlin(@(x) residuals(FT_true,omega,x),coef_0))];
-%     fprintf('Estimated: ct = %e -- d = %f\nFitted: ct = %e -- d = %f\n',ct,d,fitted_coefs(1),fitted_coefs(2))
-% end
-% 
-% plot_coef_vs_fitted(coef,fitted_coefs)
-% 
-% use_LS_values(fitted_coefs,omega,T)
+for i = 1:length(coef)
+    ct = coef(1,i);
+    d = coef(2,i)/coef(1,i);
+    
+    coef_0 = [ct;d];
+    FT_true = T;
+    
+    fitted_coefs = [fitted_coefs,(lsqnonlin(@(x) residuals(FT_true,omega,x),coef_0))];
+    fprintf('Estimated: ct = %e -- d = %f\nFitted: ct = %e -- d = %f\n',ct,d,fitted_coefs(1),fitted_coefs(2))
+end
+
+plot_coef_vs_fitted(coef,fitted_coefs)
+
+use_LS_values(fitted_coefs,omega,T)
 
 fit4 = ct_vs_omega(omega,coef,n1,n2);
 
