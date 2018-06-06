@@ -1,29 +1,31 @@
 function lsnonlintest
-load('POCidentification_all_coefs_2018_06_05_4Corners_Acro.mat')
-load('POCidentification_test_span_2018_06_05_4Corners_Acro.mat')
+load('POCidentification_all_coefs_2018_06_06_Circles_Acro.mat')
+load('POCidentification_test_span_2018_06_06_Circles_Acro.mat')
 
 fitted_coefs = [];
 
-% for i = 1:length(coef)
-%     ct = coef(1,i);
-%     d = coef(2,i)/coef(1,i);
-%     
-%     coef_0 = [ct;d];
-%     FT_true = T;
-%     
-%     fitted_coefs = [fitted_coefs,(lsqnonlin(@(x) residuals(FT_true,omega,x),coef_0))];
-%     fprintf('Estimated: ct = %e -- d = %f\nFitted: ct = %e -- d = %f\n',ct,d,fitted_coefs(1),fitted_coefs(2))
-% end
-% 
-% plot_coef_vs_fitted(coef,fitted_coefs)
-% 
-% use_LS_values(fitted_coefs,omega,T)
+for i = 1:length(coef)
+    ct = coef(1,i);
+    d = coef(2,i)/coef(1,i);
+    
+    coef_0 = [ct;d];
+    FT_true = T;
+    
+    fitted_coefs = [fitted_coefs,(lsqnonlin(@(x) residuals(FT_true,omega,x),coef_0))];
+    fprintf('Estimated: ct = %e -- d = %f\nFitted: ct = %e -- d = %f\n',ct,d,fitted_coefs(1),fitted_coefs(2))
+end
+
+plot_coef_vs_fitted(coef,fitted_coefs)
+
+use_LS_values(fitted_coefs,omega,T)
 
 fit4 = ct_vs_omega(omega,coef,n1,n2);
 
 plot_ct_all_omega(discreet_coef,omega,n1,n2)
 
 use_model_for_cTs(fit4,omega,T)
+
+plot_function(fit4)
 
 
 
@@ -141,13 +143,18 @@ sMax=max(s);
 sMin=min(s);
 s_conditioned=(s-sMin)/(sMax-sMin);
 
+function plot_function(fit4)
 
+func = sprintf('cT = %f/(1 + %f * exp(-%f * omega))',fit4(1),fit4(2),fit4(3));
+fprintf(func)
 
 function use_model_for_cTs(fit4,omega,T)
 
 ft = zeros(3,length(omega));
 cts = zeros(1,length(omega));
 ave_omegas = zeros(1,length(omega));
+
+%USING THE MODEL FOR CT TO CALCULATE THE FT'S
 for i = 1:length(omega)
     
     ave_omega = mean(omega(:,i));
@@ -157,22 +164,57 @@ for i = 1:length(omega)
     dct = ct*.13;
     coef_mat = [ct,ct,ct,ct;dct,-dct,dct,-dct;-dct,dct,dct,-dct];
     
-    ft(:,i) = (coef_mat*omega(:,i));
+    ft(:,i) = (coef_mat*(omega(:,i).^2));
 end
 
 x = 1:length(omega);
 figure('Visible','on','Name','FTs using model predicted ct')
 
+%PLOTTING MODEL FTS VS ACTUAL FTS
 fts = uitab('Title','Predicted FTs');
 ft_ax = axes(fts);
 plot(ft_ax,x,ft(1,:),'r:',x,ft(2,:),'g:',x,ft(3,:),'b:',x,T(1,:),'r',x,T(2,:),'g',x,T(3,:),'b')
 legend('Predicted Fz','Predicted Tx','Predicted Ty','Fz','Tx','Ty')
 
+%PLOTTING THE PREDICTED CTS VS OMEGA
 ctp = uitab('Title','Predicted Ct vs omega');
 ct_ax = axes(ctp);
-plot(ct_ax,ave_omegas,cts)
+plot(ct_ax,ave_omegas,cts,'.')
 xlabel('Average Omega')
 ylabel('ct')
+
+
+%FILTERING THE MODEL PREDICTED DATA
+L = length(omega);
+w = 26;
+w2 = w/2;
+t_sl = x(w2+1:end-w2);
+
+sl_fz = [];
+ft_sl = ft(1,:);
+for i = w2+1:(L-w2)
+    vals = ft_sl(i-w2:i+w2);
+    sl_fz(end+1) = mean(vals);
+end
+
+sl_tx = [];
+ft_slx = ft(2,:);
+for i = w2+1:(L-w2)
+    vals = ft_slx(i-w2:i+w2);
+    sl_tx(end+1) = mean(vals);
+end
+
+sl_ty = [];
+ft_sly = ft(3,:);
+for i = w2+1:(L-w2)
+    vals = ft_sly(i-w2:i+w2);
+    sl_ty(end+1) = mean(vals);
+end
+
+tab_sl = uitab('Title','SW Filter on Model Values'); 
+ax_sl = axes(tab_sl);
+plot(ax_sl,t_sl,sl_ty,'b:',t_sl,T(3,w2+1:L-w2),'b',t_sl,sl_fz,'r:',t_sl,T(1,w2+1:L-w2),'r',t_sl,sl_tx,'g:',t_sl,T(2,w2+1:L-w2),'g');
+
 
 
 
