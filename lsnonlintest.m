@@ -1,6 +1,6 @@
 function lsnonlintest
-load('POCidentification_all_coefs_2018_06_06_Circles_Acro.mat')
-load('POCidentification_test_span_2018_06_06_Circles_Acro.mat')
+load('POCidentification_all_coefs_2018_06_05_4Corners_Acro.mat')
+load('POCidentification_test_span_2018_06_05_4Corners_Acro.mat')
 
 fitted_coefs = [];
 
@@ -38,14 +38,12 @@ for i = 1:length(omega)
 end
 
 function ft = model(omega,x)
-ft = [];
-
 ct=x(1);
 d=x(2);
 dct = ct*d;
 
 coef_mat = [ct,ct,ct,ct;dct,-dct,dct,-dct;-dct,dct,dct,-dct];
-ft = (coef_mat*omega);
+ft = coef_mat*omega.^2;
 
 function use_LS_values(fitted_coefs,omega,T)
 FT_true = T;

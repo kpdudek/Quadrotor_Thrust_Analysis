@@ -1,7 +1,7 @@
 function POC_tracks_alignment
 %Loads the file, then calls functions to process the raw data before signal
 %analysis can occur
-file = 'R2_2018_06_06_Circles_Acro';
+file = 'R2_2018_06_05_4Corners_Acro';
 [o1,o2,o3,o4,tp] = PX4_CSV_Plotter_V2(file);
 [ffz,ftx,fty,ftz,t_sl] = ATI_AXIA80_LOG_Processor_V2(file);
 [o2_init_1,ty_init_1,locs2] = find_peaks(o2,tp,fty,t_sl);
@@ -50,7 +50,7 @@ a_ty_p = condition(a_ty);
 plot(a_fz_p)
 hold on
 plot(a_ty_p)
-save([mfilename '_data_2018_06_06_Circles_Acro'],'a_fz','a_tx','a_ty','a_tz','a_o1','a_o2','a_o3','a_o4')
+save([mfilename '_data_2018_06_05_4Corners_Acro'],'a_fz','a_tx','a_ty','a_tz','a_o1','a_o2','a_o3','a_o4')
 
 
 
@@ -121,7 +121,7 @@ ax_s1 = axes(tab_s1);
 %sr1 = max(t1)/length(t1);
 plot(ax_s1,t1,s1)
 hold on
-[pks1,locs1] = findpeaks(s1,'MinPeakHeight',1320,'MinPeakDistance',5);
+[pks1,locs1] = findpeaks(s1,'MinPeakHeight',1260,'MinPeakDistance',5);
 plot(ax_s1,t1(locs1),pks1,'ko')
 
 tab_s2 = uitab('Title','Filtered Force Y');
