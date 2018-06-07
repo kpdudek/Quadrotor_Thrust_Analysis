@@ -54,7 +54,7 @@ dct = ct * d;
 coef_mat = [ct,ct,ct,ct;dct,-dct,dct,-dct;-dct,dct,dct,-dct];
 
 for i = 1:length(omega)
-    T_fit = [T_fit,(coef_mat * omega(:,i))];
+    T_fit = [T_fit,(coef_mat * omega(:,i).^2)];
 end
 
 len = 1:length(omega);
