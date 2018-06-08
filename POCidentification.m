@@ -1,17 +1,16 @@
 function POCidentification
 %Loads output of POC_tracks_alignment
-load('POC_tracks_alignment_data_2018_06_05_4Corners_Acro.mat')
+load('POC_tracks_alignment_data_2018_06_06_Circles_Acro.mat')
 
 %Takes the data input, and forms the matricies used in future calculations
 [omega,T] = create_matricies(a_o1,a_o2,a_o3,a_o4,a_fz,a_tx,a_ty,a_tz);
 d = .118;
 
 %Span to calculate coefficients over
-%load('POCidentification_test_span_2018_06_05_4Corners_Acro.mat')
-n1 = [835,5653,9161,14440,19240,25680];
-n2 = [5397,9085,14050,19120,25600,30300];
+load('POCidentification_test_span_2018_06_06_Circles_Acro.mat')
+%n1 = [835,5653,9161,14440,19240,25680];
+%n2 = [5397,9085,14050,19120,25600,30300];
 len_n1 = length(n1);
-len_n2 = length(n2);
 
 figures = [];
 
@@ -41,13 +40,13 @@ print_stars()
 %Furthering the calculations, here a larger matrix is created that solves
 %for the coefficients of each motor
 independent_coef = independent_coefficients(omega,T,n1,n2,len_n1);
-figures = use_independent(independent_coef,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1,figures,d);
+figures = use_independent(independent_coef,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1,figures);
 figures = plot_independent_coef(independent_coef,figures);
 
 %Stars for clarity
 print_stars()
 
-figures = independent_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz,figures,d);
+figures = independent_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz,figures);
 
 %Stars for clarity
 print_stars()
@@ -59,8 +58,8 @@ discreet_coef = discreet_coefs(omega,T,n1,n2);
 
 
 %savefig(figures,'Figures_POC_tracks_alignment_data_2018_06_01_4Corners_Acro.fig')
-save([mfilename '_all_coefs_2018_06_05_4Corners_Acro.mat'],'coef','coef_ave','independent_coef','discreet_coef','omega','T')
-save([mfilename '_test_span_2018_06_05_4Corners_Acro.mat'],'n1','n2')
+save([mfilename '_all_coefs_2018_06_06_Circles_Acro.mat'],'coef','coef_ave','independent_coef','discreet_coef','omega','T')
+save([mfilename '_test_span_2018_06_06_Circles_Acro.mat'],'n1','n2')
 
 
 
@@ -106,27 +105,11 @@ end
 function figures = use_coefficients(coef,coef_ave,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1,figures,d)
 %fig = figure('Visible','on','Name','Check Coefficients');
 for i = 1:len_n1
-    T_plot = [];
-    T_av_plot = [];
     
-    ct = coef(1,i);
-    cq = coef(2,i);
-    dct = ct .* d;
-    av_ct = coef_ave(1,i);
-    av_cq = coef_ave(2,i);
-    av_dct = av_ct .* d;
+    T_plot = plot_using_combined_coefs(coef(:,i),omega);
     
-    coef_mat = [ct,ct,ct,ct;dct,-dct,dct,-dct;-dct,dct,dct,-dct;-cq,cq,-cq,cq];
-    av_coef_mat = [av_ct,av_ct,av_ct,av_ct;av_dct,-av_dct,av_dct,-av_dct;-av_dct,av_dct,av_dct,-av_dct;-av_cq,av_cq,-av_cq,av_cq];
-    
-    for iN = 1:length(omega)
-        osq = omega(:,iN).^2;
-        T = coef_mat * osq;
-        T_av = av_coef_mat * osq;
-        
-        T_plot = [T_plot,T];
-        T_av_plot = [T_av_plot,T_av];
-    end
+    T_av_plot = plot_using_combined_coefs(coef_ave(:,i),omega);
+
     figures(end+1) = figure('Visible','on','Name','Check Coefficients');
     title = sprintf('Matrix Determined %d - %d',n1(i),n2(i));
     mat_det = uitab('Title',title);
@@ -237,33 +220,11 @@ end
 
 %Uses the coefficients for each motor to solve for the F/Ts at a given
 %omega
-function figures = use_independent(independent_coef,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1,figures,d)
+function figures = use_independent(independent_coef,omega,a_fz,a_tx,a_ty,a_tz,n1,n2,len_n1,figures)
 
 for i = 1:len_n1
     
-    T_plot = [];
-    
-    ct1 = independent_coef(1,i);
-    ct2 = independent_coef(2,i);
-    ct3 = independent_coef(3,i);
-    ct4 = independent_coef(4,i);
-    cq1 = independent_coef(5,i);
-    cq2 = independent_coef(6,i);
-    cq3 = independent_coef(7,i);
-    cq4 = independent_coef(8,i);
-    dct1 = ct1 * d;
-    dct2 = ct2 * d;
-    dct3 = ct3 * d;
-    dct4 = ct4 * d;
-    
-    coef_mat = [ct1,ct2,ct3,ct4;dct1,-dct2,dct3,-dct4;-dct1,dct2,dct3,-dct4;-cq1,cq2,-cq3,cq4];
-    
-    for iN = 1:length(omega)
-        osq = omega(:,iN).^2;
-        T = coef_mat * osq;
-        
-        T_plot = [T_plot,T];
-    end
+    T_plot = plot_using_independent_coefs(independent_coef(:,i),omega);
     
     figures(end+1) = figure('Visible','on','Name','Check Independent Coefficients');
     title = sprintf('Matrix Determined %d - %d',n1(i),n2(i));
@@ -293,7 +254,7 @@ ax_cq = axes(tab_cq);
 plot(ax_cq,t,independent_coef(5,:),t,independent_coef(6,:),t,independent_coef(7,:),t,independent_coef(8,:));
 
 %Solves for the independent coefficients using the entire data set
-function figures = independent_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz,figures,d)
+function figures = independent_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz,figures)
 
 [omega_mat,T_mat] = independent_matricies(omega,T);
 
@@ -304,29 +265,8 @@ print_coefficients('all',coef)
 
 %Lets use the calculated coefficient matrix to solve for the F/Ts and compare to experimental results
 
-T_plot = [];
+T_plot = plot_using_independent_coefs(coef,omega);
 
-ct1 = coef(1);
-ct2 = coef(2);
-ct3 = coef(3);
-ct4 = coef(4);
-dct1 = ct1*d;
-dct2 = ct2*d;
-dct3 = ct3*d;
-dct4 = ct4*d;
-cq1 = coef(5);
-cq2 = coef(6);
-cq3 = coef(7);
-cq4 = coef(8);
-
-coef_mat = [ct1,ct2,ct3,ct4;dct1,-dct2,dct3,-dct4;-dct1,dct2,dct3,-dct4;-cq1,cq2,-cq3,cq4];
-
-for iN = 1:length(omega)
-    osq = omega(:,iN).^2;
-    T = coef_mat * osq;
-   
-    T_plot = [T_plot,T];
-end
 figures(end+1) = figure('Visible','on','Name','Check Independent Coefficients Over Whole Set');
 title = sprintf('Independent Matrix Determined over entire set');
 mat_det = uitab('Title',title);
@@ -351,6 +291,7 @@ for i = n1(1):n2(end)
     discreet_coef = [discreet_coef,coefs];
 end
 
+
 function [omega_mat,T_mat] = combined_matricies(omega,T)
 d = .118;
 omega_mat = [];
@@ -365,6 +306,24 @@ for i = 1:length(omega)
     omega_mat = [omega_mat;mat_o];
     T_mat = [T_mat;Ti];
 end
+
+function T_plot = plot_using_combined_coefs(coef,omega)
+    d = .118;
+    T_plot = [];
+    
+    ct = coef(1);
+    cq = coef(2);
+    dct = ct .* d;
+    
+    coef_mat = [ct,ct,ct,ct;dct,-dct,dct,-dct;-dct,dct,dct,-dct;-cq,cq,-cq,cq];
+    
+    for iN = 1:length(omega)
+        osq = omega(:,iN).^2;
+        T = coef_mat * osq;
+        
+        T_plot = [T_plot,T];
+    end
+
 
 function [omega_mat,T_mat] = independent_matricies(omega,T)
 d = .118;
@@ -382,6 +341,32 @@ for i = 1:length(omega)
     
     omega_mat = [omega_mat;mat_o];
     T_mat = [T_mat;Ti];
+end
+
+function T_plot = plot_using_independent_coefs(coef,omega)
+d = .118;
+T_plot = [];
+
+ct1 = coef(1);
+ct2 = coef(2);
+ct3 = coef(3);
+ct4 = coef(4);
+dct1 = ct1*d;
+dct2 = ct2*d;
+dct3 = ct3*d;
+dct4 = ct4*d;
+cq1 = coef(5);
+cq2 = coef(6);
+cq3 = coef(7);
+cq4 = coef(8);
+
+coef_mat = [ct1,ct2,ct3,ct4;dct1,-dct2,dct3,-dct4;-dct1,dct2,dct3,-dct4;-cq1,cq2,-cq3,cq4];
+
+for iN = 1:length(omega)
+    osq = omega(:,iN).^2;
+    T = coef_mat * osq;
+   
+    T_plot = [T_plot,T];
 end
 
 
