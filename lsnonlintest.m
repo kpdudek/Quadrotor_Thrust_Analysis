@@ -128,8 +128,9 @@ ylabel('ct')
 
 function plot_ct_all_omega(discreet_coef,omega,n1,n2)
 figure('Visible','on','Name','Omega vs Coefs')
-
-omega_ave = mean(omega(:,n1(1):n2(end)));
+discreet_coef = discreet_coef(:,n1(1):n2(end));
+omega = omega(:,n1(1):n2(2));
+omega_ave = mean(omega);
 
 ct = uitab('Title','Average Omega vs ct');
 ct_ax = axes(ct);
@@ -165,12 +166,11 @@ function use_model_for_cTs(fit4,omega,T)
 
 ft = zeros(3,length(omega));
 cts = zeros(4,length(omega));
-ave_omegas = zeros(1,length(omega));
 
 %USING THE MODEL FOR CT TO CALCULATE THE FT'S
 for i = 1:length(omega)
     for j = 1:4
-        cts(j,i) = fit4(1)./(1+fit4(2)*exp(-fit4(3).*omega(j,i)));
+        cts(j,i) = ct_for_omega(fit4,omega(j,i));
     end
     ft(:,i) = model(omega(:,i),cts(:,i));
 end
@@ -187,42 +187,37 @@ legend('Predicted Fz','Predicted Tx','Predicted Ty','Fz','Tx','Ty')
 %PLOTTING THE PREDICTED CTS VS OMEGA
 ctp = uitab('Title','Predicted Ct vs omega');
 ct_ax = axes(ctp);
-plot(ct_ax,ave_omegas,cts(1,:),'.',ave_omegas,cts(2,:),'.',ave_omegas,cts(3,:),'.',ave_omegas,cts(4,:),'.')
+plot(ct_ax,omega(1,:),cts(1,:),'.',omega(2,:),cts(2,:),'.',omega(3,:),cts(3,:),'.',omega(4,:),cts(4,:),'.')
 xlabel('Average Omega')
 ylabel('ct')
 
 function discreet_ct_vs_omega_fit(omega,discreet_coef,n1,n2,T)
 figure('Visible','on','Name','Discreet cT vs Omega Fit')
 
-ave_omega = mean(omega);
-ave_omega = ave_omega(n1(1):n2(end));
+omega = omega(:,n1(1):n2(end));
+discreet_coef = discreet_coef(:,n1(1):n2(end));
+T = T(:,n1(1):n2(end));
 
-x = [(2.089*10^-6),10245,.007217];
-fun = @(x,data) x(1)./(1+x(2)*exp(-x(3).*data));
-fit = nlinfit(ave_omega,discreet_coef(1,:),fun,x);
-fprintf('beta = %e\ngamma = %e\npower = %e\n',fit(1),fit(2),fit(3))
+fit = zeros(3,4);
+for i = 1:4
+    fit(:,i) = ct_nlinfit(omega(i,:),discreet_coef(1,:));
+end
 
 ft = uitab('Title','Fitted Curve');
 ax = axes(ft);
-plot(ax,ave_omega,discreet_coef(1,:),'.',ave_omega,fit(1)./(1+fit(2)*exp(-fit(3).*ave_omega)))
+plot(ax,omega(1,:),discreet_coef(1,:),'.',omega(1,:),fit(1,1)./(1+fit(2,1)*exp(-fit(3,1).*omega(1,:))))
 
-
-ave_omega = mean(omega);
-ft = zeros(3,length(omega));
-cts = zeros(1,length(ave_omega));
 %USING THE MODEL FOR CT TO CALCULATE THE FT'S
-for i = 1:length(ave_omega)
-
-    ct = fit(1)./(1+fit(2)*exp(-fit(3).*ave_omega(i)));
-    cts(i) = ct;
-    dct = ct*.13;
-    coef_mat = [ct,ct,ct,ct;dct,-dct,dct,-dct;-dct,dct,dct,-dct];
-    
-    ft(:,i) = (coef_mat*(omega(:,i).^2));
+ct = zeros(4,length(omega));
+for j = 1:4
+    ct(j,:) = ct_for_omega(fit(:,j),omega(j,:));
+end
+ft = zeros(3,length(omega));
+for k = 1:length(omega)
+    ft(:,k) = plot_using_calculated_cts(ct(:,k),omega(:,k));
 end
 
 x = 1:length(omega);
-
 %PLOTTING MODEL FTS VS ACTUAL FTS
 fts = uitab('Title','Predicted FTs');
 ft_ax = axes(fts);
@@ -232,7 +227,58 @@ legend('Predicted Fz','Predicted Tx','Predicted Ty','Fz','Tx','Ty')
 %PLOTTING THE PREDICTED CTS VS OMEGA
 ctp = uitab('Title','Predicted Ct vs omega');
 ct_ax = axes(ctp);
-plot(ct_ax,ave_omega,cts,'.')
+plot(ct_ax,omega(1,:),ct(1,:),'.',omega(2,:),ct(2,:),'.',omega(3,:),ct(3,:),'.',omega(4,:),ct(4,:),'.')
 xlabel('Average Omega')
 ylabel('ct')
+
+function ct = ct_for_omega(fit,omega)
+ct = fit(1)./(1+fit(2)*exp(-fit(3).*omega));
+
+
+function T_plot = plot_using_calculated_cts(coef,omega)
+d = .118;
+T_plot = [];
+
+ct1 = coef(1);
+ct2 = coef(2);
+ct3 = coef(3);
+ct4 = coef(4);
+dct1 = ct1*d;
+dct2 = ct2*d;
+dct3 = ct3*d;
+dct4 = ct4*d;
+
+coef_mat = [ct1,ct2,ct3,ct4;dct1,-dct2,dct3,-dct4;-dct1,dct2,dct3,-dct4];
+
+for iN = 1:length(omega(1,:))
+    osq = omega(:,iN).^2;
+    T = coef_mat * osq;
+   
+    T_plot = [T_plot,T];
+end
+
+
+function fit = ct_nlinfit(omega,discreet_coef)
+x = [(2.089*10^-6),10245,.007217];
+fun = @(x,data) x(1)./(1+x(2)*exp(-x(3).*data));
+fit = nlinfit(omega,discreet_coef(1,:),fun,x);
+fprintf('beta = %e\ngamma = %e\npower = %e\n',fit(1),fit(2),fit(3))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
