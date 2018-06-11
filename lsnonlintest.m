@@ -7,16 +7,20 @@ load('POCidentification_test_span_2018_06_06_Circles_Acro.mat')
 % plot_coef_vs_fitted(coef,fitted_coefs)
 % 
 % use_LS_values(fitted_coefs,omega,T)
-% 
+
 fit4 = ct_vs_omega(omega,coef,n1,n2);
 
-plot_ct_all_omega(discreet_coef,omega,n1,n2)
-
 use_model_for_cTs(fit4,omega,T)
+
+plot_ct_all_omega(discreet_coef,omega,n1,n2)
 
 plot_function(fit4)
 
 discreet_ct_vs_omega_fit(omega,discreet_coef,n1,n2,T)
+
+fitted = coefs_ct_function_omega(T,omega);
+
+use_nonlin(fitted,omega,T)
 
 
 function fitted_coefs = non_linear_fit(T,omega,coef)
@@ -198,10 +202,9 @@ ave_omega = mean(omega);
 
 fit = ct_nlinfit(ave_omega(:,n1(1):n2(end)),discreet_coef(1,n1(1):n2(end)));
 
-
 ft = uitab('Title','Fitted Curve');
 ax = axes(ft);
-plot(ax,ave_omega,discreet_coef(1,:),'.',ave_omega,fit(1)./(1+fit(2)*exp(-fit(3).*ave_omega)))
+plot(ax,ave_omega(:,n1(1):n2(end)),discreet_coef(1,n1(1):n2(end)),'.',ave_omega(:,n1(1):n2(end)),fit(1)./(1+fit(2)*exp(-fit(3).*ave_omega(:,n1(1):n2(end)))))
 
 %USING THE MODEL FOR CT TO CALCULATE THE FT'S
 ct = zeros(4,length(omega));
@@ -224,6 +227,12 @@ legend('Predicted Fz','Predicted Tx','Predicted Ty','Fz','Tx','Ty')
 ctp = uitab('Title','Predicted Ct vs omega');
 ct_ax = axes(ctp);
 plot(ct_ax,omega(1,:),ct(1,:),'.',omega(2,:),ct(2,:),'.',omega(3,:),ct(3,:),'.',omega(4,:),ct(4,:),'.')
+xlabel('Average Omega')
+ylabel('ct')
+
+ctt = uitab('Title','Predicted Ct vs Time');
+ctt_ax = axes(ctt);
+plot(ctt_ax,x,ct(1,:),'.',x,ct(2,:),'.',x,ct(3,:),'.',x,ct(4,:),'.')
 xlabel('Average Omega')
 ylabel('ct')
 
@@ -257,6 +266,49 @@ x = [(2.089*10^-6),10245,.007217];
 fun = @(x,data) x(1)./(1+x(2)*exp(-x(3).*data));
 fit = nlinfit(omega,ct,fun,x);
 fprintf('beta = %e\ngamma = %e\npower = %e\n',fit(1),fit(2),fit(3))
+
+function fitted = coefs_ct_function_omega(T,omega)
+fitted = [];
+
+coef_0 = [.000002323570,210370.240755,.009541519];
+FT_true = T;
+
+fitted = [fitted,(lsqnonlin(@(x) resid(FT_true,omega,x),coef_0))];
+
+fprintf('Estimated: x1 = %e\nEstimated: x2 = %e\nEstimated: x3 = %e\n',fitted(1),fitted(2),fitted(3))
+
+function f = resid(FT_true,omega,x)
+f = [];
+for i = 1:length(omega)
+    f = [f,(FT_true(1:3,i)-model2(omega(:,i),x))];
+end
+
+function ft = model2(omega,x)
+ct = zeros(1,4);
+for i = 1:4
+    ct(i) = x(1)/(1+x(2)*exp(-x(3)*omega(i)));
+end
+ct1 = ct(1);
+ct2 = ct(2);
+ct3 = ct(3);
+ct4 = ct(4);
+d = .118;
+
+coef_mat = [ct1,ct2,ct3,ct4;d*ct1,-d*ct2,d*ct3,-d*ct4;-d*ct1,d*ct2,d*ct3,-d*ct4];
+ft = coef_mat*omega.^2;
+
+function use_nonlin(fitted,omega,T)
+ft = [];
+for i = 1:length(omega)
+    ft = [ft,model2(omega(:,i),fitted)];
+end
+
+x = 1:length(ft(1,:));
+figure('Visible','on','Name','Non lin fit with ct(w)')
+fts = uitab('Title','Predicted FTs');
+ft_ax = axes(fts);
+plot(ft_ax,x,ft(1,:),'r:',x,ft(2,:),'g:',x,ft(3,:),'b:',x,T(1,:),'r',x,T(2,:),'g',x,T(3,:),'b')
+legend('Predicted Fz','Predicted Tx','Predicted Ty','Fz','Tx','Ty')
 
 
 
