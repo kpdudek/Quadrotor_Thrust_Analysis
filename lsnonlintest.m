@@ -2,12 +2,12 @@ function lsnonlintest
 load('POCidentification_all_coefs_2018_06_06_Circles_Acro.mat')
 load('POCidentification_test_span_2018_06_06_Circles_Acro.mat')
 
-fitted_coefs = non_linear_fit(T,omega,coef);
-
-plot_coef_vs_fitted(coef,fitted_coefs)
-
-use_LS_values(fitted_coefs,omega,T)
-
+% fitted_coefs = non_linear_fit(T,omega,coef);
+% 
+% plot_coef_vs_fitted(coef,fitted_coefs)
+% 
+% use_LS_values(fitted_coefs,omega,T)
+% 
 fit4 = ct_vs_omega(omega,coef,n1,n2);
 
 plot_ct_all_omega(discreet_coef,omega,n1,n2)
@@ -129,7 +129,7 @@ ylabel('ct')
 function plot_ct_all_omega(discreet_coef,omega,n1,n2)
 figure('Visible','on','Name','Omega vs Coefs')
 discreet_coef = discreet_coef(:,n1(1):n2(end));
-omega = omega(:,n1(1):n2(2));
+omega = omega(:,n1(1):n2(end));
 omega_ave = mean(omega);
 
 ct = uitab('Title','Average Omega vs ct');
@@ -194,23 +194,19 @@ ylabel('ct')
 function discreet_ct_vs_omega_fit(omega,discreet_coef,n1,n2,T)
 figure('Visible','on','Name','Discreet cT vs Omega Fit')
 
-omega = omega(:,n1(1):n2(end));
-discreet_coef = discreet_coef(:,n1(1):n2(end));
-T = T(:,n1(1):n2(end));
+ave_omega = mean(omega);
 
-fit = zeros(3,4);
-for i = 1:4
-    fit(:,i) = ct_nlinfit(omega(i,:),discreet_coef(1,:));
-end
+fit = ct_nlinfit(ave_omega(:,n1(1):n2(end)),discreet_coef(1,n1(1):n2(end)));
+
 
 ft = uitab('Title','Fitted Curve');
 ax = axes(ft);
-plot(ax,omega(1,:),discreet_coef(1,:),'.',omega(1,:),fit(1,1)./(1+fit(2,1)*exp(-fit(3,1).*omega(1,:))))
+plot(ax,ave_omega,discreet_coef(1,:),'.',ave_omega,fit(1)./(1+fit(2)*exp(-fit(3).*ave_omega)))
 
 %USING THE MODEL FOR CT TO CALCULATE THE FT'S
 ct = zeros(4,length(omega));
 for j = 1:4
-    ct(j,:) = ct_for_omega(fit(:,j),omega(j,:));
+    ct(j,:) = ct_for_omega(fit,omega(j,:));
 end
 ft = zeros(3,length(omega));
 for k = 1:length(omega)
@@ -234,7 +230,6 @@ ylabel('ct')
 function ct = ct_for_omega(fit,omega)
 ct = fit(1)./(1+fit(2)*exp(-fit(3).*omega));
 
-
 function T_plot = plot_using_calculated_cts(coef,omega)
 d = .118;
 T_plot = [];
@@ -257,11 +252,10 @@ for iN = 1:length(omega(1,:))
     T_plot = [T_plot,T];
 end
 
-
-function fit = ct_nlinfit(omega,discreet_coef)
+function fit = ct_nlinfit(omega,ct)
 x = [(2.089*10^-6),10245,.007217];
 fun = @(x,data) x(1)./(1+x(2)*exp(-x(3).*data));
-fit = nlinfit(omega,discreet_coef(1,:),fun,x);
+fit = nlinfit(omega,ct,fun,x);
 fprintf('beta = %e\ngamma = %e\npower = %e\n',fit(1),fit(2),fit(3))
 
 
