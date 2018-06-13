@@ -121,7 +121,7 @@ fit3 = lsqcurvefit(fun3,x2,ave_omega,coef(1,:));
 fprintf('beta = %e\ngamma = %e\npower = %e\n',fit3(1),fit3(2),fit3(3))
 
 x3 = [(2.089*10^-6),10245,.007217];
-fun4 = @(x,data) x(1)./(1+x(2)*exp(-x(3).*data));
+fun4 = @(x,data) x(1)./(1+x(2).*exp(-x(3).*data));
 fit4 = nlinfit(ave_omega,coef(1,:),fun4,x3);
 fprintf('beta = %e\ngamma = %e\npower = %e\n',fit4(1),fit4(2),fit4(3))
 
@@ -262,7 +262,7 @@ end
 
 function fit = ct_nlinfit(omega,ct)
 x = [(2.089*10^-6),10245,.007217];
-fun = @(x,data) x(1)./(1+x(2)*exp(-x(3).*data));
+fun = @(x,data) x(1)./(1+x(2).*exp(-x(3).*data));
 fit = nlinfit(omega,ct,fun,x);
 fprintf('beta = %e\ngamma = %e\npower = %e\n',fit(1),fit(2),fit(3))
 
