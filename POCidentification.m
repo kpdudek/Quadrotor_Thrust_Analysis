@@ -54,7 +54,7 @@ print_stars()
 %average_independent_coefficients(omega,T,n1,n2,len_n1)
 
 
-discreet_coef = discreet_coefs(omega,T);
+discreet_coef = discreet_coefs(omega,T,n1,n2);
 
 
 %savefig(figures,'Figures_POC_tracks_alignment_data_2018_06_01_4Corners_Acro.fig')
@@ -139,7 +139,6 @@ tab = uitab('Title','Coefficients');
 ax = axes(tab);
 coef_plot = plot(ax,t,coef(1,:),'b',t,coef(2,:),'k',t,coef_ave(1,:),'b--+',t,coef_ave(2,:),'k--');
 legend(coef_plot,'Ct','cq','ave_Ct','ave_cq')
-
 
 %Solves for the coefficients using the entire data set
 function figures = combined_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz,figures)
@@ -281,10 +280,10 @@ legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Forc
 
 
 %Calculates the coefficients at each data instance
-function discreet_coef = discreet_coefs(omega,T)
+function discreet_coef = discreet_coefs(omega,T,n1,n2)
 discreet_coef = [];
 d = .118;
-for i = 1:length(omega)
+for i = n1(1):n2(end)
     osq = omega(:,i).^2;
     osqd = osq.*d;
     Ti = T(:,i);
@@ -292,6 +291,7 @@ for i = 1:length(omega)
     coefs = mat_o\Ti;
     discreet_coef = [discreet_coef,coefs];
 end
+
 
 
 function [omega_mat,T_mat] = combined_matricies(omega,T)

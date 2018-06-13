@@ -2,11 +2,11 @@ function lsnonlintest
 load('POCidentification_all_coefs_2018_06_06_Circles_Acro.mat')
 load('POCidentification_test_span_2018_06_06_Circles_Acro.mat')
 
-% fitted_coefs = non_linear_fit(T,omega,coef);
-% 
-% plot_coef_vs_fitted(coef,fitted_coefs)
-% 
-% use_LS_values(fitted_coefs,omega,T)
+fitted_coefs = non_linear_fit(T,omega,coef);
+
+plot_coef_vs_fitted(coef,fitted_coefs)
+
+use_LS_values(fitted_coefs,omega,T)
 
 fit4 = ct_vs_omega(omega,coef,n1,n2);
 
@@ -132,7 +132,6 @@ ylabel('ct')
 
 function plot_ct_all_omega(discreet_coef,omega,n1,n2)
 figure('Visible','on','Name','Omega vs Coefs')
-discreet_coef = discreet_coef(:,n1(1):n2(end));
 omega = omega(:,n1(1):n2(end));
 omega_ave = mean(omega);
 
@@ -200,11 +199,11 @@ figure('Visible','on','Name','Discreet cT vs Omega Fit')
 
 ave_omega = mean(omega);
 
-fit = ct_nlinfit(ave_omega(:,n1(1):n2(end)),discreet_coef(1,n1(1):n2(end)));
+fit = ct_nlinfit(ave_omega(:,n1(1):n2(end)),discreet_coef(1,:));
 
 ft = uitab('Title','Fitted Curve');
 ax = axes(ft);
-plot(ax,ave_omega(:,n1(1):n2(end)),discreet_coef(1,n1(1):n2(end)),'.',ave_omega(:,n1(1):n2(end)),fit(1)./(1+fit(2)*exp(-fit(3).*ave_omega(:,n1(1):n2(end)))))
+plot(ax,ave_omega(:,n1(1):n2(end)),discreet_coef(1,:),'.',ave_omega(:,n1(1):n2(end)),fit(1)./(1+fit(2)*exp(-fit(3).*ave_omega(:,n1(1):n2(end)))))
 
 %USING THE MODEL FOR CT TO CALCULATE THE FT'S
 ct = zeros(4,length(omega));
