@@ -1,7 +1,11 @@
 function CT_Function_of_Omega
+%Loads the result of POCidentification and POC_tracks_alignment
+%Loading the coefficients, aligned data sets for omega and F/T's
+%Loads the indicies of the test run
 load('POCidentification_all_coefs_2018_06_06_Circles_Acro.mat')
 load('POCidentification_test_span_2018_06_06_Circles_Acro.mat')
 
+%
 fitted_coefs = non_linear_fit(T,omega,coef);
 
 plot_coef_vs_fitted(coef,fitted_coefs)
@@ -23,6 +27,8 @@ fitted = coefs_ct_function_omega(T,omega);
 use_nonlin(fitted,omega,T)
 
 
+%Uses lsqnonlin to find a value of ct over the test set
+%Calls funtions "residials" and "model"
 function fitted_coefs = non_linear_fit(T,omega,coef)
 fitted_coefs = [];
 
@@ -36,12 +42,16 @@ for i = 1:length(coef)
     fprintf('Estimated: ct = %e\nFitted: ct = %e\n',ct,fitted_coefs(i))
 end
 
+%Returns the difference between the true F/T values at a time index and the
+%estimated values
 function f = residuals(FT_true,omega,x)
 f = [];
 for i = 1:length(omega)
     f = [f,(FT_true(1:3,i)-model(omega(:,i),x))];
 end
 
+%Calculates the F/T values for a given vector of omegas using the
+%coefficeint matric that was constructed by the nonlinear fit
 function ft = model(omega,x)
 
 if (length(x) == 2) || (length(x) == 1)
@@ -63,6 +73,7 @@ else
     ft = coef_mat*omega.^2;
 end
 
+%Plots the F/T values using the nonlinear fit, versus the true values
 function use_LS_values(fitted_coefs,omega,T)
 FT_true = T;
 T_fit = [];
@@ -78,6 +89,8 @@ xlabel('time')
 ylabel('Newtons')
 legend('LS Fz','LS Tx','LS Ty','Fz','Tx','Ty')
 
+%Plots the ct values from the nonliear fit versus the matrix determined
+%values from POCidentification
 function plot_coef_vs_fitted(coef,fitted_coefs)
 ct = coef(1,:);
 len = 1:length(fitted_coefs(1,:));
@@ -85,6 +98,8 @@ figure('Visible','on','Name','Least Squares vs Matrix Determined')
 plot(len,fitted_coefs(1,:),'r:+',len,ct,'r')
 legend('LS Ct','Calculated Ct')
 
+%Using the combined matrix determined values of ct from POCidentification,
+%this function applies multiple fits to the curve
 function fit4 = ct_vs_omega(omega,coef,n1,n2)
 len_coef = length(coef);
 ave_omega_array = zeros(4,len_coef);
@@ -130,6 +145,9 @@ legend('cT','Log Fit','Exponential Fit','1/e^x Fit(curvefit)','1/e^x Fit(nlinfit
 xlabel('Average Omega')
 ylabel('ct')
 
+%This function takes the values of CT that were calculated at every
+%timestep in POCidentification function "discreet_coef" and plots them
+%versus time and average omega
 function plot_ct_all_omega(discreet_coef,omega,n1,n2)
 figure('Visible','on','Name','Omega vs Coefs')
 omega = omega(:,n1(1):n2(end));
@@ -147,26 +165,23 @@ plot(ctt_ax,1:length(omega_ave),discreet_coef(1,:),'.')
 xlabel('time')
 ylabel('ct')
 
-dt = uitab('Title','Average Omega vs d');
-d_ax = axes(dt);
-d = discreet_coef(2,:)./discreet_coef(1,:);
-plot(d_ax,omega_ave,d,'.')
-xlabel('Average Omega')
-ylabel('d')
-
+%Conditions the data set, unused so far
 function s_conditioned = condition(s)
 s=shiftdim(s);
 sMax=max(s);
 sMin=min(s);
 s_conditioned=(s-sMin)/(sMax-sMin);
 
+%Plots the function from the nonlinear fit in a legible form
 function plot_function(fit4)
-
+print_stars()
 func = sprintf('\n\ncT = %f/(1 + %f * exp(-%f * omega))\n\n',fit4(1),fit4(2),fit4(3));
 fprintf(func)
+print_stars()
 
+%This function estimates the F/T values for given omega values. The
+%function calculates the value for Ct as a function of omega
 function use_model_for_cTs(fit4,omega,T)
-
 ft = zeros(3,length(omega));
 cts = zeros(4,length(omega));
 
@@ -194,6 +209,8 @@ plot(ct_ax,omega(1,:),cts(1,:),'.',omega(2,:),cts(2,:),'.',omega(3,:),cts(3,:),'
 xlabel('Average Omega')
 ylabel('ct')
 
+%This function fits an equation for CT as a funciton of omega using the
+%data set with a value of ct for every time step
 function discreet_ct_vs_omega_fit(omega,discreet_coef,n1,n2,T)
 figure('Visible','on','Name','Discreet cT vs Omega Fit')
 
@@ -235,9 +252,13 @@ plot(ctt_ax,x,ct(1,:),'.',x,ct(2,:),'.',x,ct(3,:),'.',x,ct(4,:),'.')
 xlabel('Average Omega')
 ylabel('ct')
 
+%This returns CT as a function of omega at a timestep, the coefficients have to be passed from
+%the nonlinear fit
 function ct = ct_for_omega(fit,omega)
 ct = fit(1)./(1+fit(2)*exp(-fit(3).*omega));
 
+%This function returns the F/T values for provided CTs and omegas at a time
+%step or over whole test run
 function T_plot = plot_using_calculated_cts(coef,omega)
 d = .118;
 T_plot = [];
@@ -260,12 +281,18 @@ for iN = 1:length(omega(1,:))
     T_plot = [T_plot,T];
 end
 
+%This function fits an equation to the plot of matrix determined cts versus
+%omega
 function fit = ct_nlinfit(omega,ct)
 x = [(2.089*10^-6),10245,.007217];
 fun = @(x,data) x(1)./(1+x(2).*exp(-x(3).*data));
 fit = nlinfit(omega,ct,fun,x);
 fprintf('beta = %e\ngamma = %e\npower = %e\n',fit(1),fit(2),fit(3))
 
+
+%This function does a nonlinear fit on the estimation of FT values using CT
+%as a function of omega 
+%Calls functions resid and model2
 function fitted = coefs_ct_function_omega(T,omega)
 fitted = [];
 
@@ -276,11 +303,14 @@ fitted = [fitted,(lsqnonlin(@(x) resid(FT_true,omega,x),coef_0))];
 
 fprintf('Estimated: x1 = %e\nEstimated: x2 = %e\nEstimated: x3 = %e\n',fitted(1),fitted(2),fitted(3))
 
+%Calculates the difference between the estimated FT values and the model
+%predicted values
 function f = resid(FT_true,omega,x)
 f = [];
 for i = 1:length(omega)
     f = [f,(FT_true(1:3,i)-model2(omega(:,i),x))];
 end
+
 
 function ft = model2(omega,x)
 ct = zeros(1,4);
@@ -311,6 +341,9 @@ legend('Predicted Fz','Predicted Tx','Predicted Ty','Fz','Tx','Ty')
 
 
 
+%Prints a line of asteriscs for output separation
+function print_stars()
+fprintf('\n*************************************************************\n')
 
 
 

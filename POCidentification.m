@@ -293,7 +293,8 @@ for i = n1(1):n2(end)
 end
 
 
-
+%Returns the matricies of omega values and FT values used for calculating
+%ct
 function [omega_mat,T_mat] = combined_matricies(omega,T)
 d = .118;
 omega_mat = [];
@@ -309,6 +310,8 @@ for i = 1:length(omega)
     T_mat = [T_mat;Ti];
 end
 
+%Plots the estimated F/T values using provided ct and omega
+%Provide: single ct and omega vector, or single ct and omega matrix
 function T_plot = plot_using_combined_coefs(coef,omega)
     d = .118;
     T_plot = [];
@@ -327,6 +330,8 @@ function T_plot = plot_using_combined_coefs(coef,omega)
     end
 
 
+%Returns the matiricies of omega values and FT values used to calculate the
+%individual cts
 function [omega_mat,T_mat] = independent_matricies(omega,T)
 d = .118;
 omega_mat = [];
@@ -345,6 +350,9 @@ for i = 1:length(omega)
     T_mat = [T_mat;Ti];
 end
 
+%Plots the estimated F/T values using the coefficients of each motor.
+%Provide: vector of ct's and omega vector, or vector of ct's and matrix of
+%omegas
 function T_plot = plot_using_independent_coefs(coef,omega)
 d = .118;
 T_plot = [];

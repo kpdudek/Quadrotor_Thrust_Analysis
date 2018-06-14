@@ -1,4 +1,5 @@
 function print_coefficients(all_or_combined,vals)
+%Function that prints values of ct for a single test
 combined = {'Ct','dCt','Cq'};
 no_d = {'Ct','Cq'};
 all = {'Ct1','Ct2','Ct3','Ct4','Cq1','Cq2','Cq3','Cq4'};

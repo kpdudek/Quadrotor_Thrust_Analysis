@@ -1,4 +1,7 @@
 function plots_for_poster()
+%plots single case of motor outputs and resulting force in Z for airshow
+%poster
+
 load('POC_tracks_alignment_data_2018_05_01_Thrust_Acro.mat')
 x = 1:length(a_o1);
 
