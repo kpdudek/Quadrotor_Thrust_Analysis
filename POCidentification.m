@@ -57,7 +57,7 @@ print_stars()
 discreet_coef = discreet_coefs(omega,T,n1,n2);
 
 
-%savefig(figures,'Figures_POC_tracks_alignment_data_2018_06_01_4Corners_Acro.fig')
+savefig(figures,'Figures_POC_tracks_alignment_data_2018_06_06_Circles_Acro.fig')
 save([mfilename '_all_coefs_2018_06_06_Circles_Acro.mat'],'coef','coef_ave','independent_coef','discreet_coef','omega','T')
 save([mfilename '_test_span_2018_06_06_Circles_Acro.mat'],'n1','n2')
 
