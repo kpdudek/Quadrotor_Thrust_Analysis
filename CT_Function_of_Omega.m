@@ -192,6 +192,8 @@ for i = 1:length(omega)
     ft(:,i) = model(omega(:,i),cts(:,i));
 end
 
+mean_squared_error(ft,T(1:3,:),'fit for ct(w) using matrix determined values')
+
 x = 1:length(omega);
 figure('Visible','on','Name','FTs using model predicted ct')
 
@@ -335,6 +337,8 @@ for i = 1:length(omega)
     ft = [ft,model2(omega(:,i),fitted)];
 end
 
+mean_squared_error(ft,T(1:3,:),'Non linear fit using ct(w)')
+
 x = 1:length(ft(1,:));
 figure('Visible','on','Name','Non lin fit with ct(w)')
 fts = uitab('Title','Predicted FTs');
@@ -343,6 +347,12 @@ plot(ft_ax,x,ft(1,:),'r:',x,ft(2,:),'g:',x,ft(3,:),'b:',x,T(1,:),'r',x,T(2,:),'g
 legend('Predicted Fz','Predicted Tx','Predicted Ty','Fz','Tx','Ty')
 
 
+
+function mean_squared_error(ft,FT_true,data)
+error = immse(FT_true,ft);
+print_stars()
+fprintf('The mean squared error for the %s dataset is %f\n',data,error)
+print_stars()
 
 %Prints a line of asteriscs for output separation
 function print_stars()
