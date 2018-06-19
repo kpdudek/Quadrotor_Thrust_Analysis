@@ -2,8 +2,8 @@ function CT_Function_of_Omega
 %Loads the result of POCidentification and POC_tracks_alignment
 %Loading the coefficients, aligned data sets for omega and F/T's
 %Loads the indicies of the test run
-load('POCidentification_all_coefs_2018_06_06_Circles_Acro.mat')
-load('POCidentification_test_span_2018_06_06_Circles_Acro.mat')
+load('POCidentification_all_coefs_2018_06_19_ThrustUpDown_4Corners_Acro.mat')
+load('POCidentification_test_span_2018_06_19_ThrustUpDown_4Corners_Acro.mat')
 
 fitted_coefs = non_linear_fit(T,omega,coef);
 
