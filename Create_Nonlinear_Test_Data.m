@@ -1,4 +1,4 @@
-function Create_Linear_Test_Data
+function Create_Nonlinear_Test_Data
 %Creating a set of omegas, and the resulting FT's, then adding noise to the
 %dataset and seeing how my model deals with it
 
@@ -11,11 +11,7 @@ function Create_Linear_Test_Data
 omega = create_omega();
 omega_noise = noise(omega,18);
 
-ct = 2.068061 * 10^-6;
-d = .118;
-cq = -3.542252 *10^-8;
-cts = [ct;d*ct;cq];
-%cts = create_cts(omega_noise);
+cts = create_cts(omega_noise);
 
 fts = model(cts,omega_noise);
 
@@ -32,7 +28,7 @@ plot_fts(fts)
 plot_omegas(omega_noise)
 
 
-save([mfilename '_Linear_data_2018_06_18_Sample_Data'],'a_fz','a_tx','a_ty','a_tz','a_o1','a_o2','a_o3','a_o4')
+save([mfilename '_nonlinear_data_2018_06_18_Sample_Data'],'a_fz','a_tx','a_ty','a_tz','a_o1','a_o2','a_o3','a_o4')
 
 
 
@@ -51,11 +47,14 @@ motor4 = [(slope*.6)+1300,wavy_horiz+1420,slope+1420,horizontal*1.62,(negslop)+1
 omega = [motor1;motor2;motor3;motor4];
 
 function cts = create_cts(omega)
-cts = zeros(4,length(omega));
-for i = 1:4
-    for j = 1:length(omega)
-        cts(i,j) = CT_function(omega(i,j));
-    end
+cts = zeros(3,length(omega));
+
+for j = 1:length(omega)
+    d = .118;
+    ct = CT_function(mean(omega(:,j)));
+    cts(1,j) = ct;
+    cts(2,j) = d * ct;
+    cts(3,j) = -3.542252 *10^-8;
 end
 
 function ct = CT_function(omega)
@@ -67,10 +66,11 @@ ct = x1/(1+x2*exp(-x3*omega));
 
 function fts = model(cts,omega)
 fts = zeros(4,length(omega));
-ct = cts(1);
-dct = cts(2);
-cq = cts(3);
+
 for i = 1:length(omega)
+    ct = cts(1,i);
+    dct = cts(2,i);
+    cq = cts(3,i);
     coef_mat = [ct,ct,ct,ct;dct,-dct,dct,-dct;-dct,dct,dct,-dct;-cq,cq,-cq,cq];
     fts(:,i) = coef_mat*omega(:,i).^2;
 end
@@ -105,20 +105,3 @@ plot(l,omega(1,:),l,omega(2,:),l,omega(3,:),l,omega(4,:))
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-        
-     
