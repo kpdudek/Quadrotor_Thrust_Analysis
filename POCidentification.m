@@ -1,15 +1,15 @@
 function POCidentification
 %Loads output of POC_tracks_alignment
-load('POC_tracks_alignment_data_2018_06_06_Circles_Acro.mat')
+load('Create_Test_Data_data_2018_06_18_Sample_Data.mat')  %POC_tracks_alignment_data_2018_06_06_Circles_Acro.mat
 
 %Takes the data input, and forms the matricies used in future calculations
 [omega,T] = create_matricies(a_o1,a_o2,a_o3,a_o4,a_fz,a_tx,a_ty,a_tz);
 d = .118;
 
 %Span to calculate coefficients over
-load('POCidentification_test_span_2018_06_06_Circles_Acro.mat')
-%n1 = [835,5653,9161,14440,19240,25680];
-%n2 = [5397,9085,14050,19120,25600,30300];
+%load('POCidentification_test_span_2018_06_06_Circles_Acro.mat')
+n1 = [1015,5048];
+n2 = [3984,11950];
 len_n1 = length(n1);
 
 figures = [];
@@ -57,9 +57,9 @@ print_stars()
 discreet_coef = discreet_coefs(omega,T,n1,n2);
 
 
-savefig(figures,'Figures_POC_tracks_alignment_data_2018_06_06_Circles_Acro.fig')
-save([mfilename '_all_coefs_2018_06_06_Circles_Acro.mat'],'coef','coef_ave','independent_coef','discreet_coef','omega','T')
-save([mfilename '_test_span_2018_06_06_Circles_Acro.mat'],'n1','n2')
+savefig(figures,'Figures_data_2018_06_18_Sample_Data.fig')  %Figures_POC_tracks_alignment_data_2018_06_06_Circles_Acro.fig
+save([mfilename '_all_coefs_data_2018_06_18_Sample_Data.mat'],'coef','coef_ave','independent_coef','discreet_coef','omega','T')  %_all_coefs_2018_06_06_Circles_Acro.mat
+save([mfilename '_test_span_data_2018_06_18_Sample_Data.mat'],'n1','n2')  %_test_span_2018_06_06_Circles_Acro.mat
 
 
 
