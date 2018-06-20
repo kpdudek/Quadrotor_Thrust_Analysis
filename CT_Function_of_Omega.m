@@ -2,6 +2,7 @@ function CT_Function_of_Omega
 %Loads the result of POCidentification and POC_tracks_alignment
 %Loading the coefficients, aligned data sets for omega and F/T's
 %Loads the indicies of the test run
+load('POC_tracks_alignment_data_2018_06_19_ThrustUpDown_4Corners_Acro.mat')
 load('POCidentification_all_coefs_2018_06_19_ThrustUpDown_4Corners_Acro.mat')
 load('POCidentification_test_span_2018_06_19_ThrustUpDown_4Corners_Acro.mat')
 
@@ -19,7 +20,7 @@ plot_ct_all_omega(discreet_coef,omega,n1,n2)
 
 plot_function(fit4)
 
-discreet_ct_vs_omega_fit(omega,discreet_coef,n1,n2,T)
+discreet_ct_vs_omega_fit(omega,discreet_coef,n1,n2,T,a_o1,a_o2,a_o3,a_o4)
 
 fitted = coefs_ct_function_omega(T,omega);
 
@@ -123,23 +124,27 @@ x0 = [.000006,1000];
 fun = @(x,data) x(1)*log(data-x(2));
 fit = lsqcurvefit(fun,x0,ave_omega,coef(1,:));
 fprintf('beta = %e\ngamma = %e\n',fit(1),fit(2))
+fit_plot = fit(1)*log(ave_omega-fit(2));
 
 x1 = [.000006,1000,2];
 fun2 = @(x,data) x(1)./(1+(1./(data-x(2)).^x(3)));
 fit2 = lsqcurvefit(fun2,x1,ave_omega,coef(1,:));
 fprintf('beta = %e\ngamma = %e\npower = %e\n',fit2(1),fit2(2),fit2(3))
+fit2_plot = fit2(1)./(1+(1./(ave_omega-fit2(2)).^fit2(3)));
 
 x2 = [(2.089*10^-6),10245,.007217];
 fun3 = @(x,data) x(1)./(1+x(2)*exp(-x(3).*data));
 fit3 = lsqcurvefit(fun3,x2,ave_omega,coef(1,:));
 fprintf('beta = %e\ngamma = %e\npower = %e\n',fit3(1),fit3(2),fit3(3))
+fit3_plot = (fit3(1))./(1+fit3(2)*exp(-fit3(3).*ave_omega));
 
 x3 = [(2.089*10^-6),10245,.007217];
 fun4 = @(x,data) x(1)./(1+x(2).*exp(-x(3).*data));
 fit4 = nlinfit(ave_omega,coef(1,:),fun4,x3);
 fprintf('beta = %e\ngamma = %e\npower = %e\n',fit4(1),fit4(2),fit4(3))
+fit4_plot = fit4(1)./(1+fit4(2)*exp(-fit4(3).*ave_omega));
 
-plot(ave_omega,coef(1,:),ave_omega,fit(1)*log(ave_omega-fit(2)),ave_omega,fit2(1)./(1+(1./(ave_omega-fit2(2)).^fit2(3))),ave_omega,(fit3(1))./(1+fit3(2)*exp(-fit3(3).*ave_omega)),ave_omega,fit4(1)./(1+fit4(2)*exp(-fit4(3).*ave_omega)))
+plot(ave_omega,coef(1,:),'+',ave_omega,fit_plot,ave_omega,fit2_plot,ave_omega,fit3_plot,ave_omega,fit4_plot)
 legend('cT','Log Fit','Exponential Fit','1/e^x Fit(curvefit)','1/e^x Fit(nlinfit)')
 xlabel('Average Omega')
 ylabel('ct')
@@ -212,7 +217,7 @@ ylabel('ct')
 
 %This function fits an equation for CT as a funciton of omega using the
 %data set with a value of ct for every time step
-function discreet_ct_vs_omega_fit(omega,discreet_coef,n1,n2,T)
+function discreet_ct_vs_omega_fit(omega,discreet_coef,n1,n2,T,a_o1,a_o2,a_o3,a_o4)
 figure('Visible','on','Name','Discreet cT vs Omega Fit')
 
 ave_omega = mean(omega);
@@ -250,8 +255,14 @@ ylabel('ct')
 ctt = uitab('Title','Predicted Ct vs Time');
 ctt_ax = axes(ctt);
 plot(ctt_ax,x,ct(1,:),'.',x,ct(2,:),'.',x,ct(3,:),'.',x,ct(4,:),'.')
-xlabel('Average Omega')
+xlabel('Time')
 ylabel('ct')
+
+ao = uitab('Title','Actuator Outputs');
+ao_ax = axes(ao);
+plot(ao_ax,x,a_o1,x,a_o2,x,a_o3,x,a_o4)
+xlabel('Time')
+ylabel('Actuator Output')
 
 %This returns CT as a function of omega at a timestep, the coefficients have to be passed from
 %the nonlinear fit

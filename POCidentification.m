@@ -1,15 +1,15 @@
 function POCidentification
 %Loads output of POC_tracks_alignment
-load('POC_tracks_alignment_data_2018_06_19_ThrustUpDown_4Corners_Acro.mat')  % Create_Nonlinear_Test_Data_nonlinear_data_2018_06_18_Sample_Data.mat
+load('Create_Linear_Test_Data_Linear_data_2018_06_18_Sample_Data.mat')  %   POC_tracks_alignment_data_2018_06_19_ThrustUpDown_4Corners_Acro.mat
 
 %Takes the data input, and forms the matricies used in future calculations
 [omega,T] = create_matricies(a_o1,a_o2,a_o3,a_o4,a_fz,a_tx,a_ty,a_tz);
 d = .118;
 
 %Span to calculate coefficients over
-%load('POCidentification_test_span_2018_06_06_Circles_Acro.mat')
-n1 = [393,3584,5792,8233,10780,13330,15860,18420,20800,23360];
-n2 = [3200,5730,8168,10740,13260,15740,18290,20630,23270,25760];
+load('POCidentification_test_span_2018_06_19_ThrustUpDown_4Corners_Acro.mat')
+% n1 = [393,3584,5792,8233,10780,13330,15860,18420,20800,23360];
+% n2 = [3200,5730,8168,10740,13260,15740,18290,20630,23270,25760];
 len_n1 = length(n1);
 
 figures = [];
