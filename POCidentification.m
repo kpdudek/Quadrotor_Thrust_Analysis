@@ -1,6 +1,6 @@
 function POCidentification
 %Loads output of POC_tracks_alignment
-load('Create_Linear_Test_Data_Linear_data_2018_06_18_Sample_Data.mat')  %   POC_tracks_alignment_data_2018_06_19_ThrustUpDown_4Corners_Acro.mat
+load('Create_Nonlinear_Test_Data_nonlinear_data_2018_06_18_Sample_Data.mat')  %   POC_tracks_alignment_data_2018_06_19_ThrustUpDown_4Corners_Acro.mat
 
 %Takes the data input, and forms the matricies used in future calculations
 [omega,T] = create_matricies(a_o1,a_o2,a_o3,a_o4,a_fz,a_tx,a_ty,a_tz);
@@ -57,9 +57,9 @@ print_stars()
 discreet_coef = discreet_coefs(omega,T,n1,n2);
 
 
-savefig(figures,'Figures_linear_data_2018_06_18_Sample_Data.fig')  %    Figures_POC_tracks_alignment_data_2018_06_19_ThrustUpDown_4Corners_Acro.fig
-save([mfilename '_all_coefs_linear_data_2018_06_18_Sample_Data.mat'],'coef','coef_ave','independent_coef','discreet_coef','omega','T')  %    _all_coefs_2018_06_19_ThrustUpDown_4Corners_Acro.mat
-save([mfilename '_test_span_linear_data_2018_06_18_Sample_Data.mat'],'n1','n2')  %   _test_span_2018_06_19_ThrustUpDown_4Corners_Acro.mat
+savefig(figures,'Figures_nonlinear_data_2018_06_18_Sample_Data.fig')  %    Figures_POC_tracks_alignment_data_2018_06_19_ThrustUpDown_4Corners_Acro.fig
+save([mfilename '_all_coefs_nonlinear_data_2018_06_18_Sample_Data.mat'],'coef','coef_ave','independent_coef','discreet_coef','omega','T')  %    _all_coefs_2018_06_19_ThrustUpDown_4Corners_Acro.mat
+save([mfilename '_test_span_nonlinear_data_2018_06_18_Sample_Data.mat'],'n1','n2')  %   _test_span_2018_06_19_ThrustUpDown_4Corners_Acro.mat
 
 
 
