@@ -7,9 +7,9 @@ load('Create_Linear_Test_Data_Linear_data_2018_06_18_Sample_Data.mat')  %   POC_
 d = .118;
 
 %Span to calculate coefficients over
-load('POCidentification_test_span_2018_06_19_ThrustUpDown_4Corners_Acro.mat')
-% n1 = [393,3584,5792,8233,10780,13330,15860,18420,20800,23360];
-% n2 = [3200,5730,8168,10740,13260,15740,18290,20630,23270,25760];
+%load('POCidentification_test_span_2018_06_19_ThrustUpDown_4Corners_Acro.mat')
+n1 = [974,5024];
+n2 = [3980,11900];
 len_n1 = length(n1);
 
 figures = [];
@@ -57,9 +57,9 @@ print_stars()
 discreet_coef = discreet_coefs(omega,T,n1,n2);
 
 
-savefig(figures,'Figures_POC_tracks_alignment_data_2018_06_19_ThrustUpDown_4Corners_Acro.fig')  % Figures_nonlinear_data_2018_06_18_Sample_Data.fig
-save([mfilename '_all_coefs_2018_06_19_ThrustUpDown_4Corners_Acro.mat'],'coef','coef_ave','independent_coef','discreet_coef','omega','T')  % _all_coefs_nonlinear_data_2018_06_18_Sample_Data.mat
-save([mfilename '_test_span_2018_06_19_ThrustUpDown_4Corners_Acro.mat'],'n1','n2')  % _test_span_nonlinear_data_2018_06_18_Sample_Data.mat
+savefig(figures,'Figures_linear_data_2018_06_18_Sample_Data.fig')  %    Figures_POC_tracks_alignment_data_2018_06_19_ThrustUpDown_4Corners_Acro.fig
+save([mfilename '_all_coefs_linear_data_2018_06_18_Sample_Data.mat'],'coef','coef_ave','independent_coef','discreet_coef','omega','T')  %    _all_coefs_2018_06_19_ThrustUpDown_4Corners_Acro.mat
+save([mfilename '_test_span_linear_data_2018_06_18_Sample_Data.mat'],'n1','n2')  %   _test_span_2018_06_19_ThrustUpDown_4Corners_Acro.mat
 
 
 
