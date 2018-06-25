@@ -100,7 +100,7 @@ legend('LS Ct','Calculated Ct')
 
 %Using the combined matrix determined values of ct from POCidentification,
 %this function applies multiple fits to the curve
-function fit4 = ct_vs_omega(omega,coef,n1,n2)
+function fit3 = ct_vs_omega(omega,coef,n1,n2)
 len_coef = length(coef);
 ave_omega_array = zeros(4,len_coef);
 ave_omega = zeros(1,len_coef);
@@ -115,6 +115,11 @@ end
 for j = 1:len_coef
     ave_omega(j) = mean(ave_omega_array(:,j));
 end
+
+ind = find(ave_omega > 1400);
+ave_omega = ave_omega(ind);
+coef = coef(:,ind);
+
 
 figure('Visible','on','Name','Average Omega vs cT and Curve Fits')
 xlabel('Omega')
@@ -138,14 +143,14 @@ fit3 = lsqcurvefit(fun3,x2,ave_omega,coef(1,:));
 fprintf('beta = %e\ngamma = %e\npower = %e\n',fit3(1),fit3(2),fit3(3))
 fit3_plot = (fit3(1))./(1+fit3(2)*exp(-fit3(3).*ave_omega));
 
-x3 = [(2.089*10^-6),10245,.007217];
-fun4 = @(x,data) x(1)./(1+x(2).*exp(-x(3).*data));
-fit4 = nlinfit(ave_omega,coef(1,:),fun4,x3);
-fprintf('beta = %e\ngamma = %e\npower = %e\n',fit4(1),fit4(2),fit4(3))
-fit4_plot = fit4(1)./(1+fit4(2)*exp(-fit4(3).*ave_omega));
+% x3 = [(2.089*10^-6),10245,.007217];
+% fun4 = @(x,data) x(1)./(1+x(2).*exp(-x(3).*data));
+% fit4 = nlinfit(ave_omega,coef(1,:),fun4,x3);
+% fprintf('beta = %e\ngamma = %e\npower = %e\n',fit4(1),fit4(2),fit4(3))
+% fit4_plot = fit4(1)./(1+fit4(2)*exp(-fit4(3).*ave_omega));
 
-plot(ave_omega,coef(1,:),'+',ave_omega,fit_plot,ave_omega,fit2_plot,ave_omega,fit3_plot,ave_omega,fit4_plot)
-legend('cT','Log Fit','Exponential Fit','1/e^x Fit(curvefit)','1/e^x Fit(nlinfit)')
+plot(ave_omega,coef(1,:),'+',ave_omega,fit_plot,ave_omega,fit2_plot,ave_omega,fit3_plot)%,ave_omega,fit4_plot)
+legend('cT','Log Fit','Exponential Fit','1/e^x Fit(curvefit)')%,'1/e^x Fit(nlinfit)')
 xlabel('Average Omega')
 ylabel('ct')
 
@@ -179,7 +184,7 @@ s_conditioned=(s-sMin)/(sMax-sMin);
 %Plots the function from the nonlinear fit in a legible form
 function plot_function(fit4)
 print_stars()
-func = sprintf('\n\ncT = %f/(1 + %f * exp(-%f * omega))\n\n',fit4(1),fit4(2),fit4(3));
+func = sprintf('\ncT = %f/(1 + %f * exp(-%f * omega))\n',fit4(1),fit4(2),fit4(3));
 fprintf(func)
 print_stars()
 
@@ -222,7 +227,7 @@ figure('Visible','on','Name','Discreet cT vs Omega Fit')
 
 ave_omega = mean(omega);
 
-fit = ct_nlinfit(ave_omega(:,n1(1):n2(end)),discreet_coef(1,:));
+fit = ct_curve_fit(ave_omega(:,n1(1):n2(end)),discreet_coef(1,:));
 
 ft = uitab('Title','Fitted Curve');
 ax = axes(ft);
@@ -295,10 +300,10 @@ end
 
 %This function fits an equation to the plot of matrix determined cts versus
 %omega
-function fit = ct_nlinfit(omega,ct)
+function fit = ct_curve_fit(omega,ct)
 x = [(2.089*10^-6),10245,.007217];
 fun = @(x,data) x(1)./(1+x(2).*exp(-x(3).*data));
-fit = nlinfit(omega,ct,fun,x);
+fit = lsqcurvefit(fun,x,omega,ct);
 fprintf('beta = %e\ngamma = %e\npower = %e\n',fit(1),fit(2),fit(3))
 
 
@@ -312,7 +317,6 @@ coef_0 = [.000002323570,210370.240755,.009541519];
 FT_true = T;
 
 fitted = [fitted,(lsqnonlin(@(x) resid(FT_true,omega,x),coef_0))];
-
 fprintf('Estimated: x1 = %e\nEstimated: x2 = %e\nEstimated: x3 = %e\n',fitted(1),fitted(2),fitted(3))
 
 %Calculates the difference between the estimated FT values and the model
