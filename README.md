@@ -10,8 +10,12 @@ Before any test can occur clone the Pyulog python package so that the .ulg files
 git clone https://github.com/PX4/pyulog.git
 ```
 
-Additionally ensure that the ATINetFT.jar application runs and can connect to the sensor using the ip address:
+Additionally ensure that the ATINetFT.jar application runs and can connect to the sensor using the ip address. First, navigate to the cloned repository and make the application executable as follows:
 ```
+~$ cd ATI_Log_Processor
+~$ chmod +x ./ATINetFT.jar
+~$ ./ATINetFT.jar
+
 ip address: 192.168.1.241
 ```
 
