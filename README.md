@@ -1,13 +1,13 @@
 # ATI_Log_Processor
 
-Matlab functions that process the data from the PixHawk and ATI Force Torque sensor to find the coefficient of thrust of the motors
+Matlab functions that process the data from the PixHawk and ATI Force Torque sensor. The results are  to find the coefficient of thrust of the motors
 
 
 ## Usage
 
-Before any test can occur clone the Pyulog python package so that the .ulg files can be converted into a .csv file:
+Before any test can occur clone the repository using the --recursive option so that the submodule is cloned as well:
 ```
-git clone https://github.com/PX4/pyulog.git
+git clone --recursive <project url>
 ```
 
 Additionally ensure that the ATINetFT.jar application runs and can connect to the sensor using the ip address. First, navigate to the cloned repository and make the application executable as follows:
@@ -19,17 +19,17 @@ Additionally ensure that the ATINetFT.jar application runs and can connect to th
 ip address: 192.168.1.241
 ```
 
-Now, run QGroundContol and calibrate the sensors on the quadcopter before mounting to the stand. Connect the sensor to the dri network before plugging it in.
+Now, run QGroundContol and calibrate the sensors on the quadcopter before mounting to the stand. Connect the sensor to the dri network before powering it on.
 
 Data collection on the quad must follow this procedure:
 ```
-0. Create a folder in which to store all of the files that will be created during the test run. Name it following the convention QuadName_Year_Month_Day_WhatYouManipulate_FlightMode
+0. Run ATINetFT.jar and connect to the sensor. Click on log data and create a new folder ~/ATI_Log_Processor/Test_Data/R2_Date_TestDescription_FlightMode to save the log file to.
 1. Arm the quadcopter and press "Collect Data" as close to simultaneously as possible. The analysis program can handle misalignemnt of a few seconds at max
-2. Wait 3 seconds to let the motors equalize
-3. Provide three spikes of full roll right separated by ~1 second. These bumps show up on the sensor data and allow the analssis program to find the offset between plots
-4. Now, perform your test run
-5. When the test run has finished, move the .csv file from the F/T sensor into a folder with the .ulg file from the /Log folder on the pix hawk's sd card. The pix hawk names the logs numerically, so you must rename the .ulg file to the same name as the F/T sensor
-6. Navigate to /pyulog/pyulog and run: python ulog2csv /path/to/file.ulg -o /output/path
+2. Move the throttle inbetween the 2nd and 3rd line then wait 3 seconds to let the motors equalize
+3. Provide three spikes of full roll right separated by ~1 second. These bumps show up on the sensor data and allow the analysis program to find the offset between plots
+4. Now, perform your test run varying throttle, roll and pitch
+5. When the test run has finished, move the .ulg file from the /Log/ folder on the pix hawk's sd card. The pix hawk names the logs numerically, so you must rename the .ulg file to the same name as the F/T sensor file you just recorded
+6. Navigate to ~/ATI_Log_Processor/pyulog/pyulog and run: python ulog2csv /path/to/file.ulg -o .
 7. Now open matlab and set your working directory to the folder containing all of the files
 ```
 
