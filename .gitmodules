@@ -1,0 +1,3 @@
+[submodule "pyulog"]
+	path = pyulog
+	url = https://github.com/PX4/pyulog.git
