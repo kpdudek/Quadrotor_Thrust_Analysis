@@ -3,13 +3,24 @@
 Matlab functions that process the data from the PixHawk and ATI Force Torque sensor. The results are  to find the coefficient of thrust of the motors
 
 
-## Usage
+## Setup
 
 Before any test can occur clone the repository using the --recursive option so that the submodule is cloned as well:
 ```
 git clone --recursive <project url>
 ```
 
+### Now we will setup the ULOG converter:
+First we need some dependencies
+```
+~$ sudo apt-get install python-setuptools
+~$ sudo apt-get install python-dev
+```
+Now we can instal the ulog converter
+```
+~$ cd ATI_Log_Processor/pyulog/
+~$ sudo python setup.py build install
+```
 Additionally ensure that the ATINetFT.jar application runs and can connect to the sensor using the ip address. First, navigate to the cloned repository and make the application executable as follows:
 ```
 ~$ cd ATI_Log_Processor
@@ -18,6 +29,8 @@ Additionally ensure that the ATINetFT.jar application runs and can connect to th
 
 ip address: 192.168.1.241
 ```
+
+## Usage
 
 Now, run QGroundContol and calibrate the sensors on the quadcopter before mounting to the stand. Connect the sensor to the dri network before powering it on.
 
