@@ -6,6 +6,7 @@ strobe = load_strobe_data(date);
 cd(dir)
 
 omega = create_omega_mat(file);
+[omega,strobe] = eliminate_outliers(omega,strobe);
 
 plot_omegaVSstrobe(omega,strobe)
 
@@ -99,12 +100,15 @@ for i = 1:16
     omega(4,i) = mean(o4);
 end
 
-function plot_omegaVSstrobe(omega,strobe)
+function [omega,strobe] = eliminate_outliers(omega,strobe)
 index = find(strobe ~= 0);
 strobe = (strobe(index)./2)*60;
-omega = omega(3,index);
+omega = omega(:,index);
 
+function plot_omegaVSstrobe(omega,strobe)
+omega = omega(3,:);
 [calculated,b] = linear_regression(strobe,omega);
+poly_fit_plot = poly_fit(strobe,omega);
 
 omega_max = [1 2000]*b;
 omega_min = [1 1250]*b;
@@ -114,17 +118,20 @@ fprintf('The maximum motor rpm using 2000 PX4 reading is predicted to be: %f\n',
 fprintf('The calculated max RPM of the motor using 14.8V * 1100KV is 16280 RPM\n\n')
 
 figure('Visible','on','Name','Strobe vs Omega')
-plot(omega,strobe,'b*',omega,calculated,2000,omega_max,'k+',1250,omega_min,'k+')
+plot(omega,strobe,'b*',omega,calculated,'r',2000,omega_max,'k+',1250,omega_min,'k+',omega,poly_fit_plot,'g')
 xlabel('Omega Value')
 ylabel('Strobe Frequency (rpm)')
-legend('Strobe Measurements','Linear Regression','Minimum RPM using Fit','Max RPM using Fit')
-
+legend('Strobe Measurements','Linear Regression','Minimum RPM using Fit','Max RPM using Fit','Poly Fit')
 
 function [calculated,b] = linear_regression(strobe,omega)
 x = length(omega);
 Omega = [ones(x,1) omega'];
 b = Omega\(strobe');
 calculated = Omega * b;
+
+function calculated = poly_fit(strobe,omega)
+coef = polyfit(omega,strobe,2);
+calculated = polyval(coef,omega);
 
 
 
