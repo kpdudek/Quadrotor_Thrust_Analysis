@@ -1,9 +1,9 @@
 function [o1,o2,o3,o4,tp] = PX4_CSV_Plotter_V2(file)
 [sc,va,ao] = string_form(file);
-[g0,g1,g2,a0,a1,a2,t_sc] = read_sensor_combined(sc);
-plot_sensor_combined(g0,g1,g2,a0,a1,a2,t_sc)
-[r_s,p_s,y_s,t_a] = read_attitude(va);
-plot_attitude(r_s,p_s,y_s,t_a)
+%[g0,g1,g2,a0,a1,a2,t_sc] = read_sensor_combined(sc);
+%plot_sensor_combined(g0,g1,g2,a0,a1,a2,t_sc)
+%[r_s,p_s,y_s,t_a] = read_attitude(va);
+%plot_attitude(r_s,p_s,y_s,t_a)
 [o1,o2,o3,o4,tp] = read_actuator_outputs(ao);
 plot_actuator_outputs(o1,o2,o3,o4,tp)
 

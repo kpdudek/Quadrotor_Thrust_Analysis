@@ -4,7 +4,7 @@ function [ffz,ftx,fty,ftz,t_sl] = ATI_AXIA80_LOG_Processor_V2(file)
 max_values(forces,torques)
 plot_ft(time,forces,torques)
 [ffx,ffy,ffz,ftx,fty,ftz,t_sl] = filter_ft(time,forces,torques);
-time_split(time,elap_time,forces,torques,21)
+%time_split(time,elap_time,forces,torques,21)
 
 %save([filename '_processed.mat'],fty)
 end

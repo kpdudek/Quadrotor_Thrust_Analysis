@@ -2,9 +2,9 @@ function CT_Function_of_Omega
 %Loads the result of POCidentification and POC_tracks_alignment
 %Loading the coefficients, aligned data sets for omega and F/T's
 %Loads the indicies of the test run
-load('POC_tracks_alignment_data_2018_06_19_ThrustUpDown_4Corners_Acro.mat')
-load('POCidentification_all_coefs_2018_06_19_ThrustUpDown_4Corners_Acro.mat')
-load('POCidentification_test_span_2018_06_19_ThrustUpDown_4Corners_Acro.mat')
+load('POC_tracks_alignment_data_2018_07_02_4Corners_2Indicators_Manual.mat')
+load('POCidentification_all_coefs_data_2018_07_02_4Corners_2Indicators_Manual.mat')
+load('POCidentification_test_span_data_2018_07_02_4Corners_2Indicators_Manual.mat')
 
 fitted_coefs = non_linear_fit(T,omega,coef);
 
@@ -32,7 +32,7 @@ use_nonlin(fitted,omega,T)
 function fitted_coefs = non_linear_fit(T,omega,coef)
 fitted_coefs = [];
 
-for i = 1:length(coef)
+for i = 1:length(coef(1,:))
     ct = coef(1,i);
     
     coef_0 = ct;
@@ -101,7 +101,7 @@ legend('LS Ct','Calculated Ct')
 %Using the combined matrix determined values of ct from POCidentification,
 %this function applies multiple fits to the curve
 function fit3 = ct_vs_omega(omega,coef,n1,n2)
-len_coef = length(coef);
+len_coef = length(coef(1,:));
 ave_omega_array = zeros(4,len_coef);
 ave_omega = zeros(1,len_coef);
 
