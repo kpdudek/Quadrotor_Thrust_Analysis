@@ -10,8 +10,8 @@ Before any test can occur clone the repository using the --recursive option so t
 git clone --recursive <project url>
 ```
 
-### Now we will setup the ULOG converter:
-First we need some dependencies
+### Now we will setup the dependencies:
+First we need to setup the python enviornment:
 ```
 ~$ sudo apt-get install python-setuptools
 ~$ sudo apt-get install python-dev
@@ -25,7 +25,15 @@ Additionally ensure that the ATINetFT.jar application runs and can connect to th
 ```
 ~$ cd ATI_Log_Processor
 ~$ chmod +x ./ATINetFT.jar
-~$ ./ATINetFT.jar
+```
+Ensure that you have a version of java
+```
+~$ sudo apt-get install default-jre
+```
+
+Now launch the application and connect to the sensor using the static ip address of the sensor on the DRI network. Make sure to connect the ethernet cable to a switch before plugging the sensor into an outlet.
+```
+~/ATI_Log_Processor$ java -jar ATINetFT.jar
 
 ip address: 192.168.1.241
 ```
