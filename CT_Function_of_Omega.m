@@ -2,9 +2,9 @@ function CT_Function_of_Omega
 %Loads the result of POCidentification and POC_tracks_alignment
 %Loading the coefficients, aligned data sets for omega and F/T's
 %Loads the indicies of the test run
-load('POC_tracks_alignment_data_2018_07_02_4Corners_2Indicators_Manual.mat')
-load('POCidentification_all_coefs_data_2018_07_02_4Corners_2Indicators_Manual.mat')
-load('POCidentification_test_span_data_2018_07_02_4Corners_2Indicators_Manual.mat')
+load('POC_tracks_alignment_data_2018_07_03_4Corners_2Indicators_Manual.mat')
+load('POCidentification_all_coefs_data_2018_07_03_4Corners_2Indicators_Manual.mat')
+load('POCidentification_test_span_data_2018_07_03_4Corners_2Indicators_Manual.mat')
 
 fitted_coefs = non_linear_fit(T,omega,coef);
 
@@ -116,9 +116,9 @@ for j = 1:len_coef
     ave_omega(j) = mean(ave_omega_array(:,j));
 end
 
-ind = find(ave_omega > 1400);
-ave_omega = ave_omega(ind);
-coef = coef(:,ind);
+% ind = find(ave_omega > 1400);
+% ave_omega = ave_omega(ind);
+% coef = coef(:,ind);
 
 
 figure('Visible','on','Name','Average Omega vs cT and Curve Fits')
@@ -126,7 +126,7 @@ xlabel('Omega')
 ylabel('ct')
 
 x0 = [.000006,1000];
-fun = @(x,data) x(1)*log(data-x(2));
+fun = @(x,data) x(1).*log(data-x(2));
 fit = lsqcurvefit(fun,x0,ave_omega,coef(1,:));
 fprintf('beta = %e\ngamma = %e\n',fit(1),fit(2))
 fit_plot = fit(1)*log(ave_omega-fit(2));
