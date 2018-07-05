@@ -49,7 +49,7 @@ a_ty_p = condition(a_ty);
 plot(a_o2_p)
 hold on
 plot(a_ty_p)
-save([mfilename '_data_2018_07_03_4Corners_2Indicators_Manual_2'],'a_fz','a_tx','a_ty','a_tz','a_o1','a_o2','a_o3','a_o4')
+%save([mfilename '_data_2018_07_03_4Corners_2Indicators_Manual_2'],'a_fz','a_tx','a_ty','a_tz','a_o1','a_o2','a_o3','a_o4')
 
 
 function directory = string_form(file)
