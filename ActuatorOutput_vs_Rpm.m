@@ -1,11 +1,11 @@
 function ActuatorOutput_vs_Rpm
-date = 26;
+date = 05;
 file = create_file(date);
 dir = string_form(file);
 strobe = load_strobe_data(date);
 cd(dir)
 
-omega = create_omega_mat(file);
+omega = create_omega_mat(file,date);
 [omega,strobe] = eliminate_outliers(omega,strobe);
 
 plot_omegaVSstrobe(omega,strobe)
@@ -18,6 +18,9 @@ if num == 25
 elseif num == 26
     file = 'Strobe_log_20180626';
     fprintf('Loading file "Strobe_log_20180626"...\n\n')
+elseif num == 05
+    file = 'Strobe_log_20180705';
+    fprintf('Loading file "Strobe_log_20180626"...\n\n')
 else
     error('File doesnt exist')
 end
@@ -25,6 +28,8 @@ end
 function strobe = load_strobe_data(date)
 if date == 25
     strobe = [1200,1380,2460,2367,2478,2855,5160,0,7984,0,0,2404,2680,4550,6852,0];
+elseif date == 05
+    strobe = [416.4,432.4,444.3,486.5,498.1,553,582,413,450,463];
 else
     strobe = [0,562,540,511,473,445,425,396,382,413,473,433,485,409.5,433.5,450];
 end
@@ -78,9 +83,15 @@ figure('Visible','on','Name','Actuator Outputs')
 x = 1:length(o1);
 plot(x,o1,'b:',x,o2,'b:',x,o3,'k',x,o4,'b:')
 
-function omega = create_omega_mat(file)
-omega = zeros(4,16);
-for i = 1:16
+function omega = create_omega_mat(file,date)
+if date == 05
+    num = 10;
+else
+    num = 16;
+end
+
+omega = zeros(4,num);
+for i = 1:num
     folder = sprintf('%s/%s',file,num2str(i));
     dir = string_form(folder);
     cd(dir)
@@ -115,7 +126,7 @@ omega_min = [1 1250]*b;
 fprintf('\nThe minimum motor rpm using 1250 PX4 reading is predicted to be: %f\n',omega_min)
 fprintf('The maximum motor rpm using 2000 PX4 reading is predicted to be: %f\n',omega_max)
 
-fprintf('The calculated max RPM of the motor using 14.8V * 1100KV is 16280 RPM\n\n')
+fprintf('The calculated max RPM of the motor using 16.8V * 1100KV is 18480 RPM\n\n')
 
 figure('Visible','on','Name','Strobe vs Omega')
 plot(omega,strobe,'b*',omega,calculated,'r',2000,omega_max,'k+',1250,omega_min,'k+')%,omega,poly_fit_plot,'g')
