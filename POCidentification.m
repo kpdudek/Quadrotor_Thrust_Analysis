@@ -7,9 +7,9 @@ load('POC_tracks_alignment_data_2018_07_03_4Corners_2Indicators_Manual_2.mat')  
 d = .118;
 
 %Span to calculate coefficients over
-load('POCidentification_test_span_2018_06_19_ThrustUpDown_4Corners_Acro.mat')
-% n1 = [385,6509,11570,13960,16580,22120,24050,25290,26490,27920,29050,30300,31540];
-% n2 = [6288,11350,13840,16450,21870,23930,25170,26400,27820,28950,30160,31490,37680];
+%load('POCidentification_test_span_2018_06_19_ThrustUpDown_4Corners_Acro.mat')
+n1 = [385,6509,11570,13960,16580,22120,24050,25290,26490,27920,29050,30300,31540];
+n2 = [6288,11350,13840,16450,21870,23930,25170,26400,27820,28950,30160,31490,37680];
 len_n1 = length(n1);
 
 figures = [];

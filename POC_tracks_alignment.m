@@ -1,7 +1,8 @@
 function POC_tracks_alignment
 %Loads the file, then calls functions to process the raw data before signal
 %analysis can occur
-file = 'R2_2018_07_03_4Corners_2Indicators_Manual_2';
+file = 'R2_2018_07_11_Demo';
+
 directory = string_form(file);
 cd(directory)
 
@@ -49,7 +50,7 @@ a_ty_p = condition(a_ty);
 plot(a_o2_p)
 hold on
 plot(a_ty_p)
-save([mfilename '_data_2018_07_03_4Corners_2Indicators_Manual_2'],'a_fz','a_tx','a_ty','a_tz','a_o1','a_o2','a_o3','a_o4')
+save([mfilename '_data_2018_07_11_Demo'],'a_fz','a_tx','a_ty','a_tz','a_o1','a_o2','a_o3','a_o4')
 
 
 function directory = string_form(file)
@@ -161,7 +162,7 @@ ax_s1 = axes(tab_s1);
 t1 = 1:length(s1);
 plot(ax_s1,t1,s1)
 hold on
-[pks1,locs1] = findpeaks(s1,'MinPeakHeight',1600,'MinPeakDistance',8);
+[pks1,locs1] = findpeaks(s1,'MinPeakHeight',1360,'MinPeakDistance',8);
 plot(ax_s1,t1(locs1),pks1,'ko')
 
 tab_s2 = uitab('Title','Filtered Force Y');

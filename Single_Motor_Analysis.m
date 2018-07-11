@@ -8,6 +8,7 @@ matrix_ct = matrix_determined_ct(a_fz,a_o2);
 disp(matrix_ct)
 predict_fts(a_fz,a_o2,matrix_ct)
 
+
 % Checking the linear relationship using
 % Thrust = Ct * omega
 % Solve for Ct at each discreet point, then plot Ct vs omega
