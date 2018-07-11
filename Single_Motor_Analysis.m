@@ -6,6 +6,7 @@ plot_omega_ct(a_o2,ct)
 
 matrix_ct = matrix_determined_ct(a_fz,a_o2);
 disp(matrix_ct)
+predict_fts(a_fz,a_o2,matrix_ct)
 
 % Checking the linear relationship using
 % Thrust = Ct * omega
@@ -39,6 +40,19 @@ a_fz = a_fz';
 a_o2 = a_o2'.^2;
 
 ct = a_o2\a_fz;
+
+function predict_fts(a_fz,a_o2,matrix_ct)
+estim_fz = zeros(1,length(a_o2));
+for i = 1:length(a_o2)
+    estim_fz(i) = matrix_ct * (a_o2(i)^2);
+end
+
+len = 1:length(a_o2);
+figure('Visible','on','Name','Predicted Fts')
+plot(len,estim_fz,'g',len,a_fz,'k:')
+legend('Estimated Fz','Actual Fz')
+xlabel('Time')
+ylabel('Fz (N)')
 
 
 
