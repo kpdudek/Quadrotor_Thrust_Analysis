@@ -1,4 +1,8 @@
 function Single_Motor_Analysis
+file = 'Single_Motor_Test_WithFT_20180711';
+dir = string_form(file);
+cd(dir)
+
 load('Single_Motor_Test_data_2018_07_11_Single_Motor_Test_WithFT.mat')
 
 ct = check_linear_relationship(a_fz,a_o2);
@@ -13,6 +17,9 @@ predict_fts(a_fz,a_o2,matrix_ct)
 % Thrust = Ct * omega
 % Solve for Ct at each discreet point, then plot Ct vs omega
 % Ct versus omega should be linear
+function directory = string_form(file)
+directory = sprintf('/home/kurt/ATI_Log_Processor/Test_Data/%s',file);
+
 function ct = check_linear_relationship(a_fz,a_o2)
 ct = zeros(1,length(a_o2));
 for i = 1:length(a_o2)

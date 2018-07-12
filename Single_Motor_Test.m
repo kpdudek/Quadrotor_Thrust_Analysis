@@ -3,7 +3,7 @@ file = 'Single_Motor_Test_WithFT_20180711';
 
 [a_fz,a_tx,a_ty,a_tz,a_o1,a_o2,a_o3,a_o4] = Align_Data(file);
 
-save([mfilename '_data_2018_07_11_Single_Motor_Test_WithFT'],'a_fz','a_tx','a_ty','a_tz','a_o1','a_o2','a_o3','a_o4')
+%save([mfilename '_data_2018_07_11_Single_Motor_Test_WithFT'],'a_fz','a_tx','a_ty','a_tz','a_o1','a_o2','a_o3','a_o4')
 
 
 function [a_fz,a_tx,a_ty,a_tz,a_o1,a_o2,a_o3,a_o4] = Align_Data(file)
