@@ -1,7 +1,7 @@
 function POC_tracks_alignment
 %Loads the file, then calls functions to process the raw data before signal
 %analysis can occur
-file = 'R2_2018_07_11_Demo';
+file = 'R2_2018_07_12_manual';
 
 directory = string_form(file);
 cd(directory)
@@ -54,7 +54,7 @@ save([mfilename '_data_2018_07_11_Demo'],'a_fz','a_tx','a_ty','a_tz','a_o1','a_o
 
 
 function directory = string_form(file)
-directory = sprintf('/home/kurt/ATI_Log_Processor/Test_Data/%s',file);
+directory = sprintf('/home/smranda/ATI_Log_Processor/Test_Data/%s',file);
 fprintf('\nloading: %s\n\n',directory')
 
 %Both data sets are the same length. This crops the lagging data set to align the

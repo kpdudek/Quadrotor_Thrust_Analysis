@@ -59,23 +59,23 @@ tp_1 = t_s_1 - t_1_shift;
 function plot_sensor_combined(g0,g1,g2,a0,a1,a2,tp_1)
 %Figure Setup
 gy_acc_plot = figure('Visible','on','Name','PX4 Accelerometer & Gyro');
-
+tg = uitabgroup(gy_acc_plot);
 %Plot Gyro 0
-tab_g0 = uitab('Title','Gyro 0');
+tab_g0 = uitab(tg,'Title','Gyro 0');
 ax_g0 = axes(tab_g0);
 plot(ax_g0,tp_1,g0,'b');
 title('Gyro 0')
 xlabel('Time(s)')
 ylabel('Gyro')
 %Plot Gyro 1
-tab_g1 = uitab('Title','Gyro 1');
+tab_g1 = uitab(tg,'Title','Gyro 1');
 ax_g1 = axes(tab_g1);
 plot(ax_g1,tp_1,g1,'b');
 title('Gyro 1')
 xlabel('Time(s)')
 ylabel('Gyro')
 %Plot Gyro 2
-tab_g2 = uitab('Title','Gyro 2');
+tab_g2 = uitab(tg,'Title','Gyro 2');
 ax_g2 = axes(tab_g2);
 plot(ax_g2,tp_1,g2,'b');
 title('Gyro 2')
@@ -83,21 +83,21 @@ xlabel('Time(s)')
 ylabel('Gyro')
 
 %Plot Accelerometer 0
-tab_a0 = uitab('Title','Accelerometer 0');
+tab_a0 = uitab(tg,'Title','Accelerometer 0');
 ax_a0 = axes(tab_a0);
 plot(ax_a0,tp_1,a0,'b');
 title('Accelerometer 0')
 xlabel('Time(s)')
 ylabel('Accelerometer')
 %Plot Accelerometer 1
-tab_a1 = uitab('Title','Accelerometer 1');
+tab_a1 = uitab(tg,'Title','Accelerometer 1');
 ax_a1 = axes(tab_a1);
 plot(ax_a1,tp_1,a1,'b');
 title('Accelerometer 1')
 xlabel('Time(s)')
 ylabel('Accelerometer')
 %Plot Accelerometer 2
-tab_a2 = uitab('Title','Accelerometer 2');
+tab_a2 = uitab(tg,'Title','Accelerometer 2');
 ax_a2 = axes(tab_a2);
 plot(ax_a2,tp_1,a2,'b');
 title('Accelerometer 2')
@@ -119,7 +119,7 @@ for i = w2+1:(L-w2)
     vals = sl_g0(i-w2:i+w2);
     sl_pg0(end+1) = mean(vals);
 end
-tab_slg0 = uitab('Title','SW Filter Gyro 0'); 
+tab_slg0 = uitab(tg,'Title','SW Filter Gyro 0'); 
 ax_slg0 = axes(tab_slg0);
 plot(ax_slg0,t_sl_1,sl_pg0,'b');
 title('Sliding Window Filter Gyro 0')
