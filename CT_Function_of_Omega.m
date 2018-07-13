@@ -2,9 +2,9 @@ function CT_Function_of_Omega
 %Loads the result of POCidentification and POC_tracks_alignment
 %Loading the coefficients, aligned data sets for omega and F/T's
 %Loads the indicies of the test run
-load('POC_tracks_alignment_data_2018_07_03_4Corners_2Indicators_Manual_2.mat')
-load('POCidentification_all_coefs_data_2018_07_03_4Corners_2Indicators_Manual_2.mat')
-load('POCidentification_test_span_data_2018_07_03_4Corners_2Indicators_Manual_2.mat')
+load('POC_tracks_alignment_data_2018_07_13_4Corners_2Indicators_Acro.mat')
+load('POCidentification_all_coefs_data_2018_07_13_4Corners_2Indicators_Acro.mat')
+load('POCidentification_test_span_data_2018_07_13_4Corners_2Indicators_Acro.mat')
 
 fitted_coefs = non_linear_fit(T,omega,coef);
 
@@ -150,6 +150,7 @@ fit3_plot = (fit3(1))./(1+fit3(2)*exp(-fit3(3).*ave_omega));
 % fit4_plot = fit4(1)./(1+fit4(2)*exp(-fit4(3).*ave_omega));
 
 plot(ave_omega,coef(1,:),'+',ave_omega,fit_plot,ave_omega,fit2_plot,ave_omega,fit3_plot)%,ave_omega,fit4_plot)
+title('Average Omega vs Ct Curve Fits')
 legend('cT','Log Fit','Exponential Fit','1/e^x Fit(curvefit)')%,'1/e^x Fit(nlinfit)')
 xlabel('Average Omega')
 ylabel('ct')
@@ -165,12 +166,14 @@ omega_ave = mean(omega);
 ct = uitab('Title','Average Omega vs ct');
 ct_ax = axes(ct);
 plot(ct_ax,omega_ave,discreet_coef(1,:),'.') %,1:length(omega_ave),condition(omega_ave),
+title('Average Omega vs Ct Over Entire Set')
 xlabel('Average Omega')
 ylabel('ct')
 
 ctt = uitab('Title','t vs ct');
 ctt_ax = axes(ctt);
 plot(ctt_ax,1:length(omega_ave),discreet_coef(1,:),'.')
+title('Omega vs Ct Over Entire Set')
 xlabel('time')
 ylabel('ct')
 
@@ -211,6 +214,7 @@ figure('Visible','on','Name','FTs using model predicted ct')
 fts = uitab('Title','Predicted FTs');
 ft_ax = axes(fts);
 plot(ft_ax,x,ft(1,:),'r:',x,ft(2,:),'g:',x,ft(3,:),'b:',x,T(1,:),'r',x,T(2,:),'g',x,T(3,:),'b')
+title('Estimated FTs using ct(w) From Curve Fit on Matrix Determined cTs')
 legend('Predicted Fz','Predicted Tx','Predicted Ty','Fz','Tx','Ty')
 
 %PLOTTING THE PREDICTED CTS VS OMEGA
@@ -232,6 +236,9 @@ fit = ct_curve_fit(ave_omega(:,n1(1):n2(end)),discreet_coef(1,:));
 ft = uitab('Title','Fitted Curve');
 ax = axes(ft);
 plot(ax,ave_omega(:,n1(1):n2(end)),discreet_coef(1,:),'.',ave_omega(:,n1(1):n2(end)),fit(1)./(1+fit(2)*exp(-fit(3).*ave_omega(:,n1(1):n2(end)))))
+title('Curve Fit for cT(w) Over Entire Set')
+xlabel('Average Omega')
+ylabel('cT')
 
 %USING THE MODEL FOR CT TO CALCULATE THE FT'S
 ct = zeros(4,length(omega));
@@ -248,6 +255,7 @@ x = 1:length(omega);
 fts = uitab('Title','Predicted FTs');
 ft_ax = axes(fts);
 plot(ft_ax,x,ft(1,:),'r:',x,ft(2,:),'g:',x,ft(3,:),'b:',x,T(1,:),'r',x,T(2,:),'g',x,T(3,:),'b')
+title('Estimated FTs Using cT(w)')
 legend('Predicted Fz','Predicted Tx','Predicted Ty','Fz','Tx','Ty')
 
 %PLOTTING THE PREDICTED CTS VS OMEGA
@@ -360,6 +368,7 @@ fts = uitab('Title','Predicted FTs');
 ft_ax = axes(fts);
 plot(ft_ax,x,ft(1,:),'r:',x,ft(2,:),'g:',x,ft(3,:),'b:',x,T(1,:),'r',x,T(2,:),'g',x,T(3,:),'b')
 legend('Predicted Fz','Predicted Tx','Predicted Ty','Fz','Tx','Ty')
+title('Estimated FTs Using lsqnonlin to Determine Coefficients of ct(w)')
 
 
 
