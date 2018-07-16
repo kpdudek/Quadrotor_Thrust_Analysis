@@ -7,9 +7,9 @@ load('POC_tracks_alignment_data_2018_07_13_4Corners_2Indicators_Acro.mat')  %   
 d = .118;
 
 %Span to calculate coefficients over
-%load('POCidentification_test_span_2018_06_19_ThrustUpDown_4Corners_Acro.mat')
-n1 = [344,5314,10420,15580,20610,26780,32010];
-n2 = [5142,10300,15360,20340,26640,31860,37410];
+load('POCidentification_test_span_data_2018_07_13_4Corners_2Indicators_Acro.mat')
+% n1 = [344,5314,10420,15580,20610,26780,32010];
+% n2 = [5142,10300,15360,20340,26640,31860,37410];
 len_n1 = length(n1);
 
 figures = [];
@@ -137,8 +137,10 @@ t = 1:length(coef(1,:));
 
 tab = uitab('Title','Coefficients');
 ax = axes(tab);
-coef_plot = plot(ax,t,coef(1,:),'b',t,coef(2,:),'k',t,coef_ave(1,:),'b--+',t,coef_ave(2,:),'k--');
-legend(coef_plot,'Ct','cq','ave_Ct','ave_cq')
+coef_plot = plot(ax,t,coef(1,:),'b',t,coef(2,:),'k'); %,t,coef_ave(1,:),'b--+',t,coef_ave(2,:),'k--');
+legend(coef_plot,'Ct','cq') %,'ave_Ct','ave_cq')
+xlabel('Time')
+title('Combined Coefficients')
 
 %Solves for the coefficients using the entire data set
 function figures = combined_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz,figures)
@@ -247,6 +249,9 @@ t = 1:length(independent_coef(1,:));
 tab_ct = uitab('Title','CT');
 ax_ct = axes(tab_ct);
 plot(ax_ct,t,independent_coef(1,:),t,independent_coef(2,:),t,independent_coef(3,:),t,independent_coef(4,:));
+title('Independent Values of cT')
+xlabel('Time')
+legend('Motor 1','Motor 2','Motor 3','Motor 4')
 
 tab_cq = uitab('Title','CQ');
 ax_cq = axes(tab_cq);
