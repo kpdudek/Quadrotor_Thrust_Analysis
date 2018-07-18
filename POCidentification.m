@@ -57,9 +57,9 @@ print_stars()
 discreet_coef = discreet_coefs(omega,T,n1,n2);
 
 
-savefig(figures,'Figures_data_2018_07_13_4Corners_2Indicators_Acro.fig')  
-save([mfilename '_all_coefs_data_2018_07_13_4Corners_2Indicators_Acro.mat'],'coef','coef_ave','independent_coef','discreet_coef','omega','T')  
-save([mfilename '_test_span_data_2018_07_13_4Corners_2Indicators_Acro.mat'],'n1','n2')  
+% savefig(figures,'Figures_data_2018_07_13_4Corners_2Indicators_Acro.fig')  
+% save([mfilename '_all_coefs_data_2018_07_13_4Corners_2Indicators_Acro.mat'],'coef','coef_ave','independent_coef','discreet_coef','omega','T')  
+% save([mfilename '_test_span_data_2018_07_13_4Corners_2Indicators_Acro.mat'],'n1','n2')  
 
 
 
@@ -168,6 +168,10 @@ for iN = 1:length(omega)
    
     T_plot = [T_plot,T];
 end
+
+FT_true = [a_fz;a_tx;a_ty];
+mean_squared_error(T_plot(1:3,:),FT_true,'combined ct control')
+
 figures(end+1) = figure('Visible','on','Name','Check Combined Coefficients Over Whole Set');
 title = sprintf('Combined Matrix Determined over entire set');
 mat_det = uitab('Title',title);
@@ -385,6 +389,11 @@ for iN = 1:length(omega)
 end
 
 
+function mean_squared_error(ft,FT_true,data)
+error = immse(FT_true,ft);
+print_stars()
+fprintf('The mean squared error for the %s dataset is %f\n',data,error)
+print_stars()
 
 
 %Prints a line of asteriscs for output separation

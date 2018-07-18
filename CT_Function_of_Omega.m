@@ -12,7 +12,7 @@ plot_coef_vs_fitted(coef,fitted_coefs)
 
 use_LS_values(fitted_coefs,omega,T)
 
-fit4 = ct_vs_omega(omega,coef,n1,n2);
+fit4 = ct_vs_omega(omega,coef,n1,n2,independent_coef);
 
 use_model_for_cTs(fit4,omega,T)
 
@@ -25,6 +25,8 @@ discreet_ct_vs_omega_fit(omega,discreet_coef,n1,n2,T,a_o1,a_o2,a_o3,a_o4)
 fitted = coefs_ct_function_omega(T,omega);
 
 use_nonlin(fitted,omega,T)
+
+plot_independent_vs_omega(omega,n1,n2,independent_coef)
 
 
 %Uses lsqnonlin to find a value of ct over the test set
@@ -100,7 +102,7 @@ legend('LS Ct','Calculated Ct')
 
 %Using the combined matrix determined values of ct from POCidentification,
 %this function applies multiple fits to the curve
-function fit3 = ct_vs_omega(omega,coef,n1,n2)
+function fit3 = ct_vs_omega(omega,coef,n1,n2,independent_coef)
 len_coef = length(coef(1,:));
 ave_omega_array = zeros(4,len_coef);
 ave_omega = zeros(1,len_coef);
@@ -250,6 +252,8 @@ for k = 1:length(omega)
     ft(:,k) = plot_using_calculated_cts(ct(:,k),omega(:,k));
 end
 
+mean_squared_error(ft,T(1:3,:),'fit for ct(w) using instantaneous ct values')
+
 x = 1:length(omega);
 %PLOTTING MODEL FTS VS ACTUAL FTS
 fts = uitab('Title','Predicted FTs');
@@ -370,6 +374,25 @@ plot(ft_ax,x,ft(1,:),'r:',x,ft(2,:),'g:',x,ft(3,:),'b:',x,T(1,:),'r',x,T(2,:),'g
 legend('Predicted Fz','Predicted Tx','Predicted Ty','Fz','Tx','Ty')
 title('Estimated FTs Using lsqnonlin to Determine Coefficients of ct(w)')
 
+
+function plot_independent_vs_omega(omega,n1,n2,independent_coef)
+len_coef = length(independent_coef(1,:));
+ave_omega_array = zeros(4,len_coef);
+ave_omega = zeros(1,len_coef);
+
+for i = 1:len_coef
+    ave_omega_array(1,i) = mean(omega(1,n1(i):n2(i)));
+    ave_omega_array(2,i) = mean(omega(2,n1(i):n2(i)));
+    ave_omega_array(3,i) = mean(omega(3,n1(i):n2(i)));
+    ave_omega_array(4,i) = mean(omega(4,n1(i):n2(i)));
+end
+
+for j = 1:len_coef
+    ave_omega(j) = mean(ave_omega_array(:,j));
+end
+
+figure('Visible','on','Name','Omega vs Independent Coefs')
+plot(ave_omega,independent_coef(1,:),ave_omega,independent_coef(2,:),ave_omega,independent_coef(3,:),ave_omega,independent_coef(4,:))
 
 
 function mean_squared_error(ft,FT_true,data)
