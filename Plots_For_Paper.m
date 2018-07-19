@@ -6,38 +6,51 @@ load('POCidentification_test_span_data_2018_07_13_4Corners_2Indicators_Acro.mat'
 
 file = 'R2_2018_07_13_4Corners_2Indicators_Acro';
 
-directory = string_form(file);
-cd(directory)
+% [o1,o2,o3,o4,tp] = PX4_CSV_Plotter_V2(file);
+% [ffz,ftx,fty,ftz,t_sl] = ATI_AXIA80_LOG_Processor_V2(file);
+% 
+% save('o2_ty','o2','fty')
 
-[o1,o2,o3,o4,tp] = PX4_CSV_Plotter_V2(file);
-[ffz,ftx,fty,ftz,t_sl] = ATI_AXIA80_LOG_Processor_V2(file);
+load('o2_ty')
 
-figure('Visible','on')
-plot(o2)
+o2f = figure('Visible','on');
+o2a = axes(o2f);
+o2 = plot(o2a,o2);
+xlabel('Time')
+ylabel('Actuator Output 2')
 
-figure('Visible','on')
-plot(fty)
+tyf = figure('Visible','on');
+tya = axes(tyf);
+ty = plot(tya,fty);
+xticks([0 20000 40000])
+tya.XAxis.Exponent = 0;
+%set(tya,'Position',[0.1300 0.1100 0.7750 0.8150])
+xlabel('Time')
+ylabel('Torque (N*m)')
 
-figure('Visible','on')
-
-figure('Visible','on')
-
-figure('Visible','on')
-
-figure('Visible','on')
-
-figure('Visible','on')
-
-figure('Visible','on')
-
-figure('Visible','on')
-
-figure('Visible','on')
-
-figure('Visible','on')
-
-figure('Visible','on')
-
-figure('Visible','on')
-
-figure('Visible','on')
+% FT_true = [a_fz;a_tx;a_ty;a_tz];
+% 
+% for i = 1:7
+%     name = sprintf('combined_coef_%d',i);
+%     name1 = sprintf('indep_coef_%d',i);
+%     
+%     load(name)
+%     figure('Visible','on','Name',name)
+%     plot(time,FT_true,time,T_plot,':')
+%     legend({'T_z','\tau_x','\tau_y','\tau_z'},'Location','northwest','NumColumns',2)
+%     
+%     load(name1)
+%     figure('Visible','on','Name',name1)
+%     plot(time,FT_true,time,T_plot,':')
+%     legend({'T_z','\tau_x','\tau_y','\tau_z'},'Location','northwest','NumColumns',2)
+% end
+% 
+% load('indep_coef_whole')
+% figure('Visible','on','Name','indep_coef_whole')
+% plot(time,FT_true,time,T_plot,':')
+% legend({'T_z','\tau_x','\tau_y','\tau_z'},'Location','northwest','NumColumns',2)
+% 
+% load('combined_coef_whole')
+% figure('Visible','on','Name','combined_coef_whole')
+% plot(time,FT_true,time,T_plot,':')
+% legend({'T_z','\tau_x','\tau_y','\tau_z'},'Location','northwest','NumColumns',2)

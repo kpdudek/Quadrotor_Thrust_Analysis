@@ -213,16 +213,18 @@ x = 1:length(omega);
 figure('Visible','on','Name','FTs using model predicted ct')
 
 %PLOTTING MODEL FTS VS ACTUAL FTS
-fts = uitab('Title','Predicted FTs');
-ft_ax = axes(fts);
-plot(ft_ax,x,ft(1,:),'r:',x,ft(2,:),'g:',x,ft(3,:),'b:',x,T(1,:),'r',x,T(2,:),'g',x,T(3,:),'b')
-title('Estimated FTs using ct(w) From Curve Fit on Matrix Determined cTs')
-legend('Predicted Fz','Predicted Tx','Predicted Ty','Fz','Tx','Ty')
+% fts = uitab('Title','Predicted FTs');
+% ft_ax = axes(fts);
+plot(x,T(1,:),'r',x,T(2,:),'g',x,T(3,:),'b',x,ft(1,:),'r:',x,ft(2,:),'g:',x,ft(3,:),'b:')
+%title('Estimated FTs using ct(w) From Curve Fit on Matrix Determined cTs')
+legend({'Fz','Tx','Ty'},'Location','northwest')
 
+
+figure('Visible','on','Name','ct vs omega using model predicted ct')
 %PLOTTING THE PREDICTED CTS VS OMEGA
-ctp = uitab('Title','Predicted Ct vs omega');
-ct_ax = axes(ctp);
-plot(ct_ax,omega(1,:),cts(1,:),'.',omega(2,:),cts(2,:),'.',omega(3,:),cts(3,:),'.',omega(4,:),cts(4,:),'.')
+% ctp = uitab('Title','Predicted Ct vs omega');
+% ct_ax = axes(ctp);
+plot(omega(1,:),cts(1,:),'.',omega(2,:),cts(2,:),'.',omega(3,:),cts(3,:),'.',omega(4,:),cts(4,:),'.')
 xlabel('Average Omega')
 ylabel('ct')
 
@@ -235,12 +237,12 @@ ave_omega = mean(omega);
 
 fit = ct_curve_fit(ave_omega(:,n1(1):n2(end)),discreet_coef(1,:));
 
-ft = uitab('Title','Fitted Curve');
-ax = axes(ft);
-plot(ax,ave_omega(:,n1(1):n2(end)),discreet_coef(1,:),'.',ave_omega(:,n1(1):n2(end)),fit(1)./(1+fit(2)*exp(-fit(3).*ave_omega(:,n1(1):n2(end)))))
-title('Curve Fit for cT(w) Over Entire Set')
+plot(ave_omega(:,n1(1):n2(end)),discreet_coef(1,:),'.',ave_omega(:,n1(1):n2(end)),fit(1)./(1+fit(2)*exp(-fit(3).*ave_omega(:,n1(1):n2(end)))))
+%title('Curve Fit for cT(w) Over Entire Set')
 xlabel('Average Omega')
 ylabel('cT')
+
+figure('Visible','on','Name','Discreet cT vs Omega estimation')
 
 %USING THE MODEL FOR CT TO CALCULATE THE FT'S
 ct = zeros(4,length(omega));
@@ -256,12 +258,14 @@ mean_squared_error(ft,T(1:3,:),'fit for ct(w) using instantaneous ct values')
 
 x = 1:length(omega);
 %PLOTTING MODEL FTS VS ACTUAL FTS
-fts = uitab('Title','Predicted FTs');
-ft_ax = axes(fts);
-plot(ft_ax,x,ft(1,:),'r:',x,ft(2,:),'g:',x,ft(3,:),'b:',x,T(1,:),'r',x,T(2,:),'g',x,T(3,:),'b')
+% fts = uitab('Title','Predicted FTs');
+% ft_ax = axes(fts);
+plot(x,T(1,:),'r',x,T(2,:),'g',x,T(3,:),'b',x,ft(1,:),'r:',x,ft(2,:),'g:',x,ft(3,:),'b:')
 title('Estimated FTs Using cT(w)')
-legend('Predicted Fz','Predicted Tx','Predicted Ty','Fz','Tx','Ty')
+legend({'Fz','Tx','Ty'},'Location','northwest')
 
+
+figure('Visible','on','Name','Discreet cT vs Omega extra')
 %PLOTTING THE PREDICTED CTS VS OMEGA
 ctp = uitab('Title','Predicted Ct vs omega');
 ct_ax = axes(ctp);
@@ -368,11 +372,11 @@ mean_squared_error(ft,T(1:3,:),'Non linear fit using ct(w)')
 
 x = 1:length(ft(1,:));
 figure('Visible','on','Name','Non lin fit with ct(w)')
-fts = uitab('Title','Predicted FTs');
-ft_ax = axes(fts);
-plot(ft_ax,x,ft(1,:),'r:',x,ft(2,:),'g:',x,ft(3,:),'b:',x,T(1,:),'r',x,T(2,:),'g',x,T(3,:),'b')
-legend('Predicted Fz','Predicted Tx','Predicted Ty','Fz','Tx','Ty')
-title('Estimated FTs Using lsqnonlin to Determine Coefficients of ct(w)')
+% fts = uitab('Title','Predicted FTs');
+% ft_ax = axes(fts);
+plot(x,T(1,:),'r',x,T(2,:),'g',x,T(3,:),'b',x,ft(1,:),'r:',x,ft(2,:),'g:',x,ft(3,:),'b:')
+legend({'Fz','Tx','Ty'},'Location','northwest')
+%title('Estimated FTs Using lsqnonlin to Determine Coefficients of ct(w)')
 
 
 function plot_independent_vs_omega(omega,n1,n2,independent_coef)

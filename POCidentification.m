@@ -57,9 +57,9 @@ print_stars()
 discreet_coef = discreet_coefs(omega,T,n1,n2);
 
 
-% savefig(figures,'Figures_data_2018_07_13_4Corners_2Indicators_Acro.fig')  
-% save([mfilename '_all_coefs_data_2018_07_13_4Corners_2Indicators_Acro.mat'],'coef','coef_ave','independent_coef','discreet_coef','omega','T')  
-% save([mfilename '_test_span_data_2018_07_13_4Corners_2Indicators_Acro.mat'],'n1','n2')  
+savefig(figures,'Figures_data_2018_07_13_4Corners_2Indicators_Acro.fig')  
+save([mfilename '_all_coefs_data_2018_07_13_4Corners_2Indicators_Acro.mat'],'coef','coef_ave','independent_coef','discreet_coef','omega','T')  
+save([mfilename '_test_span_data_2018_07_13_4Corners_2Indicators_Acro.mat'],'n1','n2')  
 
 
 
@@ -122,11 +122,13 @@ for i = 1:len_n1
     
     mat = plot(mat_ax,time,T_plot(1,:),'r:',time,T_plot(2,:),'k:',time,T_plot(3,:),'g:',time,T_plot(4,:),'b:',time,a_fz,'r',time,a_tx,'k',time,a_ty,'g',time,a_tz,'b');
     rectangle(mat_ax,'Position',[(n1(i)-350) (a_fz(n1(i))-3) ((n2(i)-n1(i))+700) (abs((a_fz(n2(i)))-(a_fz(n1(i))))+6)],'EdgeColor','r')
-    legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
+    legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z')
     
     av = plot(av_ax,time,T_av_plot(1,:),time,T_av_plot(2,:),time,T_av_plot(3,:),time,T_av_plot(4,:),time,a_fz,time,a_tx,time,a_ty,time,a_tz);
-    rectangle(av_ax,'Position',[(n1(i)-350) (a_fz(n1(i))-3) ((n2(i)-n1(i))+700) (abs((a_fz(n2(i)))-(a_fz(n1(i))))+6)],'EdgeColor','r')
-    legend(av,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
+    rectangle(av_ax,'Position',[(n1(i)-350) (a_fz(n1(i))-3) ((n2(i)-n1(i))+700) (abs((a_fz(n2(i)))-(a_fz(n1(i))))+6)],'EdgeColor','r');
+    legend(av,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z')
+    name = sprintf('combined_coef_%d',i);
+    save(name,'T_plot','time')
 end
 
 %Plots the coefficients at each horizontal to check for trends. Also
@@ -135,10 +137,10 @@ function figures = plot_coefficients(coef,coef_ave,figures)
 figures(end+1) = figure('Visible','on','Name','Plotted Coefficients');
 t = 1:length(coef(1,:));
 
-tab = uitab('Title','Coefficients');
-ax = axes(tab);
-coef_plot = plot(ax,t,coef(1,:),'b',t,coef(2,:),'k'); %,t,coef_ave(1,:),'b--+',t,coef_ave(2,:),'k--');
-legend(coef_plot,'Ct','cq') %,'ave_Ct','ave_cq')
+% tab = uitab('Title','Coefficients');
+% ax = axes(tab);
+coef_plot = plot(t,coef(1,:),'b',t,coef(2,:),'k'); %,t,coef_ave(1,:),'b--+',t,coef_ave(2,:),'k--');
+legend({'Ct','cq'},'Location','northwest') %,'ave_Ct','ave_cq')
 xlabel('Time')
 title('Combined Coefficients')
 
@@ -153,7 +155,6 @@ fprintf('\n<< Combined Linear system solution for entire data set >>\n')
 print_coefficients('no_d',coef)
 
 %Lets use the calculated coefficient matrix to solve for the F/Ts and compare to experimental results
-
 T_plot = [];
 d = .118;
 ct = coef(1);
@@ -173,14 +174,16 @@ FT_true = [a_fz;a_tx;a_ty];
 mean_squared_error(T_plot(1:3,:),FT_true,'combined ct control')
 
 figures(end+1) = figure('Visible','on','Name','Check Combined Coefficients Over Whole Set');
-title = sprintf('Combined Matrix Determined over entire set');
-mat_det = uitab('Title',title);
-mat_ax = axes(mat_det);
+% title = sprintf('Combined Matrix Determined over entire set');
+% mat_det = uitab('Title',title);
+% mat_ax = axes(mat_det);
 
 time = 1:length(T_plot(1,:));
 
-mat = plot(mat_ax,time,T_plot(1,:),'r:',time,T_plot(2,:),'k:',time,T_plot(3,:),'g:',time,T_plot(4,:),'b:',time,a_fz,'r',time,a_tx,'k',time,a_ty,'g',time,a_tz,'b');
-legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
+mat = plot(time,T_plot(1,:),'r:',time,T_plot(2,:),'k:',time,T_plot(3,:),'g:',time,T_plot(4,:),'b:',time,a_fz,'r',time,a_tx,'k',time,a_ty,'g',time,a_tz,'b');
+legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z')
+name = sprintf('combined_coef_whole');
+save(name,'T_plot','time','FT_true')
 
 
 
@@ -231,16 +234,19 @@ for i = 1:len_n1
     
     T_plot = plot_using_independent_coefs(independent_coef(:,i),omega);
     
-    figures(end+1) = figure('Visible','on','Name','Check Independent Coefficients');
-    title = sprintf('Matrix Determined %d - %d',n1(i),n2(i));
-    mat_det = uitab('Title',title);
-    mat_ax = axes(mat_det);
+    title = sprintf('Independent Matrix Determined %d - %d',n1(i),n2(i));
+    figures(end+1) = figure('Visible','on','Name',title);
+%     mat_det = uitab('Title',title);
+%     mat_ax = axes(mat_det);
     
     time = 1:length(T_plot(1,:));
     
-    mat = plot(mat_ax,time,T_plot(1,:),'r:',time,T_plot(2,:),'k:',time,T_plot(3,:),'g:',time,T_plot(4,:),'b:',time,a_fz,'r',time,a_tx,'k',time,a_ty,'g',time,a_tz,'b');
-    rectangle(mat_ax,'Position',[(n1(i)-350) (a_fz(n1(i))-3) ((n2(i)-n1(i))+700) (abs((a_fz(n2(i)))-(a_fz(n1(i))))+6)],'EdgeColor','r')
-    legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
+    plot(time,T_plot(1,:),'r:',time,T_plot(2,:),'k:',time,T_plot(3,:),'g:',time,T_plot(4,:),'b:',time,a_fz,'r',time,a_tx,'k',time,a_ty,'g',time,a_tz,'b');
+    rectangle('Position',[(n1(i)-350) (a_fz(n1(i))-3) ((n2(i)-n1(i))+700) (abs((a_fz(n2(i)))-(a_fz(n1(i))))+6)],'EdgeColor','r')
+    legend('Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z')
+    
+    name = sprintf('indep_coef_%d',i);
+    save(name,'T_plot','time')
     
 end
 
@@ -250,16 +256,18 @@ function figures = plot_independent_coef(independent_coef,figures)
 figures(end+1) = figure('Visible','on','Name','Plotted Independent Coefficients');
 t = 1:length(independent_coef(1,:));
 
-tab_ct = uitab('Title','CT');
-ax_ct = axes(tab_ct);
-plot(ax_ct,t,independent_coef(1,:),t,independent_coef(2,:),t,independent_coef(3,:),t,independent_coef(4,:));
+% tab_ct = uitab('Title','CT');
+% ax_ct = axes(tab_ct);
+plot(t,independent_coef(1,:),t,independent_coef(2,:),t,independent_coef(3,:),t,independent_coef(4,:));
 title('Independent Values of cT')
 xlabel('Time')
-legend('Motor 1','Motor 2','Motor 3','Motor 4')
+legend({'Motor 1','Motor 2','Motor 3','Motor 4'},'Location','northwest','NumColumns',2)
 
-tab_cq = uitab('Title','CQ');
-ax_cq = axes(tab_cq);
-plot(ax_cq,t,independent_coef(5,:),t,independent_coef(6,:),t,independent_coef(7,:),t,independent_coef(8,:));
+% tab_cq = uitab('Title','CQ');
+% ax_cq = axes(tab_cq);
+% plot(ax_cq,t,independent_coef(5,:),t,independent_coef(6,:),t,independent_coef(7,:),t,independent_coef(8,:));
+k = 1;
+
 
 %Solves for the independent coefficients using the entire data set
 function figures = independent_whole_dataset(omega,T,a_fz,a_tx,a_ty,a_tz,figures)
@@ -276,14 +284,17 @@ print_coefficients('all',coef)
 T_plot = plot_using_independent_coefs(coef,omega);
 
 figures(end+1) = figure('Visible','on','Name','Check Independent Coefficients Over Whole Set');
-title = sprintf('Independent Matrix Determined over entire set');
-mat_det = uitab('Title',title);
-mat_ax = axes(mat_det);
+% title = sprintf('Independent Matrix Determined over entire set');
+% mat_det = uitab('Title',title);
+% mat_ax = axes(mat_det);
 
 time = 1:length(T_plot(1,:));
 
-mat = plot(mat_ax,time,T_plot(1,:),'r:',time,T_plot(2,:),'k:',time,T_plot(3,:),'g:',time,T_plot(4,:),'b:',time,a_fz,'r',time,a_tx,'k',time,a_ty,'g',time,a_tz,'b');
-legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Orientation','horizontal')
+mat = plot(time,T_plot(1,:),'r:',time,T_plot(2,:),'k:',time,T_plot(3,:),'g:',time,T_plot(4,:),'b:',time,a_fz,'r',time,a_tx,'k',time,a_ty,'g',time,a_tz,'b');
+legend('Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z')
+
+name = sprintf('indep_coef_whole');
+save(name,'T_plot','time')
 
 
 
