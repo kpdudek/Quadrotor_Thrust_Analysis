@@ -1,8 +1,8 @@
 function Tachometer_VS_ActuatorOutput
 
-filename = 'R2_2018_07_20_manual01';
+filename = 'R2_2018_07_20_manual05';
 [ao] = string_form(filename);
-file = 'RPM_data01.csv';
+file = 'RPM_data05.csv';
 
 omega = read_pixhawk(ao);
 
@@ -11,6 +11,13 @@ omega = read_pixhawk(ao);
 %[sl_pfx,sl_pfy,sl_pfz,sl_ptx,sl_pty,sl_ptz,t_sl] = filter_ft(time,force_plot,torque_plot);
 
 rpm = read_tachometer(file);
+
+plot_data(rpm,omega)
+
+omega_new = omega(4,:)*6.7857;
+
+figure('Visible','on')
+plot(1:length(omega(1,:)),omega_new)
 
 
 function [ao] = string_form(file)
@@ -40,10 +47,11 @@ while ~feof(fid)
         [m_4,remain] = strtok(remain,',');
         
         t_s(end+1) = (str2double(time)/1000000);
-        omega(1,end+1) = str2double(m_1);
-        omega(2,end+1) = str2double(m_2);
-        omega(3,end+1) = str2double(m_3);
-        omega(4,end+1) = str2double(m_4);
+        [r,c] = size(omega);
+        omega(1,c+1) = str2double(m_1);
+        omega(2,c+1) = str2double(m_2);
+        omega(3,c+1) = str2double(m_3);
+        omega(4,c+1) = str2double(m_4);
     end
 end
 fclose(fid);
@@ -204,6 +212,16 @@ while ~feof(fid)
     end
 end
 fclose(fid);
+
+function plot_data(rpm,omega)
+figure('Visible','on')
+len_rpm = 1:length(rpm);
+len_omega = 1:length(omega(1,:));
+
+plot(len_rpm,rpm)
+
+figure('Visible','on')
+plot(len_omega,omega(4,:))
 
 
 
