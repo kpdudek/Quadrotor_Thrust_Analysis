@@ -19,7 +19,6 @@ plot_data(rpm,omega,sl_pty)
 % 
 % figure('Visible','on')
 % plot(1:length(omega(1,:)),omega_new)
-
 [a_rpm,a_omega] = align_data(rpm_init,omega_init,ty_init);
 
 
@@ -238,7 +237,7 @@ ax_s1 = axes(tab_s1);
 t1 = 1:length(omega);
 plot(ax_s1,t1,omega)
 hold on
-[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1220,'MinPeakDistance',8);
+[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1275,'MinPeakDistance',8);
 plot(ax_s1,t1(omega_locs),pks1,'ko')
 
 tab_s2 = uitab('Title','Filtered Force Y');
@@ -246,7 +245,7 @@ ax_s2 = axes(tab_s2);
 t2 = 1:length(ty);
 plot(ax_s2,t2,ty)
 hold on
-[pks2,ty_locs] = findpeaks(ty,'MinPeakHeight',.06,'MinPeakDistance',90);
+[pks2,ty_locs] = findpeaks(ty,'MinPeakHeight',.07,'MinPeakDistance',150);
 plot(ax_s2,t2(ty_locs),pks2,'ko')
 
 tab_s3 = uitab('Title','RPM');
@@ -254,10 +253,10 @@ ax_s3 = axes(tab_s3);
 t3 = 1:length(rpm);
 plot(ax_s3,t3,rpm)
 hold on
-[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',7700,'MinPeakDistance',2);
+[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',7425,'MinPeakDistance',2);
 plot(ax_s3,t3(rpm_locs),pks3,'ko')
 
-omega_init = omega(1:(omega_locs(10)+20));
+omega_init = omega(1:(omega_locs(11)+20));
 ty_init = ty(1:(ty_locs(10)+200));
 rpm_init = rpm(1:(rpm_locs(10)+2));
 
@@ -286,8 +285,11 @@ omega_iLag = 0;
 ft_length = length(c_ty);
 rotor_length = length(c_omega);
 rpm_length = length(c_rpm);
-omega_resamp = resample(c_omega,ft_length,rotor_length);
-rpm_resamp = resample(c_rpm,ft_length,rpm_length);
+omega_resamp = interp1(c_omega,1:ft_length);
+rpm_resamp = interp1(c_rpm,1:ft_length);
+
+%omega_resamp = resample(c_omega,ft_length,rotor_length);
+%rpm_resamp = resample(c_rpm,ft_length,rpm_length);
 
 for iLags=1:Nlags
     score_omega = align_score(omega_resamp,c_ty,lags(iLags));
@@ -317,7 +319,7 @@ a_omega = 0;
 function score=align_score(s1_resampled,s2,lag)
 [s1_lag,s2_lag] = lag_signals(s1_resampled,s2,lag);
 
-score=correlation(s1_lag,s2_lag);
+score = correlation(s1_lag,s2_lag);
 
 %Conditions the data to a 0 though 1 scale
 function s_conditioned=condition(s)
@@ -341,8 +343,8 @@ end
 
 %Finds the correlation between the data sets
 function c=correlation(s1,s2)
-N=min(length(s1),length(s2));
-c=sum(s1(1:N).*s2(1:N));
+N = min(length(s1),length(s2));
+c = sum(s1(1:N).*s2(1:N));
 
 function [a_fz,a_tx,a_ty,a_tz,out_o1,out_o2,out_o3,out_o4] = aligned_data(ffz,ftx,fty,ftz,o1,o2,o3,o4,offset,locs1,locs2)
 FT_length = length(ffz);
