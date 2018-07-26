@@ -7,7 +7,7 @@ Matlab functions that process the data from the PixHawk and ATI Force Torque sen
 
 Before any test can occur clone the repository using the --recursive option so that the submodule is cloned as well:
 ```
-git clone --recursive <project url>
+git clone --recursive https://github.com/kpdudek/ATI_Log_Processor.git
 ```
 
 ### Now we will setup the dependencies:
