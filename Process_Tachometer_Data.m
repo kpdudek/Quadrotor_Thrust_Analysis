@@ -11,7 +11,9 @@ plot_data(rpm,omega,sl_pty)
 
 [omega_init,rpm_init,ty_init,omega_locs,rpm_locs,ty_locs] = find_peaks(omega(2,:),rpm,sl_pty,r,o,t);
 
-test_linear(omega(4,:),rpm)
+rpm_cut=rpm(100:263);
+omega_cut=omega(4,1000:2695);
+test_linear(omega_cut,rpm_cut)
 
 [a_rpm,a_omega] = align_data(rpm_init,omega_init,ty_init);
 
@@ -75,10 +77,21 @@ len_omega = length(omega);
 len_rpm = length(rpm);
 t = 1:len_omega;
 
-rpm = resample(rpm,len_omega,len_rpm);
+rpm = interp1(1:len_rpm,rpm,linspace(1,len_rpm,len_omega));
+%rpm = resample(rpm,len_omega,len_rpm);
 
-figure('Visible','on','Name','RPM Scaling')
+figure('Name','RPM Scaling')
 plot(t,omega*6.7857,t,rpm)
+ylabel('Note: pixhawk reading is manually scaled')
+figure('Name','RPM Scaling Scatter')
+%scatter(omega,rpm)
+mdl=fitlm(omega,rpm);
+plot(mdl)
+q=table2array(mdl.Coefficients(1,'Estimate'));
+p=table2array(mdl.Coefficients(2,'Estimate'));
+figure('Name','RPM After Fit')
+plot(t,omega*p+q,t,rpm)
+%keyboard
 
 
 %Align the rpm dataset and the pixhawk dataset to the FT set. Since the FT
