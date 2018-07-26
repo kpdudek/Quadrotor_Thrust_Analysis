@@ -2,18 +2,20 @@ function Process_Tachometer_Data
 load('sensor_data.mat')
 load('num_peaks.mat')
 
-%Values for the number of peaks to crop after for the indicator portions
-r = 10; %RPM
-o = 13; %Omega plot (PX4)
-t = 11; %Torque
-
 plot_data(rpm,omega,sl_pty)
 
-[omega_init,rpm_init,ty_init,omega_locs,rpm_locs,ty_locs] = find_peaks(omega(2,:),rpm,sl_pty,r,o,t);
 
 rpm_cut=rpm(100:263);
 omega_cut=omega(4,1000:2695);
 test_linear(omega_cut,rpm_cut)
+
+
+%%%  Values for the number of peaks to crop after for the indicator
+%%%  portions
+% r = 10; %RPM
+% o = 13; %Omega plot (PX4)
+% t = 11; %Torque
+[omega_init,rpm_init,ty_init,omega_locs,rpm_locs,ty_locs] = find_peaks(omega(2,:),rpm,sl_pty,r,o,t);
 
 [a_rpm,a_omega] = align_data(rpm_init,omega_init,ty_init);
 
@@ -36,6 +38,31 @@ plot(len_omega,omega(4,:))
 
 figure('Visible','on','Name','Ty')
 plot(len_ft,ty)
+
+%Function that resamples the rpm data, and then scales the corresponding
+%omega plot to check if its linear
+function test_linear(omega,rpm)
+len_omega = length(omega);
+len_rpm = length(rpm);
+t = 1:len_omega;
+
+rpm = interp1(1:len_rpm,rpm,linspace(1,len_rpm,len_omega));
+%rpm = resample(rpm,len_omega,len_rpm);
+
+figure('Name','RPM Scaling')
+plot(t,omega*6.7857,t,rpm)
+ylabel('Note: pixhawk reading is manually scaled')
+figure('Name','RPM Scaling Scatter')
+%scatter(omega,rpm)
+mdl=fitlm(omega,rpm);
+plot(mdl)
+q=table2array(mdl.Coefficients(1,'Estimate'));
+p=table2array(mdl.Coefficients(2,'Estimate'));
+figure('Name','RPM After Fit')
+plot(t,omega*p+q,t,rpm)
+
+
+%%%%%    The data set is now being aligned    %%%%%
 
 %Function that pulls out the indicator portions by isolating the first n
 %peaks,
@@ -69,30 +96,6 @@ plot(ax_s3,t3(rpm_locs),pks3,'ko')
 omega_init = omega(1:(omega_locs(o)+20));
 ty_init = ty(1:(ty_locs(t)+200));
 rpm_init = rpm(1:(rpm_locs(r)+2));
-
-%Function that resamples the rpm data, and then scales the corresponding
-%omega plot to check if its linear
-function test_linear(omega,rpm)
-len_omega = length(omega);
-len_rpm = length(rpm);
-t = 1:len_omega;
-
-rpm = interp1(1:len_rpm,rpm,linspace(1,len_rpm,len_omega));
-%rpm = resample(rpm,len_omega,len_rpm);
-
-figure('Name','RPM Scaling')
-plot(t,omega*6.7857,t,rpm)
-ylabel('Note: pixhawk reading is manually scaled')
-figure('Name','RPM Scaling Scatter')
-%scatter(omega,rpm)
-mdl=fitlm(omega,rpm);
-plot(mdl)
-q=table2array(mdl.Coefficients(1,'Estimate'));
-p=table2array(mdl.Coefficients(2,'Estimate'));
-figure('Name','RPM After Fit')
-plot(t,omega*p+q,t,rpm)
-%keyboard
-
 
 %Align the rpm dataset and the pixhawk dataset to the FT set. Since the FT
 %set is the highest samplerate, the RPM/PX4 have to be resampled
@@ -151,18 +154,18 @@ check_alignment(omega_resamp,rpm_resamp,c_ty,rpm_offset,omega_offset)
 a_rpm = 0;
 a_omega = 0;
 
-%Function that offsets the dataset and then calculates the correlation 
-function score=align_score(s1_resampled,s2,lag)
-[s1_lag,s2_lag] = lag_signals(s1_resampled,s2,lag);
-
-score = correlation(s1_lag,s2_lag);
-
 %Conditions the data to a 0 though 1 scale
 function s_conditioned=condition(s)
 s=shiftdim(s);
 sMax=max(s);
 sMin=min(s);
 s_conditioned=(s-sMin)/(sMax-sMin);
+
+%Function that offsets the dataset and then calculates the correlation 
+function score=align_score(s1_resampled,s2,lag)
+[s1_lag,s2_lag] = lag_signals(s1_resampled,s2,lag);
+
+score = correlation(s1_lag,s2_lag);
 
 %Crops the data set to the specified lag
 function [s1_lag,s2_lag] = lag_signals(s1,s2,lag)

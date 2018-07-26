@@ -6,6 +6,8 @@ load('POC_tracks_alignment_data_2018_07_13_4Corners_2Indicators_Acro.mat')
 load('POCidentification_all_coefs_data_2018_07_13_4Corners_2Indicators_Acro.mat')
 load('POCidentification_test_span_data_2018_07_13_4Corners_2Indicators_Acro.mat')
 
+%omega = px4_to_rpm(omega);
+
 fitted_coefs = non_linear_fit(T,omega,coef);
 
 plot_coef_vs_fitted(coef,fitted_coefs)
