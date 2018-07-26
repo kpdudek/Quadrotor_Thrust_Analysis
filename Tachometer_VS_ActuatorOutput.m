@@ -1,6 +1,6 @@
 function Tachometer_VS_ActuatorOutput
 
-filename = 'R2_2018_07_24_manual04';
+filename = 'R2_2018_07_24_manual01';
 [ft,px4,tach] = string_form(filename);
 
 omega = read_pixhawk(px4);
@@ -14,13 +14,15 @@ rpm = read_tachometer(tach);
 save('sensor_data','rpm','sl_pty','omega')
 
 
-
+%Takes the standard naming syntax and adds suffixes to open the different
+%.csv files from the sensors
 function [ft,px4,tach] = string_form(file)
 px4 = sprintf('%s_Px4_actuator_outputs_0.csv',file);
 ft = sprintf('%s_FT',file);
 tach = sprintf('%s_Tacho.csv',file);
 
-
+%Parse the pixhawk Actuator Output .csv and store the values in matrix
+%omega with size 4 x n
 function omega = read_pixhawk(filename)
 fid = fopen(filename,'r');
 
@@ -56,6 +58,7 @@ fclose(fid);
 t_shift = (t_s(1)-1); %Makes the first time value == 1 so the plot looks cleaner
 tp = t_s - t_shift;
 
+%Parse the FT sensor and store the values in matricies 
 function [time,force_plot,torque_plot] = read_ft(filename)
 fid = fopen(filename,'r');
 
@@ -135,6 +138,7 @@ elap_time = time_cap(end) - time_cap(1); %elapsed time
 time_split = elap_time / length(time_cap); %time between data points
 time = 0:time_split:elap_time; %time vector from 0-->total time counting by split time
 
+%Apply sliding window filter to the FT values
 function [sl_pfx,sl_pfy,sl_pfz,sl_ptx,sl_pty,sl_ptz,t_sl] = filter_ft(time,force_plot,torque_plot)
 L = length(force_plot(:,1));
 w = 26;
@@ -189,6 +193,7 @@ for i = w2+1:(L-w2)
     sl_ptz(end+1) = mean(vals);
 end
 
+%Parse the tachometer .csv and store in a vector
 function rpm = read_tachometer(file)
 fid = fopen(file,'r');
 rpm = [];
