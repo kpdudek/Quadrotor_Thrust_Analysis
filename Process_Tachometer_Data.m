@@ -21,7 +21,7 @@ shift_omega = 0;
 shift_rpm = 0;
 [rpm_offset,omega_offset] = align_data(rpm_init,omega_init,ty_init,shift_omega,shift_rpm);
 
-manual_shift()
+% manual_shift()
 
 %save('num_peaks','r','o','t')
 
@@ -124,19 +124,15 @@ c_omega = condition(omega);
 c_ty = condition(ty);
 
 %Setup of variables for use in looping for best resample and offset
-lags=-450:450;
+lags=1:100;
 Nlags=length(lags);
 
 %Empty matrix to contain correlation between data
-scores=zeros(3,Nlags);
+scores=[];
 
 %Running data to find best correlation and the indexes for offset and lag
-rpm_max = 0;
-rpm_iLag = 0;
-omega_max = 0;
-omega_iLag = 0;
-comp_max = 0
-comp_iLag = 0
+score_max = 0;
+Lags = [];
 
 %Looping to find correlation at varying offsets and lags
 ft_length = length(c_ty);
@@ -151,34 +147,21 @@ rpm_resamp = interp1(1:rpm_length,c_rpm,linspace(1,rpm_length,ft_length))';
 
 for iLags=1:Nlags
     for jLags=1:Nlags
-        
-        score_omega = align_score(omega_resamp,c_ty,lags(iLags));
-        score_rpm = align_score(rpm_resamp,c_ty,lags(iLags));
-        score_compare = align_score(rpm_resamp,omega_resamp,lags(iLags));
-        
-        scores(1,iLags) = score_omega; %Score for the correlation between FT sensor and pixhawk plot
-        scores(2,iLags) = score_rpm; %Score for the correlation between FT sensor and tachometer
-        scores(3,iLags) = score_compare; %Score for the correlation between PixHawk and tachometer
-        
-        if score_omega > omega_max
-            omega_max = score_omega;
-            omega_iLag = iLags;
-        end
-        
-        if score_rpm > rpm_max
-            rpm_max = score_rpm;
-            rpm_iLag = iLags;
-        end
-        
-        if score_compare > comp_max
-            comp_max = score_compare;
-            comp_iLag = iLags;
+        for kLags=1:Nlags
+            
+            score = align_score(omega_resamp,rpm_resamp,c_ty,lags(iLags),lags(jLags),lags(kLags));
+            scores = [scores,score];
+            
+            if score > score_max
+                score_max = score;
+                Lags = [iLags,jLags,kLags]; % omega , rpm , FT
+            end
         end
     end
 end
 %Processing the output of the looping
-[rpm_offset,omega_offset,comp_offset] = surf_scores(scores,rpm_iLag,omega_iLag,comp_iLag,lags);
-check_alignment(omega_resamp,rpm_resamp,c_ty,rpm_offset,omega_offset)
+[rpm_offset,omega_offset,ty_offset] = surf_scores(scores,Lags,lags);
+check_alignment(omega_resamp,rpm_resamp,c_ty,Lags)
 
 
 
@@ -192,10 +175,18 @@ sMin=min(s);
 s_conditioned=(s-sMin)/(sMax-sMin);
 
 %Function that offsets the dataset and then calculates the correlation 
-function score=align_score(s1_resampled,s2,lag)
-[s1_lag,s2_lag] = lag_signals(s1_resampled,s2,lag);
+function score=align_score(omega_resamp,rpm_resamp,c_ty,iLag,jLag,kLag)
+lag_set = [iLag,jLag,kLag];
+[ft_lag,omega_lag,rpm_lag] = lag_sets(omega_resamp,rpm_resamp,c_ty,lag_set);
 
-score = correlation(s1_lag,s2_lag);
+score = correlation(ft_lag,omega_lag,rpm_lag);
+
+function [ft_lag,omega_lag,rpm_lag] = lag_sets(omega_resamp,rpm_resamp,c_ty,lags)
+omega_lag = omega_resamp(lags(1)+1:end);
+rpm_lag = rpm_resamp(lags(2)+1:end);
+ft_lag = c_ty(lags(3)+1:end);
+
+
 
 %Crops the data set to the specified lag
 function [s1_lag,s2_lag] = lag_signals(s1,s2,lag)
@@ -211,9 +202,9 @@ else
 end
 
 %Finds the correlation between the data sets
-function c = correlation(s1,s2)
-N = min(length(s1),length(s2));
-c = sum(s1(1:N).*s2(1:N));
+function c = correlation(ft_lag,omega_lag,rpm_lag)
+N = min([length(ft_lag),length(omega_lag),length(rpm_lag)]);
+c = sum(ft_lag(1:N).*omega_lag(1:N).*rpm_lag(1:N));
 
 %Takes the raw datasets and offsets them by the calculated lag in
 %align_data()
@@ -311,41 +302,36 @@ out_o4 = resample(a_o4,FT_length,rotor_length);
 
 %Pulls out the greatest correlation and the corresponding index value that
 %will be used to align the raw datasets
-function [rpm_offset,omega_offset,comp_offset] = surf_scores(scores,rpm_iLag,omega_iLag,comp_iLag,lags)
+function [rpm_offset,omega_offset,ty_offset] = surf_scores(scores,Lags,lags)
 POC_plot = figure('Visible','on','Name','FT & PX4 Offset');
-len = 1:length(scores(1,:));
-plot(len,scores(1,:),len,scores(2,:))
-legend('PX4 Correlation','RPM Correlation')
+%len = 1:length(scores(1,:));
+plot(scores)
+%legend('PX4 Correlation','RPM Correlation')
 
-rpm_offset = lags(rpm_iLag);
-rpm_offset_ind = rpm_iLag;
+rpm_offset = lags(Lags(2));
+rpm_offset_ind = Lags(2);
 fprintf('RPM Offset(index): %f - Offset: %f\n',rpm_offset_ind,rpm_offset)
 
-omega_offset = lags(omega_iLag);
-omega_offset_ind = omega_iLag;
+omega_offset = lags(Lags(1));
+omega_offset_ind = Lags(1);
 fprintf('Omega Offset(index): %f - Offset: %f\n',omega_offset_ind,omega_offset)
 
-comp_offset = lags(comp_iLag);
+ty_offset = lags(Lags(3));
 
 %Plots aligned data to visually check alignment
-function check_alignment(omega_resamp,rpm_resamp,c_ty,rpm_offset,omega_offset)
-figure('Visible','on','Name','RPM Alignment')
-[rpm, ty] = lag_signals(rpm_resamp,c_ty,rpm_offset);
+function check_alignment(omega_resamp,rpm_resamp,c_ty,Lags)
+figure('Visible','on','Name','Alignment')
+[ft,omega,rpm] = lag_sets(omega_resamp,rpm_resamp,c_ty,Lags);
 plot(rpm)
 hold on
-plot(ty)
-hold off
-
-figure('Visible','on','Name','Omega Alignment')
-[omega, ty] = lag_signals(omega_resamp,c_ty,omega_offset);
 plot(omega)
 hold on
-plot(ty)
-hold off
+plot(ft)
 
-function [rpm_out,omega_out] = manual_shift(rpm,omega,ty,omega_shift,rpm_shift)
-[rpm_temp = lag_signals(rpm,ty,rpm_shift);
-omega_temp = lag_signals(omega,ty,omega_shift);
+% 
+% function [rpm_out,omega_out] = manual_shift(rpm,omega,ty,omega_shift,rpm_shift)
+% [rpm_temp = lag_signals(rpm,ty,rpm_shift);
+% omega_temp = lag_signals(omega,ty,omega_shift);
 
 
 
