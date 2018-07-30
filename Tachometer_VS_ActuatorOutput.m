@@ -8,10 +8,10 @@ omega = read_pixhawk(px4);
 [time,force_plot,torque_plot] = read_ft(ft);
 
 [sl_pfx,sl_pfy,sl_pfz,sl_ptx,sl_pty,sl_ptz,t_sl] = filter_ft(time,force_plot,torque_plot);
-
+ft = [sl_pfz;sl_ptx;sl_pty;sl_ptz];
 rpm = read_tachometer(tach);
 
-save('sensor_data','rpm','sl_pty','omega')
+save([mfilename '_sensor_data'],'rpm','omega','ft')
 
 
 %Takes the standard naming syntax and adds suffixes to open the different

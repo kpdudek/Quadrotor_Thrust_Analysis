@@ -1,13 +1,13 @@
 function Process_Tachometer_Data
-load('sensor_data.mat')
+load('Tachometer_VS_ActuatorOutput_sensor_data.mat')
 %load('num_peaks.mat')
 
-plot_data(rpm,omega,sl_pty)
+%plot_data(rpm,omega,ft(3,:))
 
 
 rpm_cut=rpm(100:263);
 omega_cut=omega(4,1000:2695);
-test_linear(omega_cut,rpm_cut)
+%test_linear(omega_cut,rpm_cut)
 
 
 %%%  Values for the number of peaks to crop after for the indicator
@@ -15,13 +15,18 @@ test_linear(omega_cut,rpm_cut)
 r = 5; %RPM
 o = 5; %Omega plot (PX4)
 t = 5; %Torque
-[omega_init,rpm_init,ty_init,omega_locs,rpm_locs,ty_locs] = find_peaks(omega(2,:),rpm,sl_pty,r,o,t);
+[omega_init,rpm_init,ty_init,omega_locs,rpm_locs,ty_locs] = find_peaks(omega(2,:),rpm,ft(3,:),r,o,t);
 
 shift_omega = 0;
 shift_rpm = 0;
-[rpm_offset,omega_offset] = align_data(rpm_init,omega_init,ty_init,shift_omega,shift_rpm);
+%[rpm_offset,omega_offset,ty_offset] = align_data(rpm_init,omega_init,ty_init,shift_omega,shift_rpm);
 
-% manual_shift()
+%save('offsets','rpm_offset','omega_offset','ty_offset')
+load('offsets.mat')
+
+[a_FT,a_Omega,a_RPM] = aligned_data(ft,omega,rpm,rpm_offset,omega_offset,ty_offset,omega_locs,rpm_locs,ty_locs,r,o,t);
+
+% manual_shift(rpm,omega,sl_pty)
 
 %save('num_peaks','r','o','t')
 
@@ -117,14 +122,14 @@ rpm_init = rpm(1:(rpm_locs(r)+4));
 
 %Align the rpm dataset and the pixhawk dataset to the FT set. Since the FT
 %set is the highest samplerate, the RPM/PX4 have to be resampled
-function [rpm_offset,omega_offset] = align_data(rpm,omega,ty,shift_omega,shift_rpm)
+function [rpm_offset,omega_offset,ty_offset] = align_data(rpm,omega,ty,shift_omega,shift_rpm)
 %Beginning of the signal analysis
 c_rpm = condition(rpm);
 c_omega = condition(omega);
 c_ty = condition(ty);
 
 %Setup of variables for use in looping for best resample and offset
-lags=1:100;
+lags=1:3:300;
 Nlags=length(lags);
 
 %Empty matrix to contain correlation between data
@@ -161,11 +166,7 @@ for iLags=1:Nlags
 end
 %Processing the output of the looping
 [rpm_offset,omega_offset,ty_offset] = surf_scores(scores,Lags,lags);
-check_alignment(omega_resamp,rpm_resamp,c_ty,Lags)
-
-
-
-
+check_alignment(omega_resamp,rpm_resamp,c_ty,rpm_offset,omega_offset,ty_offset)
 
 %Conditions the data to a 0 though 1 scale
 function s_conditioned=condition(s)
@@ -185,8 +186,6 @@ function [ft_lag,omega_lag,rpm_lag] = lag_sets(omega_resamp,rpm_resamp,c_ty,lags
 omega_lag = omega_resamp(lags(1)+1:end);
 rpm_lag = rpm_resamp(lags(2)+1:end);
 ft_lag = c_ty(lags(3)+1:end);
-
-
 
 %Crops the data set to the specified lag
 function [s1_lag,s2_lag] = lag_signals(s1,s2,lag)
@@ -208,105 +207,56 @@ c = sum(ft_lag(1:N).*omega_lag(1:N).*rpm_lag(1:N));
 
 %Takes the raw datasets and offsets them by the calculated lag in
 %align_data()
-function [a_FT,a_Omega,a_RPM] = aligned_data(ft,omega,rpm,rpm_offset,omega_offset,omega_locs,rpm_locs,ty_locs,r,o,t)
+function [a_FT,a_Omega,a_RPM] = aligned_data(ft,omega,rpm,rpm_offset,omega_offset,ty_offset,omega_locs,rpm_locs,ty_locs,r,o,t)
+ft_length = length(ft(1,:));
+omega_length = length(omega(1,:));
+rpm_length = length(rpm);
 
-%determine which dataset starts first
-if (rpm_offset > 0) && (omega_offset > 0) && (comp_offset > 0) %ggg
-    %rpm first
-elseif (rpm_offset < 0) && (omega_offset < 0) && (comp_offset < 0) %lll
-    %ATI first
-elseif (rpm_offset > 0) && (omega_offset < 0) && (comp_offset > 0) %glg
-    %rpm first
-elseif (rpm_offset > 0) && (omega_offset < 0) && (comp_offset < 0) %gll
-    %rpm first
-elseif (rpm_offset < 0) && (omega_offset > 0) && (comp_offset > 0) %lgg
-    %omega first
-elseif (rpm_offset < 0) && (omega_offset < 0) && (comp_offset > 0) %llg
-    %ATI first
-elseif (rpm_offset > 0) && (omega_offset > 0) && (comp_offset < 0) %ggl
-    %omega first
-elseif (rpm_offset < 0) && (omega_offset > 0) && (comp_offset > 0) %lgg
-    %omega first
-elseif (rpm_offset < 0) && (omega_offset > 0) && (comp_offset < 0) %lgl
-    %omega first
+omega_resamp = [];
+for i = 1:4
+    omega_resamp = [omega_resamp;interp1(1:omega_length,omega(i,:),linspace(1,omega_length,ft_length))];
 end
+rpm_resamp = interp1(1:rpm_length,rpm,linspace(1,rpm_length,ft_length));
+
+a_ft = ft(:,ty_offset+1+ty_locs(t):end);
+a_omega = omega_resamp(:,omega_offset+1+ty_locs(t):end);
+a_rpm = rpm_resamp(rpm_offset+1+ty_locs(t):end);
+
+figure()
+plot(condition(a_ft(1,:)))
+hold on
+plot(condition(a_omega(1,:)))
+hold on
+plot(condition(a_rpm))
 
 
+% [locs1,locs2] = end_peaks(a_o2,a_ty);
+% 
+% a_o1 = a_o1(1:locs1(end)+50);
+% a_o2 = a_o2(1:locs1(end)+50);
+% a_o3 = a_o3(1:locs1(end)+50);
+% a_o4 = a_o4(1:locs1(end)+50);
+% a_fz = a_fz(1:locs2(end)+50);
+% a_tx = a_tx(1:locs2(end)+50);
+% a_ty = a_ty(1:locs2(end)+50);
+% a_tz = a_tz(1:locs2(end)+50);
+% 
+% FT_length = length(a_fz);
+% rotor_length = length(a_o1);
+% out_o1 = resample(a_o1,FT_length,rotor_length);
+% out_o2 = resample(a_o2,FT_length,rotor_length);
+% out_o3 = resample(a_o3,FT_length,rotor_length);
+% out_o4 = resample(a_o4,FT_length,rotor_length);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-FT_length = length(ffz);
-rotor_length = length(o1);
-so1 = resample(o1,FT_length,rotor_length);
-so2 = resample(o2,FT_length,rotor_length);
-so3 = resample(o3,FT_length,rotor_length);
-so4 = resample(o4,FT_length,rotor_length);
-
-if offset > 0
-    a_fz = ffz((offset+1)+(locs2(3)+300):end);
-    a_tx = ftx(offset+1+(locs2(3)+300):end);
-    a_ty = fty(offset+1+(locs2(3)+300):end);
-    a_tz = ftz(offset+1+(locs2(3)+300):end);
-    a_o1 = so1(1+(locs2(3)+300):end);
-    a_o2 = so2(1+(locs2(3)+300):end);
-    a_o3 = so3(1+(locs2(3)+300):end);
-    a_o4 = so4(1+(locs2(3)+300):end);
-elseif offset < 0
-    a_fz = ffz(1+(locs2(3)+300):end);
-    a_tx = ftx(1+(locs2(3)+300):end);
-    a_ty = fty(1+(locs2(3)+300):end);
-    a_tz = ftz(1+(locs2(3)+300):end);
-    a_o1 = so1((-offset+1)+(locs2(3)+300):end);
-    a_o2 = so2((-offset+1)+(locs2(3)+300):end);
-    a_o3 = so3((-offset+1)+(locs2(3)+300):end);
-    a_o4 = so4((-offset+1)+(locs2(3)+300):end);
-else
-    a_fz = ffz((locs2(3)+300):end);
-    a_tx = ftx((locs2(3)+300):end);
-    a_ty = fty((locs2(3)+300):end);
-    a_tz = ftz((locs2(3)+300):end);
-    a_o1 = so1((locs2(3)+300):end);
-    a_o2 = so2((locs2(3)+300):end);
-    a_o3 = so3((locs2(3)+300):end);
-    a_o4 = so4((locs2(3)+300):end);
-end
-
-[locs1,locs2] = end_peaks(a_o2,a_ty);
-
-a_o1 = a_o1(1:locs1(end)+50);
-a_o2 = a_o2(1:locs1(end)+50);
-a_o3 = a_o3(1:locs1(end)+50);
-a_o4 = a_o4(1:locs1(end)+50);
-a_fz = a_fz(1:locs2(end)+50);
-a_tx = a_tx(1:locs2(end)+50);
-a_ty = a_ty(1:locs2(end)+50);
-a_tz = a_tz(1:locs2(end)+50);
-
-FT_length = length(a_fz);
-rotor_length = length(a_o1);
-out_o1 = resample(a_o1,FT_length,rotor_length);
-out_o2 = resample(a_o2,FT_length,rotor_length);
-out_o3 = resample(a_o3,FT_length,rotor_length);
-out_o4 = resample(a_o4,FT_length,rotor_length);
+a_FT = 0;
+a_Omega = 0;
+a_RPM = 0;
 
 %Pulls out the greatest correlation and the corresponding index value that
 %will be used to align the raw datasets
 function [rpm_offset,omega_offset,ty_offset] = surf_scores(scores,Lags,lags)
 POC_plot = figure('Visible','on','Name','FT & PX4 Offset');
-%len = 1:length(scores(1,:));
 plot(scores)
-%legend('PX4 Correlation','RPM Correlation')
 
 rpm_offset = lags(Lags(2));
 rpm_offset_ind = Lags(2);
@@ -317,10 +267,13 @@ omega_offset_ind = Lags(1);
 fprintf('Omega Offset(index): %f - Offset: %f\n',omega_offset_ind,omega_offset)
 
 ty_offset = lags(Lags(3));
+ty_offset_ind = Lags(3);
+fprintf('FT sensor Offset(index): %f - Offset: %f\n',ty_offset_ind,ty_offset)
 
 %Plots aligned data to visually check alignment
-function check_alignment(omega_resamp,rpm_resamp,c_ty,Lags)
+function check_alignment(omega_resamp,rpm_resamp,c_ty,rpm_offset,omega_offset,ty_offset)
 figure('Visible','on','Name','Alignment')
+Lags = [omega_offset,rpm_offset,ty_offset];
 [ft,omega,rpm] = lag_sets(omega_resamp,rpm_resamp,c_ty,Lags);
 plot(rpm)
 hold on
