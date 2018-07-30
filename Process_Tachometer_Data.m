@@ -14,13 +14,13 @@ t = 5; %Torque
 [omega_init,rpm_init,ty_init,omega_locs,rpm_locs,ty_locs] = find_peaks(omega(2,:),rpm,ft(3,:),r,o,t);
 
 
-%[rpm_offset,omega_offset,ty_offset] = align_data(rpm_init,omega_init,ty_init,shift_omega,shift_rpm);
-%save('offsets','rpm_offset','omega_offset','ty_offset')
-load('offsets.mat')
+[rpm_offset,omega_offset,ty_offset] = align_data(rpm_init,omega_init,ty_init);
+save('offsets','rpm_offset','omega_offset','ty_offset')
+%load('offsets.mat')
 
-omega_shift = 1300;
+omega_shift = 0;
 rpm_shift = 0;
-ty_shift = 1300;
+ty_shift = 0;
 [rpm_offset,omega_offset,ty_offset] = manual_shift(rpm,omega(2,:),ft(3,:),omega_shift,rpm_shift,ty_shift,rpm_offset,omega_offset,ty_offset);
 
 
@@ -72,8 +72,7 @@ t = 1:len_omega;
 % figure('Name','RPM Scaling')
 % plot(t,omega*6.7857,t,rpm)
 % ylabel('Note: pixhawk reading is manually scaled')
-% figure('Name','RPM Scaling Scatter')
-
+figure('Name','RPM Scaling Scatter')
 mdl=fitlm(omega,rpm);
 plot(mdl)
 q=table2array(mdl.Coefficients(1,'Estimate'));
@@ -113,20 +112,20 @@ hold on
 [pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',8600,'MinPeakDistance',2);
 plot(ax_s3,t3(rpm_locs),pks3,'ko')
 
-omega_init = omega(1:(omega_locs(o)+40));
-ty_init = ty(1:(ty_locs(t)+200));
-rpm_init = rpm(1:(rpm_locs(r)+4));
+omega_init = omega(1:(omega_locs(o)+60));
+ty_init = ty(1:(ty_locs(t)+250));
+rpm_init = rpm(1:(rpm_locs(r)+5));
 
 %Align the rpm dataset and the pixhawk dataset to the FT set. Since the FT
 %set is the highest samplerate, the RPM/PX4 have to be resampled
-function [rpm_offset,omega_offset,ty_offset] = align_data(rpm,omega,ty,shift_omega,shift_rpm)
+function [rpm_offset,omega_offset,ty_offset] = align_data(rpm,omega,ty)
 %Beginning of the signal analysis
 c_rpm = condition(rpm);
 c_omega = condition(omega);
 c_ty = condition(ty);
 
 %Setup of variables for use in looping for best resample and offset
-lags=1:3:300;
+lags=1:25:1000;
 Nlags=length(lags);
 
 %Empty matrix to contain correlation between data
@@ -137,15 +136,9 @@ score_max = 0;
 Lags = [];
 
 %Looping to find correlation at varying offsets and lags
-ft_length = length(c_ty);
-rotor_length = length(c_omega);
-rpm_length = length(c_rpm);
-
-
-omega_resamp = interp1(1:rotor_length,c_omega,linspace(1,rotor_length,ft_length))';
-rpm_resamp = interp1(1:rpm_length,c_rpm,linspace(1,rpm_length,ft_length))';
-% omega_resamp = resample(c_omega,ft_length,rotor_length);
-% rpm_resamp = resample(c_rpm,ft_length,rpm_length);
+[omega_resamp,rpm_resamp] = resamp(c_ty,c_omega,c_rpm);
+omega_resamp = omega_resamp';
+rpm_resamp = rpm_resamp';
 
 for iLags=1:Nlags
     for jLags=1:Nlags
@@ -207,38 +200,20 @@ c = sum(ft_lag(1:N).*omega_lag(1:N).*rpm_lag(1:N));
 function [a_FT,a_Omega,a_RPM] = aligned_data(ft,omega,rpm,rpm_offset,omega_offset,ty_offset,omega_locs,rpm_locs,ty_locs,r,o,t)
 [omega_resamp,rpm_resamp] = resamp(ft,omega,rpm);
 
-a_ft = ft(:,ty_offset+1+ty_locs(t):end);
-a_omega = omega_resamp(:,omega_offset+1+ty_locs(t):end);
-a_rpm = rpm_resamp(rpm_offset+1+ty_locs(t):end);
+a_ft = ft(:,ty_offset+1:end);
+a_omega = omega_resamp(:,omega_offset+1:end);
+a_rpm = rpm_resamp(rpm_offset+1:end);
 
 [omega_resamp,rpm_resamp] = resamp(a_ft,a_omega,a_rpm);
 
 
-figure()
+figure('Name','Aligned Data')
 plot(condition(a_ft(3,:)))
 hold on
 plot(condition(omega_resamp(2,:)))
 hold on
 plot(condition(rpm_resamp))
 
-
-% [locs1,locs2] = end_peaks(a_o2,a_ty);
-% 
-% a_o1 = a_o1(1:locs1(end)+50);
-% a_o2 = a_o2(1:locs1(end)+50);
-% a_o3 = a_o3(1:locs1(end)+50);
-% a_o4 = a_o4(1:locs1(end)+50);
-% a_fz = a_fz(1:locs2(end)+50);
-% a_tx = a_tx(1:locs2(end)+50);
-% a_ty = a_ty(1:locs2(end)+50);
-% a_tz = a_tz(1:locs2(end)+50);
-% 
-% FT_length = length(a_fz);
-% rotor_length = length(a_o1);
-% out_o1 = resample(a_o1,FT_length,rotor_length);
-% out_o2 = resample(a_o2,FT_length,rotor_length);
-% out_o3 = resample(a_o3,FT_length,rotor_length);
-% out_o4 = resample(a_o4,FT_length,rotor_length);
 
 a_FT = a_ft;
 a_Omega = omega_resamp;
@@ -285,10 +260,8 @@ rpm_temp = rpm_resamp(rpm_offset+1:end);
 omega_temp = omega_resamp(omega_offset+1:end);
 ty_temp = ty(ty_offset+1:end);
 
-% Lags = [omega_offset,rpm_offset,ty_offset];
-% [ft,omega,rpm] = lag_sets(omega_temp,rpm_temp,ty_temp,Lags);
 
-figure()
+figure('Name','Manual Shift')
 plot(condition(ty_temp))
 hold on
 plot(condition(omega_temp))
@@ -300,14 +273,14 @@ omega_out = omega_offset;
 ty_out = ty_offset;
 
 function [omega_resamp,rpm_resamp] = resamp(ft,omega,rpm)
-ft_length = length(ft(1,:));
-omega_length = length(omega(1,:));
+ft_length = length(ft);
+omega_length = length(omega);
 rpm_length = length(rpm);
 
 rpm_resamp = interp1(1:rpm_length,rpm,linspace(1,rpm_length,ft_length));
 
 [r,c] = size(omega);
-if r > 1
+if r == 4
     omega_resamp = [];
     for i = 1:4
         omega_resamp = [omega_resamp;interp1(1:omega_length,omega(i,:),linspace(1,omega_length,ft_length))];
