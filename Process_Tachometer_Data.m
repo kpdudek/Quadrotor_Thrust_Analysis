@@ -2,8 +2,13 @@ function Process_Tachometer_Data
 load('Tachometer_VS_ActuatorOutput_sensor_data.mat')
 %load('num_peaks.mat')
 
-%plot_data(rpm,omega,ft(3,:))
-
+% Resample datasets so they are all at the sample rate of the FT sensor and
+% then plot the results
+% FT Sensor = 126 Hz
+% PX4 = 10 Hz
+% Tachometer = 1 Hz
+[omega_resamp,rpm_resamp] = resample_sets(omega(2,:),rpm);
+%   plot_data(rpm_resamp,omega_resamp,ft(3,:))
 
 
 %%%  Values for the number of peaks to crop after for the indicator
@@ -11,7 +16,7 @@ load('Tachometer_VS_ActuatorOutput_sensor_data.mat')
 r = 5; %RPM
 o = 5; %Omega plot (PX4)
 t = 5; %Torque
-[omega_init,rpm_init,ty_init,omega_locs,rpm_locs,ty_locs] = find_peaks(omega(2,:),rpm,ft(3,:),r,o,t);
+[omega_init,rpm_init,ty_init,omega_locs,rpm_locs,ty_locs] = find_peaks(omega_resamp,rpm_resamp,ft(3,:),r,o,t);
 
 
 [rpm_offset,omega_offset,ty_offset] = align_data(rpm_init,omega_init,ty_init);
@@ -33,6 +38,15 @@ test_linear(a_Omega(2,:),a_RPM)
 %save('num_peaks','r','o','t')
 
 
+function [omega_resamp,rpm_resamp] = resample_sets(omega,rpm)
+rpm_length = length(rpm);
+omega_length = length(omega);
+
+rpm_rate = rpm_length * 125;
+omega_rate = ceil(omega_length * 12.5);
+
+rpm_resamp = interp1(1:rpm_length,rpm,linspace(1,rpm_length,rpm_rate));
+omega_resamp = interp1(1:omega_length,omega,linspace(1,omega_length,omega_rate));
 
 
 %Function that plots the raw data
@@ -93,7 +107,7 @@ ax_s1 = axes(tab_s1);
 t1 = 1:length(omega);
 plot(ax_s1,t1,omega)
 hold on
-[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1350,'MinPeakDistance',35);
+[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1350,'MinPeakDistance',350);
 plot(ax_s1,t1(omega_locs),pks1,'ko')
 
 tab_s2 = uitab('Title','Filtered Force Y');
@@ -109,12 +123,12 @@ ax_s3 = axes(tab_s3);
 t3 = 1:length(rpm);
 plot(ax_s3,t3,rpm)
 hold on
-[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',8600,'MinPeakDistance',2);
+[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',8600,'MinPeakDistance',350);
 plot(ax_s3,t3(rpm_locs),pks3,'ko')
 
-omega_init = omega(1:(omega_locs(o)+60));
-ty_init = ty(1:(ty_locs(t)+250));
-rpm_init = rpm(1:(rpm_locs(r)+5));
+omega_init = omega(1:(omega_locs(o)+450));
+ty_init = ty(1:(ty_locs(t)+300));
+rpm_init = rpm(1:(rpm_locs(r)+250));
 
 %Align the rpm dataset and the pixhawk dataset to the FT set. Since the FT
 %set is the highest samplerate, the RPM/PX4 have to be resampled
@@ -125,7 +139,7 @@ c_omega = condition(omega);
 c_ty = condition(ty);
 
 %Setup of variables for use in looping for best resample and offset
-lags=1:25:1000;
+lags=1:50:2000;
 Nlags=length(lags);
 
 %Empty matrix to contain correlation between data
@@ -136,15 +150,15 @@ score_max = 0;
 Lags = [];
 
 %Looping to find correlation at varying offsets and lags
-[omega_resamp,rpm_resamp] = resamp(c_ty,c_omega,c_rpm);
-omega_resamp = omega_resamp';
-rpm_resamp = rpm_resamp';
+% [omega_resamp,rpm_resamp] = resamp(c_ty,c_omega,c_rpm);
+% omega_resamp = omega_resamp';
+% rpm_resamp = rpm_resamp';
 
 for iLags=1:Nlags
     for jLags=1:Nlags
         for kLags=1:Nlags
             
-            score = align_score(omega_resamp,rpm_resamp,c_ty,lags(iLags),lags(jLags),lags(kLags));
+            score = align_score(c_omega,c_rpm,c_ty,lags(iLags),lags(jLags),lags(kLags));
             scores = [scores,score];
             
             if score > score_max
@@ -156,7 +170,7 @@ for iLags=1:Nlags
 end
 %Processing the output of the looping
 [rpm_offset,omega_offset,ty_offset] = surf_scores(scores,Lags,lags);
-check_alignment(omega_resamp,rpm_resamp,c_ty,rpm_offset,omega_offset,ty_offset)
+check_alignment(c_omega,c_rpm,c_ty,rpm_offset,omega_offset,ty_offset)
 
 %Conditions the data to a 0 though 1 scale
 function s_conditioned=condition(s)
