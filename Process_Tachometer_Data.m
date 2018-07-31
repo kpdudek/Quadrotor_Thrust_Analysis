@@ -7,7 +7,7 @@ load('Tachometer_VS_ActuatorOutput_sensor_data.mat')
 % FT Sensor = 126 Hz
 % PX4 = 10 Hz
 % Tachometer = 1 Hz
-[omega_resamp,rpm_resamp] = resample_sets(omega(2,:),rpm);
+[omega_resamp,rpm_resamp] = resample_sets(omega,rpm);
 %   plot_data(rpm_resamp,omega_resamp,ft(3,:))
 
 
@@ -16,7 +16,7 @@ load('Tachometer_VS_ActuatorOutput_sensor_data.mat')
 r = 5; %RPM
 o = 5; %Omega plot (PX4)
 t = 5; %Torque
-[omega_init,rpm_init,ty_init,omega_locs,rpm_locs,ty_locs] = find_peaks(omega_resamp,rpm_resamp,ft(3,:),r,o,t);
+[omega_init,rpm_init,ty_init,omega_locs,rpm_locs,ty_locs] = find_peaks(omega_resamp(2,:),rpm_resamp,ft(3,:),r,o,t);
 
 
 [rpm_offset,omega_offset,ty_offset] = align_data(rpm_init,omega_init,ty_init);
@@ -26,18 +26,18 @@ save('offsets','rpm_offset','omega_offset','ty_offset')
 omega_shift = 0;
 rpm_shift = 0;
 ty_shift = 0;
-[rpm_offset,omega_offset,ty_offset] = manual_shift(rpm,omega(2,:),ft(3,:),omega_shift,rpm_shift,ty_shift,rpm_offset,omega_offset,ty_offset);
+[rpm_offset,omega_offset,ty_offset] = manual_shift(rpm_resamp,omega_resamp(2,:),ft(3,:),omega_shift,rpm_shift,ty_shift,rpm_offset,omega_offset,ty_offset);
 
 
 
-
-[a_FT,a_Omega,a_RPM] = aligned_data(ft,omega,rpm,rpm_offset,omega_offset,ty_offset,omega_locs,rpm_locs,ty_locs,r,o,t);
+[a_FT,a_Omega,a_RPM] = aligned_data(ft,omega_resamp,rpm_resamp,rpm_offset,omega_offset,ty_offset,omega_locs,rpm_locs,ty_locs,r,o,t);
 test_linear(a_Omega(2,:),a_RPM)
 
 
 %save('num_peaks','r','o','t')
 
 
+% Resample the PX4 data set and the tachometer 
 function [omega_resamp,rpm_resamp] = resample_sets(omega,rpm)
 rpm_length = length(rpm);
 omega_length = length(omega);
@@ -46,8 +46,11 @@ rpm_rate = rpm_length * 125;
 omega_rate = ceil(omega_length * 12.5);
 
 rpm_resamp = interp1(1:rpm_length,rpm,linspace(1,rpm_length,rpm_rate));
-omega_resamp = interp1(1:omega_length,omega,linspace(1,omega_length,omega_rate));
 
+omega_resamp = [];
+for i = 1:4
+    omega_resamp = [omega_resamp;interp1(1:omega_length,omega(i,:),linspace(1,omega_length,omega_rate))];
+end
 
 %Function that plots the raw data
 function plot_data(rpm,omega,ty)
