@@ -1,18 +1,14 @@
 function Single_Motor_Arduino
-file = 'Single_Motor_2018_07_31_01';
+file = 'Single_Motor_2018_08_01_03';
 [ft,tach] = string_form(file);
-% 
-% [time,force_plot,torque_plot] = read_ft(ft);
-% [sl_pfx,sl_pfy,sl_pfz,sl_ptx,sl_pty,sl_ptz,t_sl] = filter_ft(time,force_plot,torque_plot);
-% rpm = read_tachometer(tach);
-% save('data','sl_pfz','rpm')
 
+%[fz,rpm] = read_files(ft,tach);
 load('data.mat')
 
 plot_data(rpm,sl_pfz)
 
-fz_isolated = sl_pfz(7692:27750);
-rpm_isolated = rpm(56:215);
+fz_isolated = sl_pfz(2500:23820);
+rpm_isolated = rpm(11:181);
 
 len_fz = length(fz_isolated);
 len_rpm = length(rpm_isolated);
@@ -35,6 +31,13 @@ legend('predicted','true')
 function [ft,tach] = string_form(file)
 ft = sprintf('%s_FT',file);
 tach = sprintf('%s_Tacho.csv',file);
+
+
+function [sl_pfz,rpm] = read_files(ft,tach)
+[time,force_plot,torque_plot] = read_ft(ft);
+[sl_pfx,sl_pfy,sl_pfz,sl_ptx,sl_pty,sl_ptz,t_sl] = filter_ft(time,force_plot,torque_plot);
+rpm = read_tachometer(tach);
+save('data','sl_pfz','rpm')
 
 
 function [time,force_plot,torque_plot] = read_ft(filename)

@@ -8,31 +8,48 @@ load('Tachometer_VS_ActuatorOutput_sensor_data.mat')
 % PX4 = 10 Hz
 % Tachometer = 1 Hz
 [omega_resamp,rpm_resamp] = resample_sets(omega,rpm);
-%   plot_data(rpm_resamp,omega_resamp,ft(3,:))
+plot_data(rpm_resamp,omega_resamp,ft(3,:))
 
 
-%%%  Values for the number of peaks to crop after for the indicator
-%%%  portions
+%%%  Values for the number of peaks to isolate, number of peaks is the
+%%%  number of RC inputs during test run
 r = 5; %RPM
 o = 5; %Omega plot (PX4)
 t = 5; %Torque
+% Find the specified number of peaks and then crop the rest of the dataset
+% after them
 [omega_init,rpm_init,ty_init,omega_locs,rpm_locs,ty_locs] = find_peaks(omega_resamp(2,:),rpm_resamp,ft(3,:),r,o,t);
 
 
+% Determine which sensor began recording first, then crop the other
+% datasets so the timescales align
+% Outputs the number of datapoints that need to be cropped from the
+% beginning of each dataset
 [rpm_offset,omega_offset,ty_offset] = align_data(rpm_init,omega_init,ty_init);
 save('offsets','rpm_offset','omega_offset','ty_offset')
 %load('offsets.mat')
 
+
+% In case the auto-alignment is off, specify the number of data points to
+% be added to the existing offset values
 omega_shift = 0;
 rpm_shift = 0;
 ty_shift = 0;
 [rpm_offset,omega_offset,ty_offset] = manual_shift(rpm_resamp,omega_resamp(2,:),ft(3,:),omega_shift,rpm_shift,ty_shift,rpm_offset,omega_offset,ty_offset);
 
 
-
+% Take the offset values from align_data() & manual_shift() and crop the
+% Full datasets
 [a_FT,a_Omega,a_RPM] = aligned_data(ft,omega_resamp,rpm_resamp,rpm_offset,omega_offset,ty_offset,omega_locs,rpm_locs,ty_locs,r,o,t);
-test_linear(a_Omega(2,:),a_RPM)
 
+% Plot the pixhawk actuator outputs versus the readings from the
+% tachometer, apply a linear fit and create an equation for rpm as a
+% function of omega (actuator output)
+[p,q] = test_linear(a_Omega(2,:),a_RPM);
+
+% Use the equation from test_linear() to convert the pixhawk actuator
+% output plots to true rpm values
+true_rpm = px4_to_rpm(a_Omega,p,q);
 
 %save('num_peaks','r','o','t')
 
@@ -58,10 +75,11 @@ len_rpm = 1:length(rpm);
 len_omega = 1:length(omega(1,:));
 len_ft = 1:length(ty);
 
-figure('Visible','on','Name','RPM')
-plot(len_rpm,rpm)
+figure('Visible','on','Name','Sensor Data')
+rpmtab = uitab('Title','RPM');
+rpmax = axes(rpmtab);
+plot(rpmax,len_rpm,rpm)
 
-figure('Visible','on','Name','Omega')
 o1 = uitab('Title','Motor 1');
 o1ax = axes(o1);
 plot(o1ax,len_omega,omega(1,:))
@@ -78,12 +96,13 @@ all = uitab('Title','All');
 allax = axes(all);
 plot(allax,len_omega,omega(1,:),len_omega,omega(2,:),len_omega,omega(3,:),len_omega,omega(4,:))
 
-figure('Visible','on','Name','Ty')
-plot(len_ft,ty)
+ft = uitab('Title','FT Sensor');
+ftax = axes(ft);
+plot(ftax,len_ft,ty)
 
 %Function that resamples the rpm data, and then scales the corresponding
 %omega plot to check if its linear
-function test_linear(omega,rpm)
+function [p,q] = test_linear(omega,rpm)
 len_omega = length(omega);
 t = 1:len_omega;
 % figure('Name','RPM Scaling')
@@ -311,6 +330,8 @@ hold on
 plot(ft)
 
 
+% This function takes the calculated offsets from align_data(), and adds the
+% user inputed offsets 
 function [rpm_out,omega_out,ty_out] = manual_shift(rpm,omega,ty,omega_shift,rpm_shift,ty_shift,rpm_offset,omega_offset,ty_offset)
 [omega_resamp,rpm_resamp] = resamp(ty,omega,rpm);
 
@@ -323,18 +344,19 @@ omega_temp = omega_resamp(omega_offset+1:end);
 ty_temp = ty(ty_offset+1:end);
 
 
-figure('Name','Manual Shift')
-plot(condition(ty_temp))
-hold on
-plot(condition(omega_temp))
-hold on
-plot(condition(rpm_temp))
+% figure('Name','Manual Shift')
+% plot(condition(ty_temp))
+% hold on
+% plot(condition(omega_temp))
+% hold on
+% plot(condition(rpm_temp))
 
 rpm_out = rpm_offset;
 omega_out = omega_offset;
 ty_out = ty_offset;
 
-
+% This function takes three vectors (ft,omega,rpm) and resamples omega and
+% rpm to have the same number of data points as the ft vector
 function [omega_resamp,rpm_resamp] = resamp(ft,omega,rpm)
 ft_length = length(ft);
 omega_length = length(omega);
