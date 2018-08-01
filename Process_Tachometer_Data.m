@@ -131,7 +131,7 @@ plot(ax_s3,t3(rpm_locs),pks3,'ko')
 
 omega_init = omega(1:(omega_locs(o)+450));
 ty_init = ty(1:(ty_locs(t)+300));
-rpm_init = rpm(1:(rpm_locs(r)+250));
+rpm_init = rpm(1:(rpm_locs(r)+300));
 
 %Align the rpm dataset and the pixhawk dataset to the FT set. Since the FT
 %set is the highest samplerate, the RPM/PX4 have to be resampled
@@ -189,12 +189,16 @@ lag_set = [iLag,jLag,kLag];
 
 score = correlation(ft_lag,omega_lag,rpm_lag);
 
+% Three datasets are passed to this function and a vector containing the
+% three values for the sets to be offset by. The vector of offsets must go
+% in this order: omega (PX4), rpm, FT sensor
 function [ft_lag,omega_lag,rpm_lag] = lag_sets(omega_resamp,rpm_resamp,c_ty,lags)
 omega_lag = omega_resamp(lags(1)+1:end);
 rpm_lag = rpm_resamp(lags(2)+1:end);
 ft_lag = c_ty(lags(3)+1:end);
 
-%Crops the data set to the specified lag
+%Crops the data set to the specified lag --Currently replaced by
+%lag_sets()--
 function [s1_lag,s2_lag] = lag_signals(s1,s2,lag)
 if lag>0
     s1_lag=s1;
@@ -212,17 +216,54 @@ function c = correlation(ft_lag,omega_lag,rpm_lag)
 N = min([length(ft_lag),length(omega_lag),length(rpm_lag)]);
 c = sum(ft_lag(1:N).*omega_lag(1:N).*rpm_lag(1:N));
 
+%Function that locates the peaks at the end of the data sets to use for
+%cropping
+function [omega_locs,rpm_locs,ty_locs] = end_peaks(omega,rpm,ty)
+figure('Visible','on','Name','End Peaks')
+
+tab_s1 = uitab('Title','Actuator Output 2');
+ax_s1 = axes(tab_s1);
+t1 = 1:length(omega);
+plot(ax_s1,t1,omega)
+hold on
+[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1432,'MinPeakDistance',350);
+plot(ax_s1,t1(omega_locs),pks1,'ko')
+
+tab_s2 = uitab('Title','Filtered Force Y');
+ax_s2 = axes(tab_s2);
+t2 = 1:length(ty);
+plot(ax_s2,t2,ty)
+hold on
+[pks2,ty_locs] = findpeaks(ty,'MinPeakHeight',.3,'MinPeakDistance',350);
+plot(ax_s2,t2(ty_locs),pks2,'ko')
+
+tab_s3 = uitab('Title','RPM');
+ax_s3 = axes(tab_s3);
+t3 = 1:length(rpm);
+plot(ax_s3,t3,rpm)
+hold on
+[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',9100,'MinPeakDistance',350);
+plot(ax_s3,t3(rpm_locs),pks3,'ko')
+
+
 %Takes the raw datasets and offsets them by the calculated lag in
 %align_data()
 function [a_FT,a_Omega,a_RPM] = aligned_data(ft,omega,rpm,rpm_offset,omega_offset,ty_offset,omega_locs,rpm_locs,ty_locs,r,o,t)
-[omega_resamp,rpm_resamp] = resamp(ft,omega,rpm);
+%[omega_resamp,rpm_resamp] = resamp(ft,omega,rpm);
 
-a_ft = ft(:,ty_offset+1:end);
-a_omega = omega_resamp(:,omega_offset+1:end);
-a_rpm = rpm_resamp(rpm_offset+1:end);
+a_ft = ft(:,ty_offset+1+ty_locs(t):end);
+a_omega = omega(:,omega_offset+1+ty_locs(t):end);
+a_rpm = rpm(rpm_offset+1+ty_locs(t):end);
+
+
+[omega_locs,rpm_locs,ty_locs] = end_peaks(a_omega(2,:),a_rpm,a_ft(3,:));
+
+a_ft = a_ft(:,1:ty_locs(end-4));
+a_omega = a_omega(:,1:omega_locs(end-4));
+a_rpm = a_rpm(1:rpm_locs(end-4));
+
 
 [omega_resamp,rpm_resamp] = resamp(a_ft,a_omega,a_rpm);
-
 
 figure('Name','Aligned Data')
 plot(condition(a_ft(3,:)))
@@ -231,10 +272,14 @@ plot(condition(omega_resamp(2,:)))
 hold on
 plot(condition(rpm_resamp))
 
+%TODO: outputs of this function NEED to be the same size otherwise
+%TestLinear() will break for reasons only god knows. Aparently my matrix
+%was 15.6 GB. Sure MATLAB... that makes sense
 
 a_FT = a_ft;
 a_Omega = omega_resamp;
 a_RPM = rpm_resamp;
+
 
 %Pulls out the greatest correlation and the corresponding index value that
 %will be used to align the raw datasets
@@ -288,6 +333,7 @@ plot(condition(rpm_temp))
 rpm_out = rpm_offset;
 omega_out = omega_offset;
 ty_out = ty_offset;
+
 
 function [omega_resamp,rpm_resamp] = resamp(ft,omega,rpm)
 ft_length = length(ft);

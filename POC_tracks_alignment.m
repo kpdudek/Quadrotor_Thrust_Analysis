@@ -67,6 +67,7 @@ so2 = resample(o2,FT_length,rotor_length);
 so3 = resample(o3,FT_length,rotor_length);
 so4 = resample(o4,FT_length,rotor_length);
 
+
 if offset > 0
     a_fz = ffz((offset+1)+(locs2(3)+300):end);
     a_tx = ftx(offset+1+(locs2(3)+300):end);
