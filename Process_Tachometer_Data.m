@@ -2,6 +2,8 @@ function Process_Tachometer_Data
 load('Tachometer_VS_ActuatorOutput_sensor_data.mat')
 %load('num_peaks.mat')
 
+rpm = filter_rpm(rpm);
+
 % Resample datasets so they are all at the sample rate of the FT sensor and
 % then plot the results
 % FT Sensor = 126 Hz
@@ -12,15 +14,11 @@ plot_data(rpm_resamp,omega_resamp,ft(3,:))
 
 
 
-%%%%%% TODO: Sliding window filter on the RPM dataset !!!!!
-
-
-
 %%%  Values for the number of peaks to isolate, number of peaks is the
 %%%  number of RC inputs during test run
-r = 5; %RPM
-o = 5; %Omega plot (PX4)
-t = 5; %Torque
+r = 6; %RPM
+o = 6; %Omega plot (PX4)
+t = 6; %Torque
 % Find the specified number of peaks and then crop the rest of the dataset
 % after them
 [omega_init,rpm_init,ty_init,omega_locs,rpm_locs,ty_locs] = find_peaks(omega_resamp(2,:),rpm_resamp,ft(3,:),r,o,t);
@@ -59,12 +57,26 @@ true_rpm = px4_to_rpm(a_Omega,p,q);
 %save('num_peaks','r','o','t')
 
 
+function filtered = filter_rpm(rpm)
+L = length(rpm);
+time = 1:L;
+w = 16;
+w2 = w/2;
+t_sl = time(w2+1:end-w2);
+
+%Filter Fx
+filtered = [];
+for i = w2+1:(L-w2)
+    vals = rpm(i-w2:i+w2);
+    filtered(end+1) = mean(vals);
+end
+
 % Resample the PX4 data set and the tachometer 
 function [omega_resamp,rpm_resamp] = resample_sets(omega,rpm)
 rpm_length = length(rpm);
 omega_length = length(omega);
 
-rpm_rate = rpm_length * 125;
+rpm_rate = ceil(rpm_length * 12.5);
 omega_rate = ceil(omega_length * 12.5);
 
 rpm_resamp = interp1(1:rpm_length,rpm,linspace(1,rpm_length,rpm_rate));
@@ -105,6 +117,16 @@ ft = uitab('Title','FT Sensor');
 ftax = axes(ft);
 plot(ftax,len_ft,ty)
 
+% figure('Name','Plots for poster')
+% plot(len_omega,omega(2,:))
+% xlabel('time')
+% ylabel('Motor Command')
+% 
+% figure('Name','Plt')
+% plot(len_rpm,rpm)
+% xlabel('time')
+% ylabel('RPM')
+
 %Function that resamples the rpm data, and then scales the corresponding
 %omega plot to check if its linear
 function [p,q] = test_linear(omega,rpm)
@@ -120,14 +142,21 @@ rpmMasked(abs([diff(rpm) 0])>4)=NaN;
 figure('Name','RPM Scaling Scatter')
 mdl=fitlm(omegaMasked,rpmMasked);
 plot(mdl)
+xlabel('Pixhawk Motor Command')
+ylabel('Tachometer Data')
 q=table2array(mdl.Coefficients(1,'Estimate'));
 p=table2array(mdl.Coefficients(2,'Estimate'));
+legend('Location','northwest')
+
 figure('Name','RPM After Fit')
 plot(t,omega.*p+q,'b',t,rpm,'r')
 hold on
 plot(t,omegaMasked.*p+q,'b.',t,rpmMasked,'r.')
 hold off
-legend('omega','rpm','omegaMasked','rpmMasked')
+xlabel('time')
+ylabel('RPM')
+legend('omega','rpm','omegaMasked','rpmMasked','Location','northwest')
+
 
 %%%%%    The data set is now being aligned    %%%%%
 
@@ -141,7 +170,7 @@ ax_s1 = axes(tab_s1);
 t1 = 1:length(omega);
 plot(ax_s1,t1,omega)
 hold on
-[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1350,'MinPeakDistance',350);
+[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1350,'MinPeakDistance',700);
 plot(ax_s1,t1(omega_locs),pks1,'ko')
 
 tab_s2 = uitab('Title','Filtered Force Y');
@@ -157,7 +186,7 @@ ax_s3 = axes(tab_s3);
 t3 = 1:length(rpm);
 plot(ax_s3,t3,rpm)
 hold on
-[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',8600,'MinPeakDistance',350);
+[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',9200,'MinPeakDistance',700);
 plot(ax_s3,t3(rpm_locs),pks3,'ko')
 
 omega_init = omega(1:(omega_locs(o)+450));
@@ -257,7 +286,7 @@ ax_s1 = axes(tab_s1);
 t1 = 1:length(omega);
 plot(ax_s1,t1,omega)
 hold on
-[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1432,'MinPeakDistance',350);
+[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1450,'MinPeakDistance',350);
 plot(ax_s1,t1(omega_locs),pks1,'ko')
 
 tab_s2 = uitab('Title','Filtered Force Y');
@@ -273,7 +302,7 @@ ax_s3 = axes(tab_s3);
 t3 = 1:length(rpm);
 plot(ax_s3,t3,rpm)
 hold on
-[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',9100,'MinPeakDistance',350);
+[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',9500,'MinPeakDistance',350);
 plot(ax_s3,t3(rpm_locs),pks3,'ko')
 
 
@@ -289,9 +318,9 @@ a_rpm = rpm(rpm_offset+1+ty_locs(t):end);
 
 [omega_locs,rpm_locs,ty_locs] = end_peaks(a_omega(2,:),a_rpm,a_ft(3,:));
 
-a_ft = a_ft(:,1:ty_locs(end-4));
-a_omega = a_omega(:,1:omega_locs(end-4));
-a_rpm = a_rpm(1:rpm_locs(end-4));
+a_ft = a_ft(:,1:ty_locs(end-5));
+a_omega = a_omega(:,1:omega_locs(end-5));
+a_rpm = a_rpm(1:rpm_locs(end-5));
 
 
 [omega_resamp,rpm_resamp] = resamp(a_ft,a_omega,a_rpm);
