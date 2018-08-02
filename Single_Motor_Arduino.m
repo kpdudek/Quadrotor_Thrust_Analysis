@@ -4,9 +4,10 @@ file = 'Single_Motor_2018_08_01_03';
 
 %[fz,rpm] = read_files(ft,tach);
 load('data.mat')
-
 plot_data(rpm,sl_pfz)
 
+
+% Manually align the datasets and crop
 fz_isolated = sl_pfz(2500:23820);
 rpm_isolated = rpm(11:181);
 
@@ -18,15 +19,17 @@ rpm_isolated = interp1(1:len_rpm,rpm_isolated,linspace(1,len_rpm,len_fz));
 figure('Name','Isoalted Portions')
 plot(t,condition(fz_isolated),t,condition(rpm_isolated))
 
-figure('Name','RPM Scaling Scatter')
-mdl=fitlm(rpm_isolated,fz_isolated);
-plot(mdl)
-q=table2array(mdl.Coefficients(1,'Estimate'));
-p=table2array(mdl.Coefficients(2,'Estimate'));
 
-figure('Name','RPM After Fit')
-plot(t,rpm_isolated.*p+q,t,fz_isolated)
-legend('predicted','true')
+% Solve for c_T
+ct = rpm_isolated'\fz_isolated';
+fz_estimated = rpm_isolated * ct;
+
+figure('Name','CT')
+plot(fz_isolated,'k')
+hold on
+plot(fz_estimated,'cyan')
+legend('True','Predicted')
+
 
 function [ft,tach] = string_form(file)
 ft = sprintf('%s_FT',file);
@@ -200,11 +203,15 @@ function plot_data(rpm,fz)
 len_rpm = 1:length(rpm);
 len_ft = 1:length(fz);
 
-figure('Visible','on','Name','RPM')
-plot(len_rpm,rpm)
+figure('Visible','on','Name','Sensor Data')
 
-figure('Visible','on','Name','Fz')
-plot(len_ft,fz)
+omega = uitab('Title','RPM');
+omegaax = axes(omega);
+plot(omegaax,len_rpm,rpm)
+
+ft = uitab('Title','Fz');
+ftax = axes(ft);
+plot(ftax,len_ft,fz)
 
 
 function s_conditioned=condition(s)

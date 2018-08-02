@@ -11,6 +11,11 @@ load('Tachometer_VS_ActuatorOutput_sensor_data.mat')
 plot_data(rpm_resamp,omega_resamp,ft(3,:))
 
 
+
+%%%%%% TODO: Sliding window filter on the RPM dataset !!!!!
+
+
+
 %%%  Values for the number of peaks to isolate, number of peaks is the
 %%%  number of RC inputs during test run
 r = 5; %RPM
@@ -108,14 +113,21 @@ t = 1:len_omega;
 % figure('Name','RPM Scaling')
 % plot(t,omega*6.7857,t,rpm)
 % ylabel('Note: pixhawk reading is manually scaled')
+omegaMasked=omega;
+omegaMasked(abs([diff(omega) 0])>0.5)=NaN;
+rpmMasked=rpm;
+rpmMasked(abs([diff(rpm) 0])>4)=NaN;
 figure('Name','RPM Scaling Scatter')
-mdl=fitlm(omega,rpm);
+mdl=fitlm(omegaMasked,rpmMasked);
 plot(mdl)
 q=table2array(mdl.Coefficients(1,'Estimate'));
 p=table2array(mdl.Coefficients(2,'Estimate'));
 figure('Name','RPM After Fit')
-plot(t,omega.*p+q,t,rpm)
-
+plot(t,omega.*p+q,'b',t,rpm,'r')
+hold on
+plot(t,omegaMasked.*p+q,'b.',t,rpmMasked,'r.')
+hold off
+legend('omega','rpm','omegaMasked','rpmMasked')
 
 %%%%%    The data set is now being aligned    %%%%%
 
@@ -287,9 +299,11 @@ a_rpm = a_rpm(1:rpm_locs(end-4));
 figure('Name','Aligned Data')
 plot(condition(a_ft(3,:)))
 hold on
-plot(condition(omega_resamp(2,:)))
+plot(condition(omega_resamp(2,:)),'.-')
 hold on
-plot(condition(rpm_resamp))
+plot(condition(rpm_resamp),'.-')
+
+legend('Ty','PX4','RPM')
 
 %TODO: outputs of this function NEED to be the same size otherwise
 %TestLinear() will break for reasons only god knows. Aparently my matrix
@@ -303,8 +317,8 @@ a_RPM = rpm_resamp;
 %Pulls out the greatest correlation and the corresponding index value that
 %will be used to align the raw datasets
 function [rpm_offset,omega_offset,ty_offset] = surf_scores(scores,Lags,lags)
-POC_plot = figure('Visible','on','Name','FT & PX4 Offset');
-plot(scores)
+% POC_plot = figure('Visible','on','Name','FT & PX4 Offset');
+% plot(scores)
 
 rpm_offset = lags(Lags(2));
 rpm_offset_ind = Lags(2);

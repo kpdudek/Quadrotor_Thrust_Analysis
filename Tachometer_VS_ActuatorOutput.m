@@ -1,5 +1,5 @@
 function Tachometer_VS_ActuatorOutput
-filename = 'R2_2018_07_27_manual04';
+filename = 'R2_2018_08_02_02';
 [ft,px4,tach] = string_form(filename);
 
 omega = read_pixhawk(px4);
