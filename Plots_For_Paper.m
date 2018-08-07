@@ -15,9 +15,11 @@ load('o2_ty')
 
 o2f = figure('Visible','on');
 o2a = axes(o2f);
-o2 = plot(o2a,o2);
+t = 1:length(a_o1);
+o2 = plot(o2a,t,a_o1,t,a_o2,t,a_o3,t,a_o4);
 xlabel('Time')
-ylabel('Actuator Output 2')
+ylabel('Actuator Outputs')
+legend('Motor 1','Motor 2','Motor 3','Motor 4','Location','northwest')
 
 tyf = figure('Visible','on');
 tya = axes(tyf);
@@ -28,7 +30,7 @@ tya.XAxis.Exponent = 0;
 xlabel('Time')
 ylabel('Torque (N*m)')
 
-% FT_true = [a_fz;a_tx;a_ty;a_tz];
+FT_true = [a_fz;a_tx;a_ty;a_tz];
 % 
 % for i = 1:7
 %     name = sprintf('combined_coef_%d',i);
@@ -45,10 +47,10 @@ ylabel('Torque (N*m)')
 %     legend({'T_z','\tau_x','\tau_y','\tau_z'},'Location','northwest','NumColumns',2)
 % end
 % 
-% load('indep_coef_whole')
-% figure('Visible','on','Name','indep_coef_whole')
-% plot(time,FT_true,time,T_plot,':')
-% legend({'T_z','\tau_x','\tau_y','\tau_z'},'Location','northwest','NumColumns',2)
+load('indep_coef_whole')
+figure('Visible','on','Name','indep_coef_whole')
+plot(time,FT_true,time,T_plot,':')
+legend({'T_z','\tau_x','\tau_y','\tau_z'},'Location','northwest','NumColumns',2)
 % 
 % load('combined_coef_whole')
 % figure('Visible','on','Name','combined_coef_whole')

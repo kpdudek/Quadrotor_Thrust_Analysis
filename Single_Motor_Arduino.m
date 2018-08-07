@@ -6,43 +6,27 @@ file = 'Single_Motor_2018_08_01_03';
 load('data.mat')
 plot_data(rpm,sl_pfz)
 
+rpm_start = 11;
+rpm_end = 181;
+fz_start = 2500;
+fz_end = 23820;
 
-% Manually align the datasets and crop
-fz_isolated = sl_pfz(2500:23820);
-rpm_isolated = rpm(11:181);
+[fz_isolated,rpm_isolated] = align_datasets(sl_pfz,rpm,rpm_start,rpm_end,fz_start,fz_end);
 
-len_fz = length(fz_isolated);
-len_rpm = length(rpm_isolated);
-t = 1:len_fz;
-rpm_isolated = interp1(1:len_rpm,rpm_isolated,linspace(1,len_rpm,len_fz));
+ct = matrix_average_cT(rpm_isolated,fz_isolated);
 
-figure('Name','Isoalted Portions')
-plot(t,condition(fz_isolated),t,condition(rpm_isolated))
+ct_vec = discreet_ct(rpm_isolated,fz_isolated);
 
 
-% Solve for c_T
-ct = rpm_isolated'\fz_isolated';
-fz_estimated = rpm_isolated * ct;
 
-figure('Name','CT')
-plot(fz_isolated,'k')
-hold on
-plot(fz_estimated,'cyan')
-legend('True','Predicted')
-
-
+% Take the generic filename and append the suffixes used to denote the
+% separate sensor files
 function [ft,tach] = string_form(file)
 ft = sprintf('%s_FT',file);
 tach = sprintf('%s_Tacho.csv',file);
 
-
-function [sl_pfz,rpm] = read_files(ft,tach)
-[time,force_plot,torque_plot] = read_ft(ft);
-[sl_pfx,sl_pfy,sl_pfz,sl_ptx,sl_pty,sl_ptz,t_sl] = filter_ft(time,force_plot,torque_plot);
-rpm = read_tachometer(tach);
-save('data','sl_pfz','rpm')
-
-
+% Open the .csv file from the FT sensor, parse, and store the values in two
+% matricies, one for forces, one for torques and a time vector
 function [time,force_plot,torque_plot] = read_ft(filename)
 fid = fopen(filename,'r');
 
@@ -122,7 +106,7 @@ elap_time = time_cap(end) - time_cap(1); %elapsed time
 time_split = elap_time / length(time_cap); %time between data points
 time = 0:time_split:elap_time; %time vector from 0-->total time counting by split time
 
-
+% Apply a sliding window filter to the FT data sets
 function [sl_pfx,sl_pfy,sl_pfz,sl_ptx,sl_pty,sl_ptz,t_sl] = filter_ft(time,force_plot,torque_plot)
 L = length(force_plot(:,1));
 w = 26;
@@ -177,7 +161,7 @@ for i = w2+1:(L-w2)
     sl_ptz(end+1) = mean(vals);
 end
 
-
+% Open the tachometer's .csv file and store the data in a vector
 function rpm = read_tachometer(file)
 fid = fopen(file,'r');
 rpm = [];
@@ -198,7 +182,17 @@ while ~feof(fid)
 end
 fclose(fid);
 
+% Call the functions that read the sensor files, and output the data to be
+% used later on
+function [sl_pfz,rpm] = read_files(ft,tach)
+[time,force_plot,torque_plot] = read_ft(ft);
+[sl_pfx,sl_pfy,sl_pfz,sl_ptx,sl_pty,sl_ptz,t_sl] = filter_ft(time,force_plot,torque_plot);
+rpm = read_tachometer(tach);
+save('data','sl_pfz','rpm')
 
+
+                      %%%-  LATER ON  -%%%
+% Take the raw data and plot against time
 function plot_data(rpm,fz)
 len_rpm = 1:length(rpm);
 len_ft = 1:length(fz);
@@ -213,14 +207,52 @@ ft = uitab('Title','Fz');
 ftax = axes(ft);
 plot(ftax,len_ft,fz)
 
-
+% Conditions the passed dataset to be on a scale of 0 --> 1
 function s_conditioned=condition(s)
 s=shiftdim(s);
 sMax=max(s);
 sMin=min(s);
 s_conditioned=(s-sMin)/(sMax-sMin);
 
+% This function takes the values for start and end set by the user and
+% crops the datasets, The rpm set is then resampled to contain the same
+% number of points as the FT sensor
+function [fz_isolated,rpm_isolated] = align_datasets(sl_pfz,rpm,rpm_start,rpm_end,fz_start,fz_end)
+% Manually align the datasets and crop
+fz_isolated = sl_pfz(fz_start:fz_end);
+rpm_isolated = rpm(rpm_start:rpm_end);
 
+len_fz = length(fz_isolated);
+len_rpm = length(rpm_isolated);
+t = 1:len_fz;
+rpm_isolated = interp1(1:len_rpm,rpm_isolated,linspace(1,len_rpm,len_fz));
+
+figure('Name','Isoalted Portions')
+plot(t,(fz_isolated/max(fz_isolated)),t,(rpm_isolated/max(rpm_isolated)).^2)%condition(rpm_isolated))
+
+% This function solves for the matrix average value of c_T. If the system
+% is truly linear, this c_T should solve Fz = c_T * w^2
+function ct = matrix_average_cT(rpm_isolated,fz_isolated)
+% Solve for average c_T
+ct = rpm_isolated'\fz_isolated';
+fz_estimated = rpm_isolated * ct;
+
+figure('Name','CT')
+plot(fz_isolated,'k')
+hold on
+plot(fz_estimated,'cyan')
+legend('True','Predicted')
+
+% This function solves for the value of c_T at every time step. c_T is then
+% plotted against the value of w^2 at that time step
+function ct_vec = discreet_ct(rpm_isolated,fz_isolated)
+%Solve for time step c_T
+ct_vec = zeros(1,length(fz_isolated));
+for i = 1:length(fz_isolated)
+    ct_vec(i) = fz_isolated(i)/rpm_isolated(i);
+end
+figure('Name','c_T vs Time')
+plot(rpm_isolated.^2,ct_vec,'.')
 
 
 

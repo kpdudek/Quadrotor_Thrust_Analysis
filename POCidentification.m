@@ -181,7 +181,9 @@ figures(end+1) = figure('Visible','on','Name','Check Combined Coefficients Over 
 time = 1:length(T_plot(1,:));
 
 mat = plot(time,T_plot(1,:),'r:',time,T_plot(2,:),'k:',time,T_plot(3,:),'g:',time,T_plot(4,:),'b:',time,a_fz,'r',time,a_tx,'k',time,a_ty,'g',time,a_tz,'b');
-legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z')
+legend(mat,'Calculated Fz','Calculated Tx','Calculated Ty','Calculated Tz','Force Z','Torque X','Torque Y','Torque Z','Location','northwest')
+xlabel('time')
+ylabel('Force (N) and Torques (Nm)')
 name = sprintf('combined_coef_whole');
 save(name,'T_plot','time','FT_true')
 
