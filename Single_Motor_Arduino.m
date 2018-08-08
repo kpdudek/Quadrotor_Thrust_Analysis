@@ -1,9 +1,10 @@
 function Single_Motor_Arduino
-file = 'Single_Motor_2018_08_01_03';
+file = 'Single_Motor_2018_08_08_05';
 [ft,tach] = string_form(file);
 
-%[fz,rpm] = read_files(ft,tach);
-load('data.mat')
+[sl_pfz,rpm] = read_files(ft,tach);
+rpm = filter_rpm(rpm);
+%load('data.mat')
 plot_data(rpm,sl_pfz)
 
 rpm_start = 11;
@@ -181,6 +182,22 @@ while ~feof(fid)
     end
 end
 fclose(fid);
+
+% Applies a sliding window filter to the rpm data. With an increased
+% sample rate came an increase in noise
+function filtered = filter_rpm(rpm)
+L = length(rpm);
+time = 1:L;
+w = 16;
+w2 = w/2;
+t_sl = time(w2+1:end-w2);
+
+%Filter Fx
+filtered = [];
+for i = w2+1:(L-w2)
+    vals = rpm(i-w2:i+w2);
+    filtered(end+1) = mean(vals);
+end
 
 % Call the functions that read the sensor files, and output the data to be
 % used later on

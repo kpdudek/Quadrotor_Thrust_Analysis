@@ -14,15 +14,15 @@ plot_data(rpm_resamp,omega_resamp,ft(3,:))
 
 
 
-%%%  Values for the number of peaks to isolate, number of peaks is the
-%%%  number of RC inputs during test run
+                      %%%   Alignment   %%%
+% Values for the number of peaks to isolate, number of peaks is the
+% number of RC inputs during test run
 r = 6; %RPM
 o = 6; %Omega plot (PX4)
 t = 6; %Torque
 % Find the specified number of peaks and then crop the rest of the dataset
 % after them
 [omega_init,rpm_init,ty_init,omega_locs,rpm_locs,ty_locs] = find_peaks(omega_resamp(2,:),rpm_resamp,ft(3,:),r,o,t);
-
 
 % Determine which sensor began recording first, then crop the other
 % datasets so the timescales align
@@ -32,7 +32,6 @@ t = 6; %Torque
 save('offsets','rpm_offset','omega_offset','ty_offset')
 %load('offsets.mat')
 
-
 % In case the auto-alignment is off, specify the number of data points to
 % be added to the existing offset values
 omega_shift = 0;
@@ -40,15 +39,23 @@ rpm_shift = 0;
 ty_shift = 0;
 [rpm_offset,omega_offset,ty_offset] = manual_shift(rpm_resamp,omega_resamp(2,:),ft(3,:),omega_shift,rpm_shift,ty_shift,rpm_offset,omega_offset,ty_offset);
 
-
 % Take the offset values from align_data() & manual_shift() and crop the
 % Full datasets
 [a_FT,a_Omega,a_RPM] = aligned_data(ft,omega_resamp,rpm_resamp,rpm_offset,omega_offset,ty_offset,omega_locs,rpm_locs,ty_locs,r,o,t);
 
+
+
+              %%%   Beginning of Analysis Calls   %%%
 % Plot the pixhawk actuator outputs versus the readings from the
 % tachometer, apply a linear fit and create an equation for rpm as a
 % function of omega (actuator output)
 [p,q] = test_linear(a_Omega(2,:),a_RPM);
+
+
+%This function plots the horizontal portions of the Pixhawk motor commands
+%against the resulting RPM. Multiple fits are then applied to determine the
+%relationship
+linear_fits(a_Omega(2,:),a_RPM)
 
 % Use the equation from test_linear() to convert the pixhawk actuator
 % output plots to true rpm values
@@ -57,6 +64,11 @@ true_rpm = px4_to_rpm(a_Omega,p,q);
 %save('num_peaks','r','o','t')
 
 
+
+                         %%%   Setup   %%%
+
+% Applies a sliding window filter to the rpm data. With an increased
+% sample rate came an increase in noise
 function filtered = filter_rpm(rpm)
 L = length(rpm);
 time = 1:L;
@@ -71,7 +83,8 @@ for i = w2+1:(L-w2)
     filtered(end+1) = mean(vals);
 end
 
-% Resample the PX4 data set and the tachometer 
+% Resample the PX4 data set and the tachometer to match the frequency of
+% the FT sensor
 function [omega_resamp,rpm_resamp] = resample_sets(omega,rpm)
 rpm_length = length(rpm);
 omega_length = length(omega);
@@ -117,49 +130,9 @@ ft = uitab('Title','FT Sensor');
 ftax = axes(ft);
 plot(ftax,len_ft,ty)
 
-% figure('Name','Plots for poster')
-% plot(len_omega,omega(2,:))
-% xlabel('time')
-% ylabel('Motor Command')
-% 
-% figure('Name','Plt')
-% plot(len_rpm,rpm)
-% xlabel('time')
-% ylabel('RPM')
 
-%Function that resamples the rpm data, and then scales the corresponding
-%omega plot to check if its linear
-function [p,q] = test_linear(omega,rpm)
-len_omega = length(omega);
-t = 1:len_omega;
-% figure('Name','RPM Scaling')
-% plot(t,omega*6.7857,t,rpm)
-% ylabel('Note: pixhawk reading is manually scaled')
-omegaMasked=omega;
-omegaMasked(abs([diff(omega) 0])>0.5)=NaN;
-rpmMasked=rpm;
-rpmMasked(abs([diff(rpm) 0])>4)=NaN;
-figure('Name','RPM Scaling Scatter')
-mdl=fitlm(omegaMasked,rpmMasked);
-plot(mdl)
-xlabel('Pixhawk Motor Command')
-ylabel('Tachometer Data')
-q=table2array(mdl.Coefficients(1,'Estimate'));
-p=table2array(mdl.Coefficients(2,'Estimate'));
-legend('Location','northwest')
-
-figure('Name','RPM After Fit')
-plot(t,omega.*p+q,'b',t,rpm,'r')
-hold on
-plot(t,omegaMasked.*p+q,'b.',t,rpmMasked,'r.')
-hold off
-xlabel('time')
-ylabel('RPM')
-legend('omega','rpm','omegaMasked','rpmMasked','Location','northwest')
-
-
-%%%%%    The data set is now being aligned    %%%%%
-
+          %%%%%    The data set is now being aligned    %%%%%
+          
 %Function that pulls out the indicator portions by isolating the first n
 %peaks,
 function [omega_init,rpm_init,ty_init,omega_locs,rpm_locs,ty_locs] = find_peaks(omega,rpm,ty,r,o,t)
@@ -170,7 +143,7 @@ ax_s1 = axes(tab_s1);
 t1 = 1:length(omega);
 plot(ax_s1,t1,omega)
 hold on
-[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1350,'MinPeakDistance',700);
+[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1350,'MinPeakDistance',450);
 plot(ax_s1,t1(omega_locs),pks1,'ko')
 
 tab_s2 = uitab('Title','Filtered Force Y');
@@ -186,7 +159,7 @@ ax_s3 = axes(tab_s3);
 t3 = 1:length(rpm);
 plot(ax_s3,t3,rpm)
 hold on
-[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',9200,'MinPeakDistance',700);
+[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',9200,'MinPeakDistance',450);
 plot(ax_s3,t3(rpm_locs),pks3,'ko')
 
 omega_init = omega(1:(omega_locs(o)+450));
@@ -202,7 +175,7 @@ c_omega = condition(omega);
 c_ty = condition(ty);
 
 %Setup of variables for use in looping for best resample and offset
-lags=1:50:2000;
+lags=1:50:2500;
 Nlags=length(lags);
 
 %Empty matrix to contain correlation between data
@@ -286,7 +259,7 @@ ax_s1 = axes(tab_s1);
 t1 = 1:length(omega);
 plot(ax_s1,t1,omega)
 hold on
-[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1450,'MinPeakDistance',350);
+[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1420,'MinPeakDistance',300);
 plot(ax_s1,t1(omega_locs),pks1,'ko')
 
 tab_s2 = uitab('Title','Filtered Force Y');
@@ -416,6 +389,49 @@ if r == 4
 else
     omega_resamp = interp1(1:omega_length,omega,linspace(1,omega_length,ft_length));
 end
+
+
+
+                        %%%   Analysis   %%%
+%Function that pulls out the horizontal portions of the dataset
+function [omegaMasked,rpmMasked] = mask_data(omega,rpm)
+omegaMasked=omega;
+omegaMasked(abs([diff(omega) 0])>0.5)=NaN;
+rpmMasked=rpm;
+rpmMasked(abs([diff(rpm) 0])>4)=NaN;
+
+%Function that resamples the rpm data, and then scales the corresponding
+%omega plot to check if its linear
+function [p,q] = test_linear(omega,rpm)
+len_omega = length(omega);
+t = 1:len_omega;
+
+[omegaMasked,rpmMasked] = mask_data(omega,rpm);
+
+figure('Name','RPM Scaling Scatter')
+mdl=fitlm(omegaMasked,rpmMasked);
+plot(mdl)
+xlabel('Pixhawk Motor Command')
+ylabel('Tachometer Data')
+q=table2array(mdl.Coefficients(1,'Estimate'));
+p=table2array(mdl.Coefficients(2,'Estimate'));
+legend('Location','northwest')
+
+figure('Name','RPM After Fit')
+plot(t,omega.*p+q,'b',t,rpm,'r')
+hold on
+plot(t,omegaMasked.*p+q,'b.',t,rpmMasked,'r.')
+hold off
+xlabel('time')
+ylabel('RPM')
+legend('omega','rpm','omegaMasked','rpmMasked','Location','northwest')
+
+function linear_fits(omega,rpm)
+[omegaMasked,rpmMasked] = mask_data(omega,rpm);
+figure('Name','Fits')
+
+scatter(omegaMasked,rpmMasked)
+
 
 
 
