@@ -259,7 +259,7 @@ ax_s1 = axes(tab_s1);
 t1 = 1:length(omega);
 plot(ax_s1,t1,omega)
 hold on
-[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1420,'MinPeakDistance',300);
+[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1440,'MinPeakDistance',300);
 plot(ax_s1,t1(omega_locs),pks1,'ko')
 
 tab_s2 = uitab('Title','Filtered Force Y');
@@ -427,10 +427,32 @@ ylabel('RPM')
 legend('omega','rpm','omegaMasked','rpmMasked','Location','northwest')
 
 function linear_fits(omega,rpm)
+t = 1:length(omega);
 [omegaMasked,rpmMasked] = mask_data(omega,rpm);
 figure('Name','Fits')
 
-scatter(omegaMasked,rpmMasked)
+scatter(omegaMasked,rpmMasked,'.')
+hold on
+
+isolated_omega_masked = [];
+isolated_rpm_masked = [];
+for i = 1:length(omegaMasked)
+    if (num2str(omegaMasked(i)) ~= "NaN") && (num2str(rpmMasked(i)) ~= "NaN")
+        isolated_omega_masked(end+1) = omegaMasked(i);
+        isolated_rpm_masked(end+1) = rpmMasked(i);
+    end
+end
+
+p = polyfit(isolated_omega_masked,isolated_rpm_masked,2);
+rpm_fit = polyval(p,isolated_omega_masked);
+
+plot(isolated_omega_masked,rpm_fit)
+
+figure('Name','RPM with function')
+rpm_new = polyval(p,omega);
+plot(t,rpm_new,t,rpm)
+legend('Estimate','RPM')
+
 
 
 

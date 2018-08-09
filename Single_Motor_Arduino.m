@@ -1,11 +1,19 @@
 function Single_Motor_Arduino
-file = 'Single_Motor_2018_08_08_05';
+file = 'Single_Motor_2018_08_08_04';
 [ft,tach] = string_form(file);
 
-[sl_pfz,rpm] = read_files(ft,tach);
+%[sl_pfz,rpm] = read_files(ft,tach);
+load('data.mat')
 rpm = filter_rpm(rpm);
-%load('data.mat')
 plot_data(rpm,sl_pfz)
+flagSkip=rpm<10050;
+figure
+rpmNoSkip=rpm;
+rpmNoSkip(flagSkip)=NaN;
+rpmSkip=rpm;
+rpmSkip(~flagSkip)=NaN;
+plot(1:length(rpm),rpmNoSkip,'b',1:length(rpm),rpmSkip,'r')
+
 
 rpm_start = 11;
 rpm_end = 181;
