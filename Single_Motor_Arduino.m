@@ -1,9 +1,9 @@
 function Single_Motor_Arduino
-file = 'Single_Motor_2018_08_08_04';
+file = 'Single_Motor_2018_08_15_03';
 [ft,tach] = string_form(file);
 
-%[sl_pfz,rpm] = read_files(ft,tach);
-load('data.mat')
+[sl_pfz,rpm] = read_files(ft,tach);
+%load('data.mat')
 rpm = filter_rpm(rpm);
 plot_data(rpm,sl_pfz)
 flagSkip=rpm<10050;

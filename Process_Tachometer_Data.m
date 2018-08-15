@@ -12,14 +12,17 @@ rpm = filter_rpm(rpm);
 [omega_resamp,rpm_resamp] = resample_sets(omega,rpm);
 plot_data(rpm_resamp,omega_resamp,ft(3,:))
 
+figure('Name','Force Z')
+plot(ft(1,:))
+
 
 
                       %%%   Alignment   %%%
 % Values for the number of peaks to isolate, number of peaks is the
 % number of RC inputs during test run
-r = 6; %RPM
-o = 6; %Omega plot (PX4)
-t = 6; %Torque
+r = 5; %RPM
+o = 5; %Omega plot (PX4)
+t = 5; %Torque
 % Find the specified number of peaks and then crop the rest of the dataset
 % after them
 [omega_init,rpm_init,ty_init,omega_locs,rpm_locs,ty_locs] = find_peaks(omega_resamp(2,:),rpm_resamp,ft(3,:),r,o,t);
@@ -143,7 +146,7 @@ ax_s1 = axes(tab_s1);
 t1 = 1:length(omega);
 plot(ax_s1,t1,omega)
 hold on
-[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1350,'MinPeakDistance',450);
+[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1320,'MinPeakDistance',450);
 plot(ax_s1,t1(omega_locs),pks1,'ko')
 
 tab_s2 = uitab('Title','Filtered Force Y');
@@ -151,7 +154,7 @@ ax_s2 = axes(tab_s2);
 t2 = 1:length(ty);
 plot(ax_s2,t2,ty)
 hold on
-[pks2,ty_locs] = findpeaks(ty,'MinPeakHeight',.3,'MinPeakDistance',350);
+[pks2,ty_locs] = findpeaks(ty,'MinPeakHeight',.15,'MinPeakDistance',450);
 plot(ax_s2,t2(ty_locs),pks2,'ko')
 
 tab_s3 = uitab('Title','RPM');
@@ -159,7 +162,7 @@ ax_s3 = axes(tab_s3);
 t3 = 1:length(rpm);
 plot(ax_s3,t3,rpm)
 hold on
-[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',9200,'MinPeakDistance',450);
+[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',8600,'MinPeakDistance',350);
 plot(ax_s3,t3(rpm_locs),pks3,'ko')
 
 omega_init = omega(1:(omega_locs(o)+450));
@@ -259,7 +262,7 @@ ax_s1 = axes(tab_s1);
 t1 = 1:length(omega);
 plot(ax_s1,t1,omega)
 hold on
-[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1440,'MinPeakDistance',300);
+[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1380,'MinPeakDistance',350);
 plot(ax_s1,t1(omega_locs),pks1,'ko')
 
 tab_s2 = uitab('Title','Filtered Force Y');
@@ -267,7 +270,7 @@ ax_s2 = axes(tab_s2);
 t2 = 1:length(ty);
 plot(ax_s2,t2,ty)
 hold on
-[pks2,ty_locs] = findpeaks(ty,'MinPeakHeight',.3,'MinPeakDistance',350);
+[pks2,ty_locs] = findpeaks(ty,'MinPeakHeight',.25,'MinPeakDistance',350);
 plot(ax_s2,t2(ty_locs),pks2,'ko')
 
 tab_s3 = uitab('Title','RPM');
@@ -275,7 +278,7 @@ ax_s3 = axes(tab_s3);
 t3 = 1:length(rpm);
 plot(ax_s3,t3,rpm)
 hold on
-[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',9500,'MinPeakDistance',350);
+[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',9000,'MinPeakDistance',350);
 plot(ax_s3,t3(rpm_locs),pks3,'ko')
 
 
@@ -291,9 +294,9 @@ a_rpm = rpm(rpm_offset+1+ty_locs(t):end);
 
 [omega_locs,rpm_locs,ty_locs] = end_peaks(a_omega(2,:),a_rpm,a_ft(3,:));
 
-a_ft = a_ft(:,1:ty_locs(end-5));
-a_omega = a_omega(:,1:omega_locs(end-5));
-a_rpm = a_rpm(1:rpm_locs(end-5));
+a_ft = a_ft(:,1:ty_locs(end-4));
+a_omega = a_omega(:,1:omega_locs(end-4));
+a_rpm = a_rpm(1:rpm_locs(end-4));
 
 
 [omega_resamp,rpm_resamp] = resamp(a_ft,a_omega,a_rpm);
@@ -451,7 +454,7 @@ plot(isolated_omega_masked,rpm_fit)
 figure('Name','RPM with function')
 rpm_new = polyval(p,omega);
 plot(t,rpm_new,t,rpm)
-legend('Estimate','RPM')
+legend('adjusted PX4','RPM')
 
 
 

@@ -1,5 +1,5 @@
 function Tachometer_VS_ActuatorOutput
-filename = 'R2_2018_08_08_02';
+filename = 'R2_2018_08_15_ConstThrust';
 [ft,px4,tach] = string_form(filename);
 
 omega = read_pixhawk(px4);
@@ -16,7 +16,7 @@ save([mfilename '_sensor_data'],'rpm','omega','ft')
 %Takes the standard naming syntax and adds suffixes to open the different
 %.csv files from the sensors
 function [ft,px4,tach] = string_form(file)
-px4 = sprintf('%s_Px4_actuator_outputs_0.csv',file);
+px4 = sprintf('%s_PX4_actuator_outputs_0.csv',file);
 ft = sprintf('%s_FT',file);
 tach = sprintf('%s_Tacho.csv',file);
 
