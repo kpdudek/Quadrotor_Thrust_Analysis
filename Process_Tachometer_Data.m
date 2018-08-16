@@ -1,7 +1,8 @@
 function Process_Tachometer_Data
 load('Tachometer_VS_ActuatorOutput_sensor_data.mat')
-%load('num_peaks.mat')
 
+% Apply a sliding window filter
+% Window = 16
 rpm = filter_rpm(rpm);
 
 % Resample datasets so they are all at the sample rate of the FT sensor and
@@ -12,28 +13,41 @@ rpm = filter_rpm(rpm);
 [omega_resamp,rpm_resamp] = resample_sets(omega,rpm);
 plot_data(rpm_resamp,omega_resamp,ft(3,:))
 
+
+% Plot Fz to check for sensor drift
 figure('Name','Force Z')
 plot(ft(1,:))
 
 
 
-                      %%%   Alignment   %%%
-% Values for the number of peaks to isolate, number of peaks is the
-% number of RC inputs during test run
-r = 5; %RPM
-o = 5; %Omega plot (PX4)
-t = 5; %Torque
-% Find the specified number of peaks and then crop the rest of the dataset
-% after them
-[omega_init,rpm_init,ty_init,omega_locs,rpm_locs,ty_locs] = find_peaks(omega_resamp(2,:),rpm_resamp,ft(3,:),r,o,t);
+%%%   Alignment   %%%
+% If x == true, load data
+% If x == false, find peaks and align the data
+x = false;         
+if x
+    load('num_peaks.mat')
+    load('offsets.mat')
+    load('peak_data')
+else
+    % Values for the number of peaks to isolate, number of peaks is the
+    % number of RC inputs during test run
+    r = 6; %RPM
+    o = 6; %Omega plot (PX4)
+    t = 6; %Torque
+    save('num_peaks','r','o','t')
+    % Find the specified number of peaks and then crop the rest of the dataset
+    % after them
+    [omega_init,rpm_init,ty_init,omega_locs,rpm_locs,ty_locs] = find_peaks(omega_resamp(2,:),rpm_resamp,ft(3,:),r,o,t);
 
-% Determine which sensor began recording first, then crop the other
-% datasets so the timescales align
-% Outputs the number of datapoints that need to be cropped from the
-% beginning of each dataset
-[rpm_offset,omega_offset,ty_offset] = align_data(rpm_init,omega_init,ty_init);
-save('offsets','rpm_offset','omega_offset','ty_offset')
-%load('offsets.mat')
+    % Determine which sensor began recording first, then crop the other
+    % datasets so the timescales align
+    % Outputs the number of datapoints that need to be cropped from the
+    % beginning of each dataset
+    [rpm_offset,omega_offset,ty_offset] = align_data(rpm_init,omega_init,ty_init);
+    save('offsets','rpm_offset','omega_offset','ty_offset','omega_locs','rpm_locs','ty_locs')
+    o_min = 1420;o_sep=300;ty_min=.25;ty_sep=350;rpm_min=9000;rpm_sep=350;
+end
+
 
 % In case the auto-alignment is off, specify the number of data points to
 % be added to the existing offset values
@@ -44,11 +58,11 @@ ty_shift = 0;
 
 % Take the offset values from align_data() & manual_shift() and crop the
 % Full datasets
-[a_FT,a_Omega,a_RPM] = aligned_data(ft,omega_resamp,rpm_resamp,rpm_offset,omega_offset,ty_offset,omega_locs,rpm_locs,ty_locs,r,o,t);
+[a_FT,a_Omega,a_RPM] = aligned_data(ft,omega_resamp,rpm_resamp,rpm_offset,omega_offset,ty_offset,omega_locs,rpm_locs,ty_locs,r,o,t,o_min,o_sep,ty_min,ty_sep,rpm_min,rpm_sep);
 
 
 
-              %%%   Beginning of Analysis Calls   %%%
+%%%   Beginning of Analysis Calls   %%%
 % Plot the pixhawk actuator outputs versus the readings from the
 % tachometer, apply a linear fit and create an equation for rpm as a
 % function of omega (actuator output)
@@ -64,7 +78,7 @@ linear_fits(a_Omega(2,:),a_RPM)
 % output plots to true rpm values
 true_rpm = px4_to_rpm(a_Omega,p,q);
 
-%save('num_peaks','r','o','t')
+
 
 
 
@@ -146,7 +160,7 @@ ax_s1 = axes(tab_s1);
 t1 = 1:length(omega);
 plot(ax_s1,t1,omega)
 hold on
-[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1320,'MinPeakDistance',450);
+[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1350,'MinPeakDistance',450);
 plot(ax_s1,t1(omega_locs),pks1,'ko')
 
 tab_s2 = uitab('Title','Filtered Force Y');
@@ -162,7 +176,7 @@ ax_s3 = axes(tab_s3);
 t3 = 1:length(rpm);
 plot(ax_s3,t3,rpm)
 hold on
-[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',8600,'MinPeakDistance',350);
+[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',9000,'MinPeakDistance',350);
 plot(ax_s3,t3(rpm_locs),pks3,'ko')
 
 omega_init = omega(1:(omega_locs(o)+450));
@@ -254,7 +268,7 @@ c = sum(ft_lag(1:N).*omega_lag(1:N).*rpm_lag(1:N));
 
 %Function that locates the peaks at the end of the data sets to use for
 %cropping
-function [omega_locs,rpm_locs,ty_locs] = end_peaks(omega,rpm,ty)
+function [omega_locs,rpm_locs,ty_locs] = end_peaks(omega,rpm,ty,o_min,o_sep,ty_min,ty_sep,rpm_min,rpm_sep)
 figure('Visible','on','Name','End Peaks')
 
 tab_s1 = uitab('Title','Actuator Output 2');
@@ -262,7 +276,7 @@ ax_s1 = axes(tab_s1);
 t1 = 1:length(omega);
 plot(ax_s1,t1,omega)
 hold on
-[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1380,'MinPeakDistance',350);
+[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',o_min,'MinPeakDistance',o_sep);
 plot(ax_s1,t1(omega_locs),pks1,'ko')
 
 tab_s2 = uitab('Title','Filtered Force Y');
@@ -270,7 +284,7 @@ ax_s2 = axes(tab_s2);
 t2 = 1:length(ty);
 plot(ax_s2,t2,ty)
 hold on
-[pks2,ty_locs] = findpeaks(ty,'MinPeakHeight',.25,'MinPeakDistance',350);
+[pks2,ty_locs] = findpeaks(ty,'MinPeakHeight',ty_min,'MinPeakDistance',ty_sep);
 plot(ax_s2,t2(ty_locs),pks2,'ko')
 
 tab_s3 = uitab('Title','RPM');
@@ -278,21 +292,20 @@ ax_s3 = axes(tab_s3);
 t3 = 1:length(rpm);
 plot(ax_s3,t3,rpm)
 hold on
-[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',9000,'MinPeakDistance',350);
+[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',rpm_min,'MinPeakDistance',rpm_sep);
 plot(ax_s3,t3(rpm_locs),pks3,'ko')
 
 
 %Takes the raw datasets and offsets them by the calculated lag in
 %align_data()
-function [a_FT,a_Omega,a_RPM] = aligned_data(ft,omega,rpm,rpm_offset,omega_offset,ty_offset,omega_locs,rpm_locs,ty_locs,r,o,t)
+function [a_FT,a_Omega,a_RPM] = aligned_data(ft,omega,rpm,rpm_offset,omega_offset,ty_offset,omega_locs,rpm_locs,ty_locs,r,o,t,o_min,o_sep,ty_min,ty_sep,rpm_min,rpm_sep)
 %[omega_resamp,rpm_resamp] = resamp(ft,omega,rpm);
 
 a_ft = ft(:,ty_offset+1+ty_locs(t):end);
 a_omega = omega(:,omega_offset+1+ty_locs(t):end);
 a_rpm = rpm(rpm_offset+1+ty_locs(t):end);
 
-
-[omega_locs,rpm_locs,ty_locs] = end_peaks(a_omega(2,:),a_rpm,a_ft(3,:));
+[omega_locs,rpm_locs,ty_locs] = end_peaks(a_omega(2,:),a_rpm,a_ft(3,:),o_min,o_sep,ty_min,ty_sep,rpm_min,rpm_sep);
 
 a_ft = a_ft(:,1:ty_locs(end-4));
 a_omega = a_omega(:,1:omega_locs(end-4));
@@ -310,13 +323,10 @@ plot(condition(rpm_resamp),'.-')
 
 legend('Ty','PX4','RPM')
 
-%TODO: outputs of this function NEED to be the same size otherwise
-%TestLinear() will break for reasons only god knows. Aparently my matrix
-%was 15.6 GB. Sure MATLAB... that makes sense
-
 a_FT = a_ft;
 a_Omega = omega_resamp;
 a_RPM = rpm_resamp;
+save('pead_data','o_min','o_sep','ty_min','ty_sep','rpm_min','rpm_sep')
 
 
 %Pulls out the greatest correlation and the corresponding index value that
