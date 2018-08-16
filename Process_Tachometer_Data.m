@@ -23,7 +23,7 @@ plot(ft(1,:))
 %%%   Alignment   %%%
 % If x == true, load data
 % If x == false, find peaks and align the data
-x = false;         
+x = true;         
 if x
     load('num_peaks.mat')
     load('offsets.mat')
