@@ -27,13 +27,13 @@ x = true;
 if x
     load('num_peaks.mat')
     load('offsets.mat')
-    load('peak_data')
+    load('peak_data.mat')
 else
     % Values for the number of peaks to isolate, number of peaks is the
     % number of RC inputs during test run
-    r = 6; %RPM
-    o = 6; %Omega plot (PX4)
-    t = 6; %Torque
+    r = 5; %RPM
+    o = 5; %Omega plot (PX4)
+    t = 5; %Torque
     save('num_peaks','r','o','t')
     % Find the specified number of peaks and then crop the rest of the dataset
     % after them
@@ -45,7 +45,7 @@ else
     % beginning of each dataset
     [rpm_offset,omega_offset,ty_offset] = align_data(rpm_init,omega_init,ty_init);
     save('offsets','rpm_offset','omega_offset','ty_offset','omega_locs','rpm_locs','ty_locs')
-    o_min = 1420;o_sep=300;ty_min=.25;ty_sep=350;rpm_min=9000;rpm_sep=350;
+    o_min = 1380;o_sep=350;ty_min=.25;ty_sep=350;rpm_min=9000;rpm_sep=350;
 end
 
 
@@ -160,7 +160,7 @@ ax_s1 = axes(tab_s1);
 t1 = 1:length(omega);
 plot(ax_s1,t1,omega)
 hold on
-[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1350,'MinPeakDistance',450);
+[pks1,omega_locs] = findpeaks(omega,'MinPeakHeight',1320,'MinPeakDistance',450);
 plot(ax_s1,t1(omega_locs),pks1,'ko')
 
 tab_s2 = uitab('Title','Filtered Force Y');
@@ -176,7 +176,7 @@ ax_s3 = axes(tab_s3);
 t3 = 1:length(rpm);
 plot(ax_s3,t3,rpm)
 hold on
-[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',9000,'MinPeakDistance',350);
+[pks3,rpm_locs] = findpeaks(rpm,'MinPeakHeight',8600,'MinPeakDistance',350);
 plot(ax_s3,t3(rpm_locs),pks3,'ko')
 
 omega_init = omega(1:(omega_locs(o)+450));
@@ -326,7 +326,7 @@ legend('Ty','PX4','RPM')
 a_FT = a_ft;
 a_Omega = omega_resamp;
 a_RPM = rpm_resamp;
-save('pead_data','o_min','o_sep','ty_min','ty_sep','rpm_min','rpm_sep')
+save('peak_data','o_min','o_sep','ty_min','ty_sep','rpm_min','rpm_sep')
 
 
 %Pulls out the greatest correlation and the corresponding index value that
