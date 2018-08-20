@@ -1,5 +1,5 @@
 function Single_Motor_Arduino
-file = 'Single_Motor_2018_08_15_03';
+file = 'Single_Motor_20180820_20Minute';
 [ft,tach] = string_form(file);
 
 if fopen('data.mat')
@@ -8,6 +8,7 @@ else
     [sl_pfz,rpm] = read_files(ft,tach);
 end
 
+% [sl_pfz,rpm] = read_files(ft,tach);
 
 rpm = filter_rpm(rpm);
 plot_data(rpm,sl_pfz)
@@ -232,10 +233,16 @@ figure('Visible','on','Name','Sensor Data')
 omega = uitab('Title','RPM');
 omegaax = axes(omega);
 plot(omegaax,len_rpm,rpm)
+xlabel('Time (10Hz sample)')
+ylabel('RPM')
+title('RPM readings from Shimpo DT2100')
 
 ft = uitab('Title','Fz');
 ftax = axes(ft);
 plot(ftax,len_ft,fz)
+xlabel('Time (125Hz sample rate)')
+ylabel('Force (N)')
+title('AXIA80 
 
 % Conditions the passed dataset to be on a scale of 0 --> 1
 function s_conditioned=condition(s)
