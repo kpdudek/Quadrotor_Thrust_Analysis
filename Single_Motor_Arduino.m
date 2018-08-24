@@ -242,7 +242,7 @@ ftax = axes(ft);
 plot(ftax,len_ft,fz)
 xlabel('Time (125Hz sample rate)')
 ylabel('Force (N)')
-title('AXIA80 
+title('AXIA80 Sensor Readings')
 
 % Conditions the passed dataset to be on a scale of 0 --> 1
 function s_conditioned=condition(s)
