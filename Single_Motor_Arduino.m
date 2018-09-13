@@ -1,8 +1,8 @@
 function Single_Motor_Arduino
-file = 'Single_Motor_20180820_20Minute';
+file = 'Insulation_Test_20180911';
 [ft,tach] = string_form(file);
 
-if fopen('data.mat')
+if fopen('data.mat') ~= -1
     load('data.mat')
 else
     [sl_pfz,rpm] = read_files(ft,tach);
