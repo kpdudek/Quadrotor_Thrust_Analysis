@@ -21,10 +21,10 @@ rpmSkip(~flagSkip)=NaN;
 plot(1:length(rpm),rpmNoSkip,'b',1:length(rpm),rpmSkip,'r')
 
 
-rpm_start = 11;
-rpm_end = 181;
-fz_start = 2500;
-fz_end = 23820;
+rpm_start = 110;
+rpm_end = 2506;
+fz_start = 1875;
+fz_end = 27250;
 
 [fz_isolated,rpm_isolated] = align_datasets(sl_pfz,rpm,rpm_start,rpm_end,fz_start,fz_end);
 
