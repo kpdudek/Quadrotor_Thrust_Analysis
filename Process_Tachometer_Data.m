@@ -21,10 +21,7 @@ plot(ft(1,:))
 
 
 %%%   Alignment   %%%
-% If x == true, load data
-% If x == false, find peaks and align the data
-x = true;         
-if x
+if (fopen('num_peaks.mat')&&fopen('offsets.mat')&&fopen('peak_data.mat'))~=-1
     load('num_peaks.mat')
     load('offsets.mat')
     load('peak_data.mat')

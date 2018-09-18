@@ -1,10 +1,10 @@
 function Single_Motor_Arduino
-file = 'Single_Motor_Inverted_20180917_2';
-[ft,tach] = string_form(file);
 
 if fopen('data.mat') ~= -1
     load('data.mat')
 else
+    file = 'Insulation_Test_20180824';
+    [ft,tach] = string_form(file);
     [sl_pfz,rpm] = read_files(ft,tach);
 end
 
@@ -22,15 +22,15 @@ plot(1:length(rpm),rpmNoSkip,'b',1:length(rpm),rpmSkip,'r')
 
 
 rpm_start = 110;
-rpm_end = 2506;
-fz_start = 1875;
-fz_end = 27250;
+rpm_end = 200;
+fz_start = 500;
+fz_end = 1000;
 
-[fz_isolated,rpm_isolated] = align_datasets(sl_pfz,rpm,rpm_start,rpm_end,fz_start,fz_end);
+%[fz_isolated,rpm_isolated] = align_datasets(sl_pfz,rpm,rpm_start,rpm_end,fz_start,fz_end);
 
-ct = matrix_average_cT(rpm_isolated,fz_isolated);
+%ct = matrix_average_cT(rpm_isolated,fz_isolated);
 
-ct_vec = discreet_ct(rpm_isolated,fz_isolated);
+%ct_vec = discreet_ct(rpm_isolated,fz_isolated);
 
 
 
