@@ -1,5 +1,5 @@
 function Single_Motor_Arduino
-file = 'Insulation_Test_20180911';
+file = 'Single_Motor_Inverted_20180917_2';
 [ft,tach] = string_form(file);
 
 if fopen('data.mat') ~= -1
