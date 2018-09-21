@@ -8,11 +8,11 @@ load('POCidentification_test_span_data_2018_07_13_4Corners_2Indicators_Acro.mat'
 
 %omega = px4_to_rpm(omega);
 
-fitted_coefs = non_linear_fit(T,omega,coef);
+%fitted_coefs = non_linear_fit(T,omega,coef);
 
-plot_coef_vs_fitted(coef,fitted_coefs)
+%plot_coef_vs_fitted(coef,fitted_coefs)
 
-use_LS_values(fitted_coefs,omega,T)
+%use_LS_values(fitted_coefs,omega,T)
 
 fit4 = ct_vs_omega(omega,coef,n1,n2,independent_coef);
 

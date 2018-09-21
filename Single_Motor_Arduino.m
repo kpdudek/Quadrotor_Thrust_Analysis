@@ -21,16 +21,16 @@ rpmSkip(~flagSkip)=NaN;
 plot(1:length(rpm),rpmNoSkip,'b',1:length(rpm),rpmSkip,'r')
 
 
-rpm_start = 110;
-rpm_end = 200;
-fz_start = 500;
-fz_end = 1000;
+rpm_start = 133;
+rpm_end = 2900;
+fz_start = 1550;
+fz_end = 35240;
 
-%[fz_isolated,rpm_isolated] = align_datasets(sl_pfz,rpm,rpm_start,rpm_end,fz_start,fz_end);
-
-%ct = matrix_average_cT(rpm_isolated,fz_isolated);
-
-%ct_vec = discreet_ct(rpm_isolated,fz_isolated);
+% [fz_isolated,rpm_isolated] = align_datasets(sl_pfz,rpm,rpm_start,rpm_end,fz_start,fz_end);
+% 
+% ct = matrix_average_cT(rpm_isolated,fz_isolated);
+% 
+% ct_vec = discreet_ct(rpm_isolated,fz_isolated);
 
 
 
