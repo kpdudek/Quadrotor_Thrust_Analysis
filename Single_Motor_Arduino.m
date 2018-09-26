@@ -3,7 +3,7 @@ function Single_Motor_Arduino
 if fopen('data.mat') ~= -1
     load('data.mat')
 else
-    file = 'Insulation_Test_20180824';
+    file = 'Single_Motor_Upright_Noninsulated';
     [ft,tach] = string_form(file);
     [sl_pfz,rpm] = read_files(ft,tach);
 end
