@@ -3,7 +3,7 @@ function Single_Motor_Arduino
 if fopen('data.mat') ~= -1
     load('data.mat')
 else
-    file = 'Single_Motor_Upright_Noninsulated';
+    file = 'Freq1923_Buffer40';
     [ft,tach] = string_form(file);
     [sl_pfz,rpm] = read_files(ft,tach);
 end
@@ -13,12 +13,12 @@ end
 rpm = filter_rpm(rpm);
 plot_data(rpm,sl_pfz)
 flagSkip=rpm<10050;
-figure
+%figure
 rpmNoSkip=rpm;
 rpmNoSkip(flagSkip)=NaN;
 rpmSkip=rpm;
 rpmSkip(~flagSkip)=NaN;
-plot(1:length(rpm),rpmNoSkip,'b',1:length(rpm),rpmSkip,'r')
+%plot(1:length(rpm),rpmNoSkip,'b',1:length(rpm),rpmSkip,'r')
 
 
 rpm_start = 133;
