@@ -10,27 +10,31 @@ end
 
 % [sl_pfz,rpm] = read_files(ft,tach);
 
-rpm = filter_rpm(rpm);
-plot_data(rpm,sl_pfz)
-flagSkip=rpm<10050;
-%figure
-rpmNoSkip=rpm;
-rpmNoSkip(flagSkip)=NaN;
-rpmSkip=rpm;
-rpmSkip(~flagSkip)=NaN;
-%plot(1:length(rpm),rpmNoSkip,'b',1:length(rpm),rpmSkip,'r')
+% rpm = filter_rpm(rpm);
+% plot_data(rpm,sl_pfz)
+% flagSkip=rpm<10050;
+% figure
+% rpmNoSkip=rpm;
+% rpmNoSkip(flagSkip)=NaN;
+% rpmSkip=rpm;
+% rpmSkip(~flagSkip)=NaN;
+% plot(1:length(rpm),rpmNoSkip,'b',1:length(rpm),rpmSkip,'r')
 
 
-rpm_start = 133;
-rpm_end = 2900;
-fz_start = 1550;
+rpm_start = 130;
+rpm_end = 2850;
+fz_start = 1431;
 fz_end = 35240;
 
-% [fz_isolated,rpm_isolated] = align_datasets(sl_pfz,rpm,rpm_start,rpm_end,fz_start,fz_end);
-% 
+[fz_isolated,rpm_isolated] = align_datasets(sl_pfz,rpm,rpm_start,rpm_end,fz_start,fz_end);
+
 % ct = matrix_average_cT(rpm_isolated,fz_isolated);
 % 
 % ct_vec = discreet_ct(rpm_isolated,fz_isolated);
+
+fzMasked = mask_data(fz_isolated);
+figure
+plot(rpm_isolated,fzMasked,'.')
 
 
 
@@ -266,6 +270,40 @@ rpm_isolated = interp1(1:len_rpm,rpm_isolated,linspace(1,len_rpm,len_fz));
 
 figure('Name','Isoalted Portions')
 plot(t,(fz_isolated/max(fz_isolated)),t,(rpm_isolated/max(rpm_isolated)).^2)%condition(rpm_isolated))
+
+function [fzMasked] = mask_data(fz)
+fzMasked=fz;
+fzMasked(abs([diff(fz) 0])>0.008)=NaN;
+figure
+plot(fzMasked)
+
+function plot_rpm_thrust(rpm,fz)
+t = 1:length(omega);
+[omegaMasked,rpmMasked] = mask_data(omega,rpm);
+figure('Name','Fits')
+
+scatter(omegaMasked,rpmMasked,'.')
+hold on
+
+isolated_omega_masked = [];
+isolated_rpm_masked = [];
+for i = 1:length(omegaMasked)
+    if (num2str(omegaMasked(i)) ~= "NaN") && (num2str(rpmMasked(i)) ~= "NaN")
+        isolated_omega_masked(end+1) = omegaMasked(i);
+        isolated_rpm_masked(end+1) = rpmMasked(i);
+    end
+end
+
+p = polyfit(isolated_omega_masked,isolated_rpm_masked,2);
+rpm_fit = polyval(p,isolated_omega_masked);
+
+plot(isolated_omega_masked,rpm_fit)
+
+figure('Name','RPM with function')
+rpm_new = polyval(p,omega);
+plot(t,rpm_new,t,rpm)
+legend('adjusted PX4','RPM')
+
 
 % This function solves for the matrix average value of c_T. If the system
 % is truly linear, this c_T should solve Fz = c_T * w^2
