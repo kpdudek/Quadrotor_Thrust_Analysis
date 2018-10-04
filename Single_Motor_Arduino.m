@@ -10,15 +10,15 @@ end
 
 % [sl_pfz,rpm] = read_files(ft,tach);
 
-% rpm = filter_rpm(rpm);
-% plot_data(rpm,sl_pfz)
-% flagSkip=rpm<10050;
-% figure
-% rpmNoSkip=rpm;
-% rpmNoSkip(flagSkip)=NaN;
-% rpmSkip=rpm;
-% rpmSkip(~flagSkip)=NaN;
-% plot(1:length(rpm),rpmNoSkip,'b',1:length(rpm),rpmSkip,'r')
+rpm = filter_rpm(rpm);
+plot_data(rpm,sl_pfz)
+flagSkip=rpm<10050;
+figure
+rpmNoSkip=rpm;
+rpmNoSkip(flagSkip)=NaN;
+rpmSkip=rpm;
+rpmSkip(~flagSkip)=NaN;
+plot(1:length(rpm),rpmNoSkip,'b',1:length(rpm),rpmSkip,'r')
 
 
 rpm_start = 130;
