@@ -32,9 +32,9 @@ fz_end = 35240;
 % 
 % ct_vec = discreet_ct(rpm_isolated,fz_isolated);
 
-fzMasked = mask_data(fz_isolated);
-figure
-plot(rpm_isolated,fzMasked,'.')
+% fzMasked = mask_data(fz_isolated);
+% figure
+% plot(rpm_isolated,fzMasked,'.')
 
 
 
