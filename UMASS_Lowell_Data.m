@@ -1,59 +1,65 @@
 function UMASS_Lowell_Data
-filename = 'Vertical_Test1.csv';
+filename = 'Horizontal_Forward.csv';
 [rpm,thrust] = read_file(filename);
-
+[rpm_o,thrust_o] = clean_thrust(thrust,rpm);
+s = 36;
+e = 1838;
+[rpm_crop,thrust_crop] = crop_sets(rpm_o,thrust_o,s,e);
 
 figure
-plot(rpm)
+plot(condition(rpm_crop))
+hold on
+plot(condition(thrust_crop))
+legend('RPM','Thrust','Location','Northeast')
+xlabel('Time')
+ylabel('Magnitude')
 
-figure
-plot(thrust)
+linfit_RPMvsThrust(rpm_crop,thrust_crop)
+
 
 
 
 function [rpm,thrust] = read_file(filename)
-% fid = fopen(filename,'r');
-% 
-% thrust = []; %empty matrix for force readings, columns (fx,fy,fz)
-% rpm = []; %empty matrix for torque readings, columns (tx,ty,tz)
-% coun = 0;
-
-% while ~feof(fid)
-%     if coun < 2 %read the first 8 lines, and do nothing
-%         coun = coun+1;
-%         line = fgetl(fid);
-%         
-%     else %read and manipulate the remaining lines of the file
-%         line = fgetl(fid);
-%         
-%         %isolates each component of the line
-%         [time,remain] = strtok(line,','); %isolate the status(hex), and store as l1
-%         [ESC,remain] = strtok(remain,','); %isolate the RDT sequence and store as RDT
-%         [S1,remain] = strtok(remain,','); %isolate the F/T sequence and store as FT
-%         [S2,remain] = strtok(remain,','); %isolate the Fx value
-%         [S3,remain] = strtok(remain,','); %isolate the Fy value
-%         [Ax,remain] = strtok(remain,','); %isolate the Fz value
-%         [Ay,remain] = strtok(remain,','); %isolate the Tx value
-%         [Az,remain] = strtok(remain,','); %isolate the Ty value
-%         [T,remain] = strtok(remain,','); %isolate the Tz value
-%         [Thrust,remain] = strtok(remain,','); %isolate the status(hex), and store as l1
-%         [V,remain] = strtok(remain,','); %isolate the RDT sequence and store as RDT
-%         [C,remain] = strtok(remain,','); %isolate the F/T sequence and store as FT
-%         [Me,remain] = strtok(remain,','); %isolate the Fx value
-%         [RPM,remain] = strtok(remain,','); %isolate the Fy value
-%     
-%     if RPM ~= ""
-%         rpm = [rpm,str2double(RPM)];
-%     end
-%     if Thrust ~= ""
-%         thrust = [thrust,str2double(Thrust)];
-%     end
-%     
-%     end
-% end
-% fclose(fid); %close the file
-
 vals = csvread(filename,1);
 rpm = vals(:,14);
-thrust = vals(:,10);
+thrust = (vals(:,10)).*9.80665;
+
+function [rpm_out,thrust_out] = clean_thrust(thrust,rpm)
+% out = thrust';
+% out(abs([diff(thrust') 0])>0.1)=NaN;
+thrust_out = [];
+rpm_out = [];
+for i = 1:length(thrust)
+    if abs(thrust(i)) > .025
+        rpm_out(end+1) = rpm(i);
+        thrust_out(end+1) = thrust(i);
+    end
+end
+
+function s_o = condition(s)
+mins = min(s);
+maxs = max(s);
+s_o = (s-mins)./(maxs-mins);
+
+function [rpm_crop,thrust_crop] = crop_sets(rpm,thrust,s,e)
+rpm_crop = rpm(s:e);
+thrust_crop = thrust(s:e);
+
+function linfit_RPMvsThrust(rpm,thrust)
+rpm_sq = rpm.^2;
+lin_fit = fitlm(rpm_sq,thrust,'linear');
+q=table2array(lin_fit.Coefficients(1,'Estimate'));
+p=table2array(lin_fit.Coefficients(2,'Estimate'));
+
+figure
+plot(rpm_sq,thrust,'.')
+hold on
+%plot(t,omega.*p+q,'b',t,rpm,'r')
+linfit = rpm_sq.*p+q;
+plot(rpm_sq,linfit)
+
+legend('Thrust','Linear Fit','Location','Northwest')
+xlabel('\omega^{2}')
+ylabel('Thrust')
+
 
