@@ -109,9 +109,9 @@ load_2 = zeros(1,length(fz));
 load_3 = zeros(1,length(fz));
 
 for i = 1:length(fx)
-    load_1(i) = (fx/a) + (fy/a) + (fz/d) + (mx/e) + (my/e) + (mz/h);
-    load_2(i) = (fx/b) + (fy/c) + (fz/d) + (mx/f) + (my/g) + (mz/h);
-    load_3(i) = (fx/c) + (fy/b) + (fz/d) + (mx/g) + (my/f) + (mz/h);
+    load_1(i) = (fx(i)/a) + (fy(i)/a) + (fz(i)/d) + (mx(i)/e) + (my(i)/e) + (mz(i)/h);
+    load_2(i) = (fx(i)/b) + (fy(i)/c) + (fz(i)/d) + (mx(i)/f) + (my(i)/g) + (mz(i)/h);
+    load_3(i) = (fx(i)/c) + (fy(i)/b) + (fz(i)/d) + (mx(i)/g) + (my(i)/f) + (mz(i)/h);
 end
 
 fail_1 = find(load_1 > 1);

@@ -1,18 +1,20 @@
 function UMASS_Lowell_Data
-filename = 'Log_2018-10-11_125849.csv';
-[rpm,thrust2] = readfile(filename);
+filename = 'Vertical_Test1.csv';
+[rpm,thrust] = read_file(filename);
 
-load('Rpm_Thrust.mat')
+%load('Rpm_Thrust.mat')
+
+
 
 figure
 plot(rpm)
 
 figure
-plot(thrust2)
+plot(thrust)
 
 
 
-function [rpm,thrust] = readfile(filename)
+function [rpm,thrust] = read_file(filename)
 fid = fopen(filename,'r');
 
 thrust = []; %empty matrix for force readings, columns (fx,fy,fz)
@@ -42,17 +44,14 @@ while ~feof(fid)
         [C,remain] = strtok(remain,','); %isolate the F/T sequence and store as FT
         [Me,remain] = strtok(remain,','); %isolate the Fx value
         [RPM,remain] = strtok(remain,','); %isolate the Fy value
-%         [E,remain] = strtok(remain,','); %isolate the Fz value
-%         [M,remain] = strtok(remain,','); %isolate the Tx value
-%         [E,remain] = strtok(remain,','); %isolate the Ty value
-%         [tz,remain] = strtok(remain,','); %isolate the Tz value
-%         [tx,remain] = strtok(remain,','); %isolate the Tx value
-%         [ty,remain] = strtok(remain,','); %isolate the Ty value
-%         [tz,remain] = strtok(remain,','); %isolate the Tz value
-        
     
-    rpm = [rpm,str2double(RPM)];
-    thrust = [thrust,str2double(Thrust)];
+    if RPM ~= ""
+        rpm = [rpm,str2double(RPM)];
+    end
+    if Thrust ~= ""
+        thrust = [thrust,str2double(Thrust)];
+    end
+    
     end
 end
 fclose(fid); %close the file
