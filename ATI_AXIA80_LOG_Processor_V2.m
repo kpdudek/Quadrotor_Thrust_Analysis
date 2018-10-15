@@ -1,4 +1,7 @@
 function [ffz,ftx,fty,ftz,t_sl] = ATI_AXIA80_LOG_Processor_V2(file)
+%%% This function reads the .csv file from the AXIA80 FT Sensor, and
+%%% outputs the FT readings as well as elapsed time
+
 [time,elap_time,forces,torques] = readfile(file);
 %ty = torques(:,2);
 max_values(forces,torques)

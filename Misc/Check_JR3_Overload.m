@@ -1,4 +1,8 @@
 function Check_JR3_Overload
+%%% This function loads the FT data from the AXIA80 from a given file. It then calculates the overload cpacity
+%%% at each time step for the JR3 sensor, to ensure it does not exceed it.
+%%% The function only prints, if there is an overload. No print out is good
+
 filename = 'R2_2018_07_13_4Corners_2Indicators_Acro';
 [time,force_plot,torque_plot] = read_ft(filename);
 check_overload(force_plot,torque_plot)
