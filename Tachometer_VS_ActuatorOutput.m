@@ -1,4 +1,8 @@
 function Tachometer_VS_ActuatorOutput
+% This function opens the .csv files from the pixhawk, Axia80 FT sensor,
+% and tachometer, parses the files and saves the neccesary values in
+% vectors.
+% The values are stored in .mat file rather than output for efficiency
 filename = 'R2_2018_08_15_ConstThrust';
 [ft,px4,tach] = string_form(filename);
 

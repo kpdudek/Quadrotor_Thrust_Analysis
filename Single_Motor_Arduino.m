@@ -1,5 +1,10 @@
 function Single_Motor_Arduino
+%%% This function takes the FT readings and tachometer data from a single
+%%% motor test run using the arduino to control the motor.
+%%% The function aims to determine the relationship between rpm and thrust,
+%%% be it linear or nonlinear
 
+% check if the files have already been parsed
 if fopen('data.mat') ~= -1
     load('data.mat')
 else
@@ -8,18 +13,9 @@ else
     [sl_pfz,rpm] = read_files(ft,tach);
 end
 
-% [sl_pfz,rpm] = read_files(ft,tach);
-
+skip_points(rpm)
 rpm = filter_rpm(rpm);
 plot_data(rpm,sl_pfz)
-flagSkip=rpm<10050;
-figure
-rpmNoSkip=rpm;
-rpmNoSkip(flagSkip)=NaN;
-rpmSkip=rpm;
-rpmSkip(~flagSkip)=NaN;
-plot(1:length(rpm),rpmNoSkip,'b',1:length(rpm),rpmSkip,'r')
-
 
 rpm_start = 130;
 rpm_end = 2850;
@@ -28,13 +24,13 @@ fz_end = 35240;
 
 [fz_isolated,rpm_isolated] = align_datasets(sl_pfz,rpm,rpm_start,rpm_end,fz_start,fz_end);
 
-% ct = matrix_average_cT(rpm_isolated,fz_isolated);
-% 
-% ct_vec = discreet_ct(rpm_isolated,fz_isolated);
+ct = matrix_average_cT(rpm_isolated,fz_isolated);
 
-% fzMasked = mask_data(fz_isolated);
-% figure
-% plot(rpm_isolated,fzMasked,'.')
+ct_vec = discreet_ct(rpm_isolated,fz_isolated);
+
+fzMasked = mask_data(fz_isolated);
+figure
+plot(rpm_isolated,fzMasked,'.')
 
 
 
@@ -226,7 +222,7 @@ rpm = read_tachometer(tach);
 save('data','sl_pfz','rpm')
 
 
-                      %%%-  LATER ON  -%%%
+                      %%%-  ANALYSIS  -%%%
 % Take the raw data and plot against time
 function plot_data(rpm,fz)
 len_rpm = 1:length(rpm);
@@ -248,8 +244,19 @@ xlabel('Time (125Hz sample rate)')
 ylabel('Force (N)')
 title('AXIA80 Sensor Readings')
 
+% This function analyzes the noise in the tachometer readings to see how it
+% affects applying a filter
+function skip_points(rpm)
+flagSkip=rpm<10050;
+figure('Visible','on','Name','Skip Points')
+rpmNoSkip=rpm;
+rpmNoSkip(flagSkip)=NaN;
+rpmSkip=rpm;
+rpmSkip(~flagSkip)=NaN;
+plot(1:length(rpm),rpmNoSkip,'b',1:length(rpm),rpmSkip,'r')
+
 % Conditions the passed dataset to be on a scale of 0 --> 1
-function s_conditioned=condition(s)
+function s_conditioned = condition(s)
 s=shiftdim(s);
 sMax=max(s);
 sMin=min(s);
@@ -271,12 +278,15 @@ rpm_isolated = interp1(1:len_rpm,rpm_isolated,linspace(1,len_rpm,len_fz));
 figure('Name','Isoalted Portions')
 plot(t,(fz_isolated/max(fz_isolated)),t,(rpm_isolated/max(rpm_isolated)).^2)%condition(rpm_isolated))
 
+% This function isolates the horizontal portions of the test, by setting
+% the threshhold for allowable change in value between points
 function [fzMasked] = mask_data(fz)
 fzMasked=fz;
 fzMasked(abs([diff(fz) 0])>0.008)=NaN;
 figure
 plot(fzMasked)
 
+% This function plots the rpm vs thrust
 function plot_rpm_thrust(rpm,fz)
 t = 1:length(omega);
 [omegaMasked,rpmMasked] = mask_data(omega,rpm);
@@ -303,7 +313,6 @@ figure('Name','RPM with function')
 rpm_new = polyval(p,omega);
 plot(t,rpm_new,t,rpm)
 legend('adjusted PX4','RPM')
-
 
 % This function solves for the matrix average value of c_T. If the system
 % is truly linear, this c_T should solve Fz = c_T * w^2

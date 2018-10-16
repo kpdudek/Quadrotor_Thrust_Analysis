@@ -380,7 +380,8 @@ plot(x,T(1,:),'r',x,T(2,:),'g',x,T(3,:),'b',x,ft(1,:),'r:',x,ft(2,:),'g:',x,ft(3
 legend({'Fz','Tx','Ty'},'Location','northwest')
 %title('Estimated FTs Using lsqnonlin to Determine Coefficients of ct(w)')
 
-
+% This function plots the independent values of C_t versus the omega value
+% they occured at
 function plot_independent_vs_omega(omega,n1,n2,independent_coef)
 len_coef = length(independent_coef(1,:));
 ave_omega_array = zeros(4,len_coef);
@@ -400,7 +401,9 @@ end
 figure('Visible','on','Name','Omega vs Independent Coefs')
 plot(ave_omega,independent_coef(1,:),ave_omega,independent_coef(2,:),ave_omega,independent_coef(3,:),ave_omega,independent_coef(4,:))
 
-
+% This function calculates the mean squared error between the estimated
+% FT values using the calculated C_t and the true value of FT from the
+% sensor
 function mean_squared_error(ft,FT_true,data)
 error = immse(FT_true,ft);
 print_stars()

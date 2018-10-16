@@ -436,6 +436,8 @@ xlabel('time')
 ylabel('RPM')
 legend('omega','rpm','omegaMasked','rpmMasked','Location','northwest')
 
+%This function applies fits to the omega vs rpm plot to check the
+%relationship
 function linear_fits(omega,rpm)
 t = 1:length(omega);
 [omegaMasked,rpmMasked] = mask_data(omega,rpm);

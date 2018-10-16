@@ -1,4 +1,13 @@
 function Single_Motor_Test
+%%% This function takes the data in from the single motor test using the
+%%% Pixhawk. This test was replaced with the single motor driven by an
+%%% arduino with a tachometer for the rpm reading.
+%%% If you're reading this, open the function Single_Motor_Arduino.m
+
+%%% Output from this funtion feeds into Single_Motor_Analysis
+%%% The output is in the form of a .mat file to speed up the runtime, as
+%%% this function really only needs to be run once
+
 file = 'Single_Motor_Test_WithFT_20180711';
 
 [a_fz,a_tx,a_ty,a_tz,a_o1,a_o2,a_o3,a_o4] = Align_Data(file);
@@ -6,6 +15,9 @@ file = 'Single_Motor_Test_WithFT_20180711';
 %save([mfilename '_data_2018_07_11_Single_Motor_Test_WithFT'],'a_fz','a_tx','a_ty','a_tz','a_o1','a_o2','a_o3','a_o4')
 
 
+%This function calculates the offset between the datasets by looping
+%through the isolated peak section and calculating the score at each
+%possible alignment
 function [a_fz,a_tx,a_ty,a_tz,a_o1,a_o2,a_o3,a_o4] = Align_Data(file)
 [o1,o2,o3,o4,tp] = PX4_CSV_Plotter_V2(file);
 [ffz,ftx,fty,ftz,t_sl] = ATI_AXIA80_LOG_Processor_V2(file);
@@ -53,6 +65,8 @@ plot(a_o2_p)
 hold on
 plot(a_fy_p)
 
+%This function takes the offset from Align_Data and actually aligns all the
+%datasets
 function [a_fz,a_tx,a_ty,a_tz,out_o1,out_o2,out_o3,out_o4] = aligned_data(ffz,ftx,fty,ftz,o1,o2,o3,o4,offset,locs1,locs2)
 FT_length = length(ffz);
 rotor_length = length(o1);
@@ -146,6 +160,8 @@ plot(ax_s2,t2(locs2),pks2,'ko')
 o2_init = s1(1:(locs1(5)+20));
 fz_init = s2(1:(locs2(3)+200));
 
+%Finds the peaks at the end of the test. This is required otherwise the
+%datasets will not represent the same timeframe
 function [locs1,locs2] = end_peaks(s1,s2)
 figure('Visible','on','Name','End Peaks')
 

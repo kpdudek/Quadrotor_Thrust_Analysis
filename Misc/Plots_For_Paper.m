@@ -1,5 +1,7 @@
 function Plots_For_Paper
-
+%This function just plots specific plots for the paper I am writing. This
+%was needed because the matlab tabs messed up the way I wanted the plots to
+%look, so I isolated the plots here
 load('POC_tracks_alignment_data_2018_07_13_4Corners_2Indicators_Acro.mat')
 load('POCidentification_all_coefs_data_2018_07_13_4Corners_2Indicators_Acro.mat')
 load('POCidentification_test_span_data_2018_07_13_4Corners_2Indicators_Acro.mat')

@@ -13,7 +13,7 @@ plot_ft(time,forces,torques)
 end
 
 
-
+% This function parses the .csv from the Axia80 FT sensor
 function [time,elap_time,force_plot,torque_plot] = readfile(filename)
 fid = fopen(filename,'r');
 
@@ -95,6 +95,7 @@ time = 0:time_split:elap_time; %time vector from 0-->total time counting by spli
 
 end
 
+% This function pulls out the max forces and torques, and prints them
 function max_values(forces,torques)
 %max Fx
 fx = forces(:,1);
@@ -136,6 +137,7 @@ res_tz = tz(max_val_tz(1));
 fprintf('\n\n\t<< Max Values >>\n\tForces: FX = %f FY = %f FZ = %f\n\tTorques: TX = %f TY = %f TZ = %f\n\n',res_fx,res_fy,res_fz,res_tx,res_ty,res_tz);
 end
 
+% This function plots the forces and torques taken from the .csv
 function plot_ft(time,force_plot,torque_plot)
 FT_Plots = figure('Visible','on','Name','Force Torque');
 %Forces
@@ -183,6 +185,7 @@ xlabel('Time(s)')
 ylabel('Force(N)')
 end
 
+% This function applies a sliding window filter to the FT readings
 function [sl_pfx,sl_pfy,sl_pfz,sl_ptx,sl_pty,sl_ptz,t_sl] = filter_ft(time,force_plot,torque_plot)
 L = length(force_plot(:,1));
 w = 26;
@@ -277,6 +280,7 @@ xlabel('Time(s)')
 ylabel('Force(N)')
 end
 
+% This function prints the FT readings at the provided time t
 function time_split(time,elap_time,force_plot,torque_plot,t)
 %t = 21;
 step_size = elap_time / length(time);

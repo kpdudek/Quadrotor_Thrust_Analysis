@@ -1,4 +1,7 @@
 function rescaling_test
+% Similar to the CurveFitOmegaRPM function, this function just exists as an
+% experimentation with different curve fits. This one I followed through
+% with however
 load('POCidentification_all_coefs_2018_06_06_Circles_Acro.mat')
 load('POCidentification_test_span_2018_06_06_Circles_Acro.mat')
 

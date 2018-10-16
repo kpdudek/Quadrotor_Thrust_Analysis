@@ -1,4 +1,8 @@
-function ActuatorOutput_vs_Rpm
+function Strobe_Analysis
+% This function plots the rpm reading from the strobometer against the pwm
+% signal. The motors rpm proved to be too inconsistent for this method to
+% work.
+% This function was replaced by Single_Motor_Arduino
 date = 05;
 file = create_file(date);
 dir = string_form(file);
@@ -11,6 +15,7 @@ omega = create_omega_mat(file,date);
 plot_omegaVSstrobe(omega,strobe)
 
 
+% This function appeds suffixes to the filenames so they can be
 function file = create_file(num)
 if num == 25
     file = 'Strobe_log_20180625';
@@ -25,6 +30,8 @@ else
     error('File doesnt exist')
 end
 
+% This function selects the correct vector of strobe data from the given
+% date
 function strobe = load_strobe_data(date)
 if date == 25
     strobe = [1200,1380,2460,2367,2478,2855,5160,0,7984,0,0,2404,2680,4550,6852,0];
@@ -34,12 +41,17 @@ else
     strobe = [0,562,540,511,473,445,425,396,382,413,473,433,485,409.5,433.5,450];
 end
 
+% This function forms the string corresponding to the filepath the data is
+% located in
 function directory = string_form(file)
 directory = sprintf('/home/kurt/ATI_Log_Processor/Test_Data/%s',file);
 
+% This function forms the string of the filename
 function actuator = file_form(file)
 actuator = sprintf('%s_actuator_outputs_0.csv',file);
 
+% This function opens and parses the file containing the actuator output
+% values
 function [o1,o2,o3,o4,tp] = read_actuator_outputs(filename)
 fid = fopen(filename,'r');
 
@@ -77,12 +89,15 @@ fclose(fid);
 t_shift = (t_s(1)-1); %Makes the first time value == 1 so the plot looks cleaner
 tp = t_s - t_shift;
 
+% This function plots the actuator outputs 
 function plot_actuator_outputs(o1,o2,o3,o4)
 figure('Visible','on','Name','Actuator Outputs')
 
 x = 1:length(o1);
 plot(x,o1,'b:',x,o2,'b:',x,o3,'k',x,o4,'b:')
 
+% This function creates the matricies of omega values based on the filename
+% given and date
 function omega = create_omega_mat(file,date)
 if date == 05
     num = 10;
@@ -111,11 +126,14 @@ for i = 1:num
     omega(4,i) = mean(o4);
 end
 
+% This function eliminates the outliers from the dataset
 function [omega,strobe] = eliminate_outliers(omega,strobe)
 index = find(strobe ~= 0);
 strobe = (strobe(index)./2)*60;
 omega = omega(:,index);
 
+% This function plots the omega values versus the corresponding strobe
+% values
 function plot_omegaVSstrobe(omega,strobe)
 omega = omega(3,:);
 [calculated,b] = linear_regression(strobe,omega);
@@ -134,12 +152,14 @@ xlabel('Omega Value')
 ylabel('Strobe Frequency (rpm)')
 legend('Strobe Measurements','Linear Regression','Minimum RPM using Fit','Max RPM using Fit')%,'Poly Fit')
 
+% This function applies a linear fit to the omega versus strobe plot
 function [calculated,b] = linear_regression(strobe,omega)
 x = length(omega);
 Omega = [ones(x,1) omega'];
 b = Omega\(strobe');
 calculated = Omega * b;
 
+% This function applies a polynomial fit to the omega versus strobe plot
 function calculated = poly_fit(strobe,omega)
 coef = polyfit(omega,strobe,2);
 calculated = polyval(coef,omega);
