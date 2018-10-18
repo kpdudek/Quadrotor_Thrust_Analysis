@@ -75,6 +75,8 @@ linear_fits(a_Omega(2,:),a_RPM)
 % output plots to true rpm values
 true_rpm = px4_to_rpm(a_Omega,p,q);
 
+rpm_vs_thrust(a_Omega,a_FT(1,:))
+
 
 
 
@@ -456,14 +458,24 @@ for i = 1:length(omegaMasked)
 end
 
 p = polyfit(isolated_omega_masked,isolated_rpm_masked,2);
-rpm_fit = polyval(p,isolated_omega_masked);
+%rpm_fit = polyval(p,isolated_omega_masked);
 
-plot(isolated_omega_masked,rpm_fit)
+fprintf('%e %e %e \n',p(1),p(2),p(3))
+rpm_fit = -4.16183*10^-3.*(isolated_omega_masked.^2) + 2.26316*10^1.*(isolated_omega_masked) - 1.395736*10^4;
+plot(sort(isolated_omega_masked),sort(rpm_fit))
 
 figure('Name','RPM with function')
 rpm_new = polyval(p,omega);
 plot(t,rpm_new,t,rpm)
 legend('adjusted PX4','RPM')
+
+function rpm_vs_thrust(omega,fz)
+rpm = -4.16183*10^-3.*(omega.^2) + 2.26316*10^1.*(omega) - 1.395736*10^4;
+rad_sec = 0.104719755.*rpm;
+thrust = fz;
+
+save('rpm_thrust','thrust','rad_sec')
+
 
 
 
