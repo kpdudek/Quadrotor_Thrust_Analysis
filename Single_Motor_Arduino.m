@@ -8,7 +8,7 @@ function Single_Motor_Arduino
 if fopen('data.mat') ~= -1
     load('data.mat')
 else
-    file = 'Freq1923_Buffer40';
+    file = 'Single_Motor_2018_08_01_01';
     [ft,tach] = string_form(file);
     [sl_pfz,rpm] = read_files(ft,tach);
 end
@@ -18,7 +18,7 @@ rpm = filter_rpm(rpm);
 plot_data(rpm,sl_pfz)
 
 rpm_start = 130;
-rpm_end = 2850;
+rpm_end = 500;
 fz_start = 1431;
 fz_end = 35240;
 
