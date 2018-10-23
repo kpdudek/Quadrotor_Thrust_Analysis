@@ -47,14 +47,19 @@ title('\omega^2 vs Thrust for all UMASS Tests')
 
 %linfit_RPMvsThrust(rpm_crop,thrust_crop)
 
-load('rpm_thrust')
-omega = rad_sec.^2;
-figure
-plot(omega(1,:),thrust,'.',omega(2,:),thrust,'.',omega(3,:),thrust,'.',omega(4,:),thrust,'.')
-xlabel('\omega^2')
-ylabel('Thrust(N)')
-title('\omega^2 vs Thrust for Quadrotor')
-legend('Motor 1','Motor 2','Motor 3','Motor 4','Location','Northwest')
+
+%%% Load RPM vs thrust data from quad for comparison
+[omega1,thrust1,p1] = load_file('rpm_thrust_20180802_2.mat');
+[omega2,thrust2,p2] = load_file('rpm_thrust_20180808_1.mat');
+[omega3,thrust3,p3] = load_file('rpm_thrust_20180808_2.mat');
+
+disp([p1;p2;p3])
+p = mean([p1,p2,p3]);
+save('coefficients_pwmTOomega','p')
+
+
+figure('Name','\omega^2vsThrust for Quad')
+plot(omega1(1,:).^2,thrust1./4,'.',omega2(1,:).^2,thrust2./4,'.',omega3(1,:).^2,thrust3./4,'.',rpmv1_crop.^2,thrustv1_crop,'+',rpmv2_crop.^2,thrustv2_crop,'+')
 
 
 
@@ -107,5 +112,32 @@ plot(rpm_sq,linfit)
 legend('Thrust','Linear Fit','Location','Northwest')
 xlabel('\omega^{2}')
 ylabel('Thrust')
+
+function [omega,thrust,p] = load_file(filename)
+load(filename)
+omega = rad_sec;
+thrust = thrust;
+p = p;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

@@ -507,7 +507,7 @@ legend('adjusted PX4','RPM')
 
 function rpm_vs_thrust(omega,fz,p)
 % Equation for rpm as a function of pixhawk pwm signals
-rpm = p(1).*(omega.^2) + p(2).*(omega) - p(3);
+rpm = p(1).*(omega.^2) + p(2).*(omega) + p(3);
 
 % Convert rpm to rad/s 
 rad_sec = 0.104719755.*rpm;
