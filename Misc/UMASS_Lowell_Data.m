@@ -53,13 +53,12 @@ title('\omega^2 vs Thrust for all UMASS Tests')
 [omega2,thrust2,p2] = load_file('rpm_thrust_20180808_1.mat');
 [omega3,thrust3,p3] = load_file('rpm_thrust_20180808_2.mat');
 
+disp('Coefficients of pwm to rpm function *1000')
 disp([p1;p2;p3])
 p = mean([p1,p2,p3]);
 save('coefficients_pwmTOomega','p')
 
-
-figure('Name','\omega^2vsThrust for Quad')
-plot(omega1(1,:).^2,thrust1./4,'.',omega2(1,:).^2,thrust2./4,'.',omega3(1,:).^2,thrust3./4,'.',rpmv1_crop.^2,thrustv1_crop,'+',rpmv2_crop.^2,thrustv2_crop,'+')
+umass_vs_quad(omega1,omega2,omega3,thrust1,thrust2,thrust3,rpmv1_crop,thrustv1_crop,rpmv2_crop,thrustv2_crop)
 
 
 
@@ -119,14 +118,23 @@ omega = rad_sec;
 thrust = thrust;
 p = p;
 
+function umass_vs_quad(omega1,omega2,omega3,thrust1,thrust2,thrust3,U_omega1,U_thrust1,U_omega2,U_thrust2)
+% Plotting omega for motor 1 versus 1/4 thrust of quad
+figure('Name','omega^2 vs Thrust for Quad')
+omega1 = (sum(omega1)/4).^2;
+omega2 = (sum(omega2)/4).^2;
+omega3 = (sum(omega3)/4).^2;
+thrust1 = thrust1./4;
+thrust2 = thrust2./4;
+thrust3 = thrust3./4;
+U_omega1 = U_omega1.^2;
+U_omega2 = U_omega2.^2;
 
+plot(omega1,thrust1,'.',omega2,thrust2,'.',omega3,thrust3,'.',U_omega1,U_thrust1,'+',U_omega2,U_thrust2,'+')
 
-
-
-
-
-
-
+mdl = fitlm([omega1,omega2,omega3,U_omega1,U_omega2],[thrust1,thrust2,thrust3,U_thrust1,U_thrust2]);
+figure
+plot(mdl)
 
 
 
