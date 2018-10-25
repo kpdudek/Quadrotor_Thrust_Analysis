@@ -499,6 +499,8 @@ p = polyfit(isolated_omega_masked,isolated_rpm_masked,2);
 %fprintf('%e %e %e \n',p(1),p(2),p(3))
 rpm_fit = p(1).*(isolated_omega_masked.^2) + p(2).*(isolated_omega_masked) + p(3);
 plot(sort(isolated_omega_masked),sort(rpm_fit))
+xlabel('PX4 PWM')
+ylabel('Tachometer RPM')
 
 figure('Name','RPM with function')
 rpm_new = polyval(p,omega);
