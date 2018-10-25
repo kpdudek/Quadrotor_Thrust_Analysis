@@ -39,7 +39,8 @@ e = 1816;
 % plot(rpmhl_crop)
 
 figure
-plot(rpmv1_crop.^2,thrustv1_crop,'.r',rpmv2_crop.^2,thrustv2_crop,'b.',rpmhf_crop.^2,thrusthf_crop,'g.',rpmhl_crop.^2,thrusthl_crop,'k.')
+plot(rpmv1_crop.^2,thrustv1_crop,'.r',rpmv2_crop.^2,thrustv2_crop,'b.',rpmhf_crop.^2,thrusthf_crop,'g.',...
+    rpmhl_crop.^2,thrusthl_crop,'k.')
 legend('Vertical Close','Vertical Far','Horizontal Close','Horizontal Far','Location','Northeast')
 xlabel('\omega^2')
 ylabel('Thrust')
@@ -120,7 +121,7 @@ p = p;
 
 function umass_vs_quad(omega1,omega2,omega3,thrust1,thrust2,thrust3,U_omega1,U_thrust1,U_omega2,U_thrust2)
 % Plotting omega for motor 1 versus 1/4 thrust of quad
-figure('Name','omega^2 vs Thrust for Quad')
+figure('Name','omega^2 vs Thrust for Quad/Single Motor')
 omega1 = (sum(omega1)/4).^2;
 omega2 = (sum(omega2)/4).^2;
 omega3 = (sum(omega3)/4).^2;
@@ -130,12 +131,30 @@ thrust3 = thrust3./4;
 U_omega1 = U_omega1.^2;
 U_omega2 = U_omega2.^2;
 
+quad_omega = [omega2,omega3];%omega1,
+quad_thrust = [thrust2,thrust3];%thrust1,
+u_omega = [U_omega1,U_omega2];
+u_thrust = [U_thrust1,U_thrust2];
+
 plot(omega1,thrust1,'.',omega2,thrust2,'.',omega3,thrust3,'.',U_omega1,U_thrust1,'+',U_omega2,U_thrust2,'+')
+legend('Ave \omega^2 quad1','Ave \omega^2 quad2','Ave \omega^2 quad3','Umass vertical close','Umass vertical far'...
+    ,'Location','eastoutside')
+xlabel('\omega^2')
+ylabel('Thrust (N)')
+title('Raw Single Motor data vs Average Quad \omega w/ thrust/4')
 
-mdl = fitlm([omega1,omega2,omega3,U_omega1,U_omega2],[thrust1,thrust2,thrust3,U_thrust1,U_thrust2]);
-figure
-plot(mdl)
+mdl_quad = fitlm(quad_omega,quad_thrust);
+bq = table2array(mdl_quad.Coefficients(1,'Estimate'));
+mq = table2array(mdl_quad.Coefficients(2,'Estimate'));
 
+mdl_u = fitlm(u_omega,u_thrust);
+bu = table2array(mdl_u.Coefficients(1,'Estimate'));
+mu = table2array(mdl_u.Coefficients(2,'Estimate'));
+
+hold on
+plot(sort(quad_omega),sort(quad_omega).*mq + bq,'r',sort(u_omega),sort(u_omega).*mu + bu,'r')
+
+fprintf('Slope of Umass: %e\nSlope of Quad: %e\n',mu,mq)
 
 
 
