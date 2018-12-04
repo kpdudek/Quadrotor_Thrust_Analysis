@@ -1,0 +1,54 @@
+Camera time:	Tue Dec  4 18:32:12 2018	
+Model:	SC1 Monochrome 8 GB	
+Sensitivity:	35000	ISO
+Shutter:	1/3000	Seconds
+Frame Rate:	1000	Frames/Second
+Horizontal:	1056	Pixels
+Vertical:	592	Pixels
+Sub-sampling:	Off	sub-sample
+Duration:	2	Seconds
+Pre-trigger:	10	percent
+Overclock:	0	level
+Extended Dynamic Range:	0	level
+Genlock:	Off	genlock
+Force monochrome:	Off	Sensor behaves normally
+Multishot Buffers:	1	buffers
+External trigger debounce:	On	5 ms debounce delay after external trigger falling edge
+Review before save:	Off	enable automatic save
+Notes:	&d &t &T
+Overlay notes:	Off	disabled
+Overlay logo:	Off	disabled
+Overlay settings:	Off	disabled
+Overlay frame number:	Off	disabled
+Active pipeline:	H264HIGH:pipelines_factory.txt	configuration
+Pipeline description:	H.264 high encode quality	 
+
+Multishot buffer:	1	number
+Frame count:	2000	frames
+Pre-trigger frames:	200	frames
+Trigger time:	1543948329	(sec since 1970)
+Trigger delay:	0.000874857	sec (time from trigger input to start of triggered frame)
+First saved frame:	-200	where frame zero is the trigger frame
+Last saved frame:	1799	where frame zero is the trigger frame
+Genlock locked:	NA	
+
+DACVREFADC:	0xbb	
+FPGA temp:	34	C
+FPGA temp at last calibration:	34	C
+Sensor temp:	31	C
+Sensor temp at last calibration:	31	C
+Time since dark frame:	19 seconds
+Time since power on:	19 minutes, 10 seconds	
+
+Model number:	0x0001	
+Serial number:	0x014D	
+Hardware revision:	0x0006	
+Hardware configuration:	0x1FF0001	
+Build date:	20150112	(YYYYMMDD)
+IR filter:	True	IR filter is installed
+Sensor type:	Monochrome	sensor
+DDR3 memory size:	8	GB
+Ethernet MAC address:	00:1B:C5:09:61:4D	
+FPGA version:	90	
+Software build date:	20170823162245	(YYYYMMDDhhmmss)
+Software version:	v2.2.2rc10	release

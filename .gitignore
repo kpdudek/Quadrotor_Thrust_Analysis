@@ -1,5 +1,6 @@
 *.m~
 *.fig
 *.MOV
+*.mov
 VideoData.mat
 *.mp4

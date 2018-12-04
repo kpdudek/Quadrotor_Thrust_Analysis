@@ -5,7 +5,7 @@ else
     play_video = 0;
 end
 
-filename = 'QuadVideo_Cannon_0-50Throttle.MOV';
+filename = 'slomo_1543948329.mov';
 
 vidObj = VideoReader(filename);
 vidHeight = vidObj.Height;
