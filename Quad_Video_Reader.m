@@ -19,7 +19,7 @@ k = 1;
 i = 1;
 while hasFrame(vidObj)
     if i>0%~mod(k,4)
-        frames(i).cdata = uint8(rgb2gray(readFrame(vidObj)) > 150);
+        frames(i).cdata = uint8(rgb2gray(readFrame(vidObj))> 32);
         frames(i).colormap = colormap(gray(2));
         i = i+1;
     end
