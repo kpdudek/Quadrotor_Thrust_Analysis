@@ -40,7 +40,7 @@ if play_video
     set(gcf,'position',[150 150 vidObj.Width vidObj.Height]);
     set(gca,'units','pixels');
     set(gca,'position',[0 0 vidObj.Width vidObj.Height]);
-    movie(frames,1,vidObj.FrameRate);
+    movie(frames,1,.5)%vidObj.FrameRate);
 end
 
 function saveframes(times_of_interest)

@@ -56,7 +56,7 @@ title('\omega^2 vs Thrust for all UMASS Tests')
 
 disp('Coefficients of pwm to rpm function *1000')
 disp([p1;p2;p3])
-p = mean([p1,p2,p3]);
+p = mean([p1;p2;p3]);
 save('coefficients_pwmTOomega','p')
 
 umass_vs_quad(omega1,omega2,omega3,thrust1,thrust2,thrust3,rpmv1_crop,thrustv1_crop,rpmv2_crop,thrustv2_crop)
