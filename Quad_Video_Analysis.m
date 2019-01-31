@@ -1,6 +1,7 @@
 function Quad_Video_Analysis
 fprintf('Loading video...\n')
-frames = Quad_Video_Reader('Dont display video');
+% Load the video
+frames = Quad_Video_Reader('Idle_20190131_Test2.mov');
 fprintf('Video loaded...\n\n')
 
 close figure 1
