@@ -1,23 +1,25 @@
 function Quad_Video_SingleFrameAnalysis
-load('Frames_of_Interest.mat')
+load('Single_Frame')
 
 % Get the size of the image to be used in the for loop
-[vidHeight,vidWidth,depth] = size(frames_of_interest(1).cdata);
+[vidHeight,vidWidth,depth] = size(frame);
 
 % Take the first image from frames of interest, and convert to grayscale,
 % then binary
-image_gry = rgb2gray(frames_of_interest(1).cdata);
-image_bin = image_gry > 125;
+% image_gry = rgb2gray(frames_of_interest(1).cdata);
+% image_bin = image_gry > 125;
 
 % Loop over the image, starting from the top, in order to find the tip of
 % the prop adapter
 prop_x = [];
 prop_y = [];
+image = frame.cdata;
+color_map = frame.colormap;
 
 flag = 0; % Flag to break out of the nested loop
 for y = 1:vidHeight
     for x = 1:vidWidth
-        if image_bin(y,x) == 0 % Threshold to indicate top of black prop adapter vs the white background
+        if image(y,x) == 0 % Threshold to indicate top of black prop adapter vs the white background
             prop_x = x;
             prop_y = y;
             flag = 1;
@@ -32,11 +34,11 @@ end
 %%% Set up a figure window and display the selected frame with 
 figure
 
-image_bin(1:prop_y,prop_x-2:prop_x+2) = 0; % Draw a line from top of image to the top of the prop adapter
-image_bin(655-2:655+2,870:1074) = 241; % Draw the dimension of the motor
+% image(1:prop_y,prop_x-2:prop_x+2) = 0; % Draw a line from top of image to the top of the prop adapter
+% image(655-2:655+2,870:1074) = 241; % Draw the dimension of the motor
 
 % Display the grayscale image with the overlays 
-imshow(image_bin,'Border','Tight','InitialMagnification','fit'); hold on;
+imshow(image,color_map,'Border','Tight','InitialMagnification','fit'); hold on;
 
 
 %%% Convert distances in pixels to inches

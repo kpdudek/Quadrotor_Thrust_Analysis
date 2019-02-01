@@ -7,13 +7,17 @@ else
     play_video = 0;
 end
 
-%filename = 'slomo_1543948329.mov';
+% error check to see if the video file is in the current directory
+file_dir = dir(filename);
+return_size = size(file_dir);
+if return_size(1) == 0
+    error('Navigate to the files directory first')
+end
+
 
 % Set up the video reader object and pass the video file to it
 % The height and width of the video is read from the object and used to
 %   initialize a struct to store the frames
-fprintf('cd %s','/home/kurt/Dropbox/QuadVideos/')
-cd /home/kurt/Dropbox/QuadVideos/
 vidObj = VideoReader(filename);
 vidHeight = vidObj.Height;
 vidWidth = vidObj.Width;
@@ -47,7 +51,7 @@ end
 % Unless a second argument was passed to the function, open a figure window
 %   and play the video
 if play_video
-    imshow(frames(550).cdata)%,frames(550).colormap,'Border','Tight','InitialMagnification','fit'); hold on;
+    imshow(frames(550).cdata,frames(550).colormap)%,'Border','Tight','InitialMagnification','fit'); hold on;
     
     %%% PLAY VIDEO BACK
     set(gcf,'position',[150 150 vidObj.Width vidObj.Height]);
