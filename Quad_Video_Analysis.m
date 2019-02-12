@@ -1,13 +1,13 @@
 function Quad_Video_Analysis
 fprintf('Loading video...\n')
 % Load the video
-frames = Quad_Video_Reader('QuadR2_20190201_Throttle0_Idle.mov');
+frames = Quad_Video_Reader('QuadR2_20190201_Throttle0_Idle.mov','No Display');
 fprintf('Video loaded...\n\n')
 
 close figure 1
 
 % Get the size of the image to be used in the for loop
-[vidHeight,vidWidth,depth] = size(frames(1).cdata);
+[vidHeight,vidWidth] = size(frames(1).cdata);
 
 % Loop over the image, starting from the top, in order to find the tip of
 % the prop adapter

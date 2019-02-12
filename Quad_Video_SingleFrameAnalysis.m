@@ -1,8 +1,8 @@
 function Quad_Video_SingleFrameAnalysis
-load('Single_Frame')
+load('Single_Frame1.mat')
 
 % Get the size of the image to be used in the for loop
-[vidHeight,vidWidth,depth] = size(frame);
+[vidHeight,vidWidth,] = size(frame.cdata);
 
 % Take the first image from frames of interest, and convert to grayscale,
 % then binary
@@ -34,8 +34,8 @@ end
 %%% Set up a figure window and display the selected frame with 
 figure
 
-% image(1:prop_y,prop_x-2:prop_x+2) = 0; % Draw a line from top of image to the top of the prop adapter
-% image(655-2:655+2,870:1074) = 241; % Draw the dimension of the motor
+image(1:prop_y,prop_x-2:prop_x+2) = 0; % Draw a line from top of image to the top of the prop adapter
+image(325-2:325+2,20:176) = 1; % Draw the dimension of the motor
 
 % Display the grayscale image with the overlays 
 imshow(image,color_map,'Border','Tight','InitialMagnification','fit'); hold on;
@@ -43,7 +43,7 @@ imshow(image,color_map,'Border','Tight','InitialMagnification','fit'); hold on;
 
 %%% Convert distances in pixels to inches
 if fopen('Motor_Pixel.mat') == -1
-    motor_pix = 204; % This needs to be measured for every test
+    motor_pix = (176-20); % This needs to be measured for every test
     save('Motor_Pixel.mat','motor_pix')
 else
     load('Motor_Pixel.mat')

@@ -51,7 +51,7 @@ end
 % Unless a second argument was passed to the function, open a figure window
 %   and play the video
 if play_video
-    imshow(frames(550).cdata,frames(550).colormap)%,'Border','Tight','InitialMagnification','fit'); hold on;
+    imshow(frames(553).cdata,frames(550).colormap)%,'Border','Tight','InitialMagnification','fit'); hold on;
     
     %%% PLAY VIDEO BACK
     set(gcf,'position',[150 150 vidObj.Width vidObj.Height]);
