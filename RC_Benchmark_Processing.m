@@ -4,14 +4,20 @@ function data = RC_Benchmark_Processing()
 %%% Filenames to read from
 %%% r/R values for the trials
 data = {};
-filenames = {'Test1_NoArm.csv','Test2_Arm_Configuration_0.75.csv','Test3_Arm_Configuration_1.5.csv',...
-    'Test4_Arm_Configuration_2.25.csv','Test5_Arm_Configuration_3.00.csv','Test6_Arm_Configuration_3.75.csv'};
-r_div_R = {'FS','.1875','.375','.5625','.75','.9375'};
+
+% filenames = {'Test1_NoArm.csv','Test2_Arm_Configuration_0.75.csv','Test3_Arm_Configuration_1.5.csv',...
+%     'Test4_Arm_Configuration_2.25.csv','Test5_Arm_Configuration_3.00.csv','Test6_Arm_Configuration_3.75.csv'};
+% r_div_R = {'FS','.1875','.375','.5625','.75','.9375'};
+
+filenames = dir('*.csv');
+load('r.mat')
+
+r_div_R = r./8;
 
 %%% Open a figure and then read then loop to read each file
 figure('Name','RPM')
 for i = 1: length(filenames)
-    filename = filenames{i};
+    filename = filenames(i).name;
     
     %%% Get rpm and thrust values from RC Benchmarks .csv file
     [rpm,thrust] = read_file(filename);
@@ -49,7 +55,12 @@ for i = 1: length(filenames)
 %     plot(thrust_out)
     
     %%% Plot the cleaned data
-    plot(omega_sq,thrust_out,'.')
+    if i == 1
+        leg = sprintf('Free Space');
+    else
+        leg = sprintf('r/R = %.3f',r_div_R(i-1));
+    end
+    plot(omega_sq,thrust_out,'.','DisplayName',leg)
     hold on
     
     %%% Apply a linear fit to the test runs data
@@ -58,7 +69,12 @@ for i = 1: length(filenames)
     p=table2array(lin_fit.Coefficients(2,'Estimate'));
     linfit_vals = omega_sq.*p+q;
     
-    plot(omega_sq,linfit_vals)
+    if i == 1
+        leg = sprintf('FS LinFit');
+    else
+        leg = sprintf('LinFit%d',i-1);
+    end
+    plot(omega_sq,linfit_vals,'DisplayName',leg)
     hold on
     
     %%% Print the slope and intercept values for the linear fit
@@ -73,8 +89,9 @@ end
 title('Omega^2 vs Thrust for Square Tube Blockage')
 xlabel('Omega ^2')
 ylabel('Thrust')
-legend('Free Space','FS linfit','r/R=.1875','linfit1','r/R=.375','linfit2','r/R=.5625','linfit3',...
-    'r/R=.75','linfit4','r/R=.9375','linfit5','Location','northwest')
+legend('show')
+%legend('Free Space','FS linfit','r/R=.1875','linfit1','r/R=.375','linfit2','r/R=.5625','linfit3',...
+    %'r/R=.75','linfit4','r/R=.9375','linfit5','Location','northwest')
 
 end
 
