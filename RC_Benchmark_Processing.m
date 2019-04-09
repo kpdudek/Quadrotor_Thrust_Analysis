@@ -22,6 +22,32 @@ for i = 1: length(filenames)
     %%% Convert RPM to Radians and then square it
     omega_sq = ((rpm_out ./(2*pi))/60).^2;
     
+    
+    %%% Loop through the RPM values and find the average tare reading for
+    %%% thrust
+    tare = [];
+    for j = 1:length(omega_sq)
+        if omega_sq(j) == 0
+            tare(end+1) = thrust_out(j);
+        else
+            break
+        end            
+    end
+    
+    %%% Check to make sure tare has values to prevent mean(tare) from being
+    %%% NaN 
+    if length(tare) ~= 0
+        tare = mean(tare); % calculate the average tare
+    else
+        tare = 0;
+    end
+    thrust_out = thrust_out - tare; % adjust the thrust readings by the tare value
+    
+    %%% Plot raw thrust data
+%     name = sprintf('Test %d',i);
+%     figure('Name',name)
+%     plot(thrust_out)
+    
     %%% Plot the cleaned data
     plot(omega_sq,thrust_out,'.')
     hold on
