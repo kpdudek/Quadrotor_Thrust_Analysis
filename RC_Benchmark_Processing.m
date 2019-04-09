@@ -5,14 +5,19 @@ function data = RC_Benchmark_Processing()
 %%% r/R values for the trials
 data = {};
 
-% filenames = {'Test1_NoArm.csv','Test2_Arm_Configuration_0.75.csv','Test3_Arm_Configuration_1.5.csv',...
-%     'Test4_Arm_Configuration_2.25.csv','Test5_Arm_Configuration_3.00.csv','Test6_Arm_Configuration_3.75.csv'};
-% r_div_R = {'FS','.1875','.375','.5625','.75','.9375'};
-
+%%% Open the RC Benchmark .csv files in the current folder
+%%% NOTE: the current directory must contain only the RC Benchmark .csv
+%%% files and the .mat file with the prop to tip distances
+%%%     r = []; %containing the prop to tip distances
+%%%     RC Benchmark files should start with the free space test and then
+%%%     the varying distances to the object
+%%%     NOTE: The RC Benchmark files must be sorted since they are read
+%%%     sequentially by the program
 filenames = dir('*.csv');
 load('r.mat')
 
-r_div_R = r./8;
+%%% Calculate the distance from prop tip to 'ground' divided by prop radius
+r_div_R = r./4;
 
 %%% Open a figure and then read then loop to read each file
 figure('Name','RPM')
@@ -54,7 +59,8 @@ for i = 1: length(filenames)
 %     figure('Name',name)
 %     plot(thrust_out)
     
-    %%% Plot the cleaned data
+    %%% Plot the cleaned data. If statement sets the legend entry to be
+    %%% that for free space or the corrent r/R value
     if i == 1
         leg = sprintf('Free Space');
     else
@@ -63,7 +69,8 @@ for i = 1: length(filenames)
     plot(omega_sq,thrust_out,'.','DisplayName',leg)
     hold on
     
-    %%% Apply a linear fit to the test runs data
+    %%% Apply a linear fit to the test runs data. If statement sets the
+    %%% legend to be for free space or the correct r/R value
     lin_fit = fitlm(omega_sq,thrust_out,'linear');
     q=table2array(lin_fit.Coefficients(1,'Estimate'));
     p=table2array(lin_fit.Coefficients(2,'Estimate'));
