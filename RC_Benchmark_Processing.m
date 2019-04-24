@@ -3,7 +3,7 @@ function data = RC_Benchmark_Processing()
 %%% Array to store omega & thrust data
 %%% Filenames to read from
 %%% r/R values for the trials
-data = {};
+data = struct('Omega_SQ',[],'Thrust',[],'Omega_SQ_Masked',[],'Thrust_Masked',[],'Tare',0,'Length',[],'Masked_Length',[]);
 
 %%% Open the RC Benchmark .csv files in the current folder
 %%% NOTE: the current directory must contain only the RC Benchmark .csv
@@ -20,7 +20,7 @@ load('r.mat')
 r_div_R = r./4;
 
 %%% Open a figure and then read then loop to read each file
-figure('Name','RPM')
+%figure('Name','RPM')
 for i = 1: length(filenames)
     filename = filenames(i).name;
     
@@ -42,11 +42,11 @@ for i = 1: length(filenames)
             tare(end+1) = thrust_out(j);
         else
             break
-        end            
+        end
     end
     
     %%% Check to make sure tare has values to prevent mean(tare) from being
-    %%% NaN 
+    %%% NaN
     if length(tare) ~= 0
         tare = mean(tare); % calculate the average tare
     else
@@ -54,10 +54,26 @@ for i = 1: length(filenames)
     end
     thrust_out = thrust_out - tare; % adjust the thrust readings by the tare value
     
+    data(i).Omega_SQ = omega_sq;
+    data(i).Thrust = thrust_out;
+    data(i).Tare = tare;
+    data(i).Length = 1:length(thrust_out);
+    
     %%% Plot raw thrust data
-%     name = sprintf('Test %d',i);
-%     figure('Name',name)
-%     plot(thrust_out)
+    %     name = sprintf('Test %d',i);
+    %     figure('Name',name)
+    %     plot(thrust_out)
+    
+    
+    % Mask the data to pull out only the horizontal portions
+    [omegaMasked,thrustMasked] = mask_data(omega_sq,thrust_out);
+    data(i).Omega_SQ_Masked = omegaMasked;
+    data(i).Thrust_Masked = thrustMasked;
+    data(i).Masked_Length = 1:length(thrustMasked);
+    
+    % figure('Name','Omega'); plot(omegaMasked,'.');
+    % figure('Name','Thrust'); plot(thrustMasked,'.');
+    
     
     %%% Plot the cleaned data. If statement sets the legend entry to be
     %%% that for free space or the corrent r/R value
@@ -66,46 +82,42 @@ for i = 1: length(filenames)
     else
         leg = sprintf('r/R = %.3f',r_div_R(i-1));
     end
-    plot(omega_sq,thrust_out,'.','DisplayName',leg)
+    plot(omegaMasked,thrustMasked,'.','DisplayName',leg)
     hold on
     
     %%% Apply a linear fit to the test runs data. If statement sets the
     %%% legend to be for free space or the correct r/R value
-    lin_fit = fitlm(omega_sq,thrust_out,'linear');
+    lin_fit = fitlm(omegaMasked,thrustMasked,'linear');
     q=table2array(lin_fit.Coefficients(1,'Estimate'));
     p=table2array(lin_fit.Coefficients(2,'Estimate'));
-    linfit_vals = omega_sq.*p+q;
+    linfit_vals = omegaMasked.*p+q;
     
     if i == 1
         leg = sprintf('FS LinFit');
     else
         leg = sprintf('LinFit%d',i-1);
     end
-    plot(omega_sq,linfit_vals,'DisplayName',leg)
+    plot(omegaMasked,linfit_vals,'-','DisplayName',leg)
     hold on
     
     %%% Print the slope and intercept values for the linear fit
     fprintf('Linfit %d: slope: %.4f, intercpt: %.4f\n',i,p,q)
+    fprintf('Rsquared for linfit %d = %.3f\n\n',i,lin_fit.Rsquared.Ordinary)
     
-    %%% Store the Omega^2 and 
-    data{end+1} = [omega_sq;thrust_out];
-       
 end
 
 %%% Plot properties
-title('Omega^2 vs Thrust for Square Tube Blockage')
+title('Omega^2 vs Thrust')
 xlabel('Omega ^2')
 ylabel('Thrust')
 legend('show')
-%legend('Free Space','FS linfit','r/R=.1875','linfit1','r/R=.375','linfit2','r/R=.5625','linfit3',...
-    %'r/R=.75','linfit4','r/R=.9375','linfit5','Location','northwest')
 
 end
 
 
 %%% -----------
 %%% Functions
-%%% ----------- 
+%%% -----------
 
 %This function opens the .csv given and returns the rpm(rad/s) and thrust
 %value (kg*f)
@@ -160,3 +172,27 @@ legend('Thrust','Linear Fit','Location','Northwest')
 xlabel('\omega^{2}')
 ylabel('Thrust')
 end
+
+%Function that pulls out the horizontal portions of the dataset
+function [omegaMasked_out,thrustMasked_out] = mask_data(omega,thrust)
+omegaMasked=omega;
+omegaMasked(abs([diff(omega) 0])>0.8)=NaN;
+thrustMasked=thrust;
+thrustMasked(abs([diff(thrust) 0])>.075)=NaN;
+
+omegaMasked_out = [];
+thrustMasked_out = [];
+for i = 1:length(omegaMasked)
+    if (num2str(omegaMasked(i)) ~= "NaN") && (num2str(thrustMasked(i)) ~= "NaN")
+        omegaMasked_out(end+1) = omegaMasked(i);
+        thrustMasked_out(end+1) = thrustMasked(i);
+    end
+end
+
+end
+
+
+
+
+
+
