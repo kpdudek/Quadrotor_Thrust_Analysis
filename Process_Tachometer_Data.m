@@ -20,7 +20,7 @@ plot_data(rpm_resamp,omega_resamp,ft(3,:))
 
 
 
-%%% ARE YOU TWEAKING THE ALIGNMENT?
+%%% Is the alignment being adjusted?
 % read = 0 --> use local variables for alignment
 % read = 1 --> open mat file of values
 %%% if read = 0 write will be used

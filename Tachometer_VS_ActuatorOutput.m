@@ -3,7 +3,7 @@ function Tachometer_VS_ActuatorOutput
 % and tachometer, parses the files and saves the neccesary values in
 % vectors.
 % The values are stored in .mat file rather than output for efficiency
-filename = 'R2_2018_08_15_ConstThrust';
+filename = 'R2_2018_08_02_02';
 [ft,px4,tach] = string_form(filename);
 
 omega = read_pixhawk(px4);

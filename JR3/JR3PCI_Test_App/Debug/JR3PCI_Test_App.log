@@ -1,0 +1,12 @@
+﻿cl : Command line warning D9035: option 'Gm' has been deprecated and will be removed in a future release
+  stdafx.cpp
+cl : Command line warning D9035: option 'Gm' has been deprecated and will be removed in a future release
+  JR3PCI_Test_App.cpp
+c:\_jr3pci_feb26_2015\jr3pci_test_app\jr3pci_test_app.cpp(92): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17763.0\ucrt\stdio.h(1774): note: see declaration of 'sprintf'
+  JR3PCI_ReadForces.cpp
+c:\_jr3pci_feb26_2015\jr3pci_test_app\jr3pci_readforces.cpp(92): error C2146: syntax error: missing ';' before identifier 'sprintf'
+c:\_jr3pci_feb26_2015\jr3pci_test_app\jr3pci_readforces.cpp(92): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17763.0\ucrt\stdio.h(1774): note: see declaration of 'sprintf'
+c:\_jr3pci_feb26_2015\jr3pci_test_app\jr3pci_readforces.cpp(110): error C2044: illegal continue
+  Generating Code...

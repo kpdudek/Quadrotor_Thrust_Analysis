@@ -1,0 +1,7 @@
+1) Build driver via 'bld' command in WDK command-line window. Note: Build both for debug and release.
+2) Update driver date and version in the .inf file. Note: mm/dd/yyyy or inf2cat fails.
+3) Create new CAT file by executing inf2cat.bat in WDK command-line window.
+4) Use the globalsign signtool to sign the CAT file.
+5) Use the globalsign signtool to sign the SYS files.
+
+

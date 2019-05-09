@@ -1,0 +1,79 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Installation INF for JR3 PCI Device Driver for 32-bit 
+; and 64-bit Windows XP, Vista, 7 and 8 platforms.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+[Version]
+Signature = "$Windows NT$"
+Class = Sensors
+ClassGUID = {5175d334-c371-4806-b3ba-71fd53c9258d}
+Provider = %MFG_NAME%
+CatalogFile = JR3PCI.cat
+DriverVer = 02/26/2015,1.1.1.0
+
+[ClassInstall32]
+; Not used but needs section to install on XP.
+
+[SourceDisksNames]
+1 = %DISK_NAME%,,,
+
+[SourceDisksFiles.x86]
+JR3PCI.sys = 1,.\x86
+
+[SourceDisksFiles.amd64]
+JR3PCI.sys = 1,.\amd64
+
+[Manufacturer]
+%MFG_NAME% = Models_JR3PCI_Devices,NTx86,NTamd64
+
+[Models_JR3PCI_Devices.NTx86]
+%JR3PCI_DeviceDesc% = JR3PCI_DDInstall, PCI\VEN_1762&DEV_1111
+%JR3PCI_DeviceDesc% = JR3PCI_DDInstall, PCI\VEN_1762&DEV_1112
+%JR3PCI_DeviceDesc% = JR3PCI_DDInstall, PCI\VEN_1762&DEV_3111
+%JR3PCI_DeviceDesc% = JR3PCI_DDInstall, PCI\VEN_1762&DEV_3112
+
+[Models_JR3PCI_Devices.NTamd64]
+%JR3PCI_DeviceDesc% = JR3PCI_DDInstall, PCI\VEN_1762&DEV_1111
+%JR3PCI_DeviceDesc% = JR3PCI_DDInstall, PCI\VEN_1762&DEV_1112
+%JR3PCI_DeviceDesc% = JR3PCI_DDInstall, PCI\VEN_1762&DEV_3111
+%JR3PCI_DeviceDesc% = JR3PCI_DDInstall, PCI\VEN_1762&DEV_3112
+
+[DestinationDirs]
+JR3PCI_DestinationFiles = 10,System32\Drivers
+
+;;;;;;;;;;;;;;;;;;;;; DDInstall Section ;;;;;;;;;;;;;;;;;;;;;;
+
+[JR3PCI_DDInstall]
+CopyFiles = JR3PCI_DestinationFiles
+AddReg = JR3PCI_Addreg
+
+[JR3PCI_DestinationFiles]
+JR3PCI.sys
+
+[JR3PCI_Addreg]
+HKR,,DriverGUID,,%DRIVER.GUID%
+HKR,,DevLoader,,*ntkern
+HKR,,NTMPDriver,,JR3PCI.sys
+
+;;;;;;;;;;;;;;;;;;;;; DDInstall.Services Section ;;;;;;;;;;;;;;;;;;;;;;
+
+[JR3PCI_DDInstall.Services]
+Addservice = JR3PCI, 0x00000002, JR3PCI_AddService
+
+[JR3PCI_AddService]
+DisplayName    = %DRIVER.SvcDesc%
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 3                  ; SERVICE_DEMAND_START
+ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %10%\System32\Drivers\JR3PCI.sys
+LoadOrderGroup = Base
+
+;;;;;;;;;;;;;;;;;;;;; STRINGS ;;;;;;;;;;;;;;;;;;;;;;
+
+[Strings]
+MFG_NAME = "JR3, Inc."
+DISK_NAME =" JR3 DSP Force Sensor Receiver PCI Adapter Driver Installation Disk"
+JR3PCI_DeviceDesc = "JR3 DSP Force Sensor Receiver PCI Adapter"
+DRIVER.SvcDesc = "JR3 DSP Force Sensor Receiver PCI Adapter"
+DRIVER.GUID = "{67A2A6AF-3259-4fe0-A44C-1851ADB88218}"
+

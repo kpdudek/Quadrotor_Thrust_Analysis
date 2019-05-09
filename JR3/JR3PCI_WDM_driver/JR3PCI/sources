@@ -1,0 +1,69 @@
+#**********************************************************************
+#       Copyright 2015 JR3, Inc
+#
+#**********************************************************************
+
+TARGETNAME=JR3PCI
+TARGETPATH=obj
+TARGETTYPE=DRIVER
+
+#uncomment the following line to build with C++ compiler
+USECXX_FLAG=/Tp
+
+TARGETLIBS= $(DDK_LIB_PATH)\ntstrsafe.lib
+
+INCLUDES=
+
+# Singly linked lists have been optimized in a non-back
+# compatible way for XP and later platforms.  As such, 
+# any binary built with the XP or later DDK and using 
+# singly linked lists will not load on 2000 and earlier
+# platforms without the use of the following define in
+# the build.  This define turns off the new optimizations, 
+# and thus it should only be used for cross-platform 
+# binaries.
+#C_DEFINES = $(C_DEFINES) -D_WIN2K_COMPAT_SLIST_USAGE
+
+!if !defined(DDK_TARGET_OS) || "$(DDK_TARGET_OS)"=="Win2K"
+C_DEFINES=$(C_DEFINES) -DWIN2K 
+!endif
+
+# Define -DDDKBUILD so we can optionally compile in code only when building this driver.
+C_DEFINES = $(C_DEFINES) -DDDKBUILD
+
+
+SOURCES=\
+        registry.c \
+        debug.c \
+        JR3PCI.c \
+        wmi.c \
+        iorw.c \
+        JR3PCI.rc \
+        queue.c \
+        pnp.c \
+        power.c
+PRECOMPILED_INCLUDE=pch.h
+PRECOMPILED_PCH=pch.pch
+PRECOMPILED_OBJ=pch.obj
+NTTARGETFILES=POSTBUILDCOPY
+
+
+#JR3PCI_WMI_TRACE=1
+
+
+!ifdef JR3PCI_WMI_TRACE
+
+C_DEFINES = $(C_DEFINES) -DJR3PCI_WMI_TRACE 
+
+!if ("$(PRECOMPILED_CXX)" == "") && ("$(USECXX_FLAG)" == "")
+RUN_WPP=$(SOURCES)\
+        -km \
+        -func:JR3PCIDebugPrint(AREA,LEVEL,MSG,...)
+!else
+RUN_WPP=$(SOURCES)\
+        -km -dll\
+        -func:JR3PCIDebugPrint(AREA,LEVEL,MSG,...)
+!endif
+
+!endif
+
