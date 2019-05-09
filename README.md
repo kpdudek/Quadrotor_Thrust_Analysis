@@ -36,7 +36,15 @@ Run QGroundContol and calibrate the sensors on the quadcopter before mounting to
 3. Provide five spikes of full roll right separated by ~1 second. These bumps show up on the sensor data and allow the analysis program to find the offset between plots
 4. Now, perform your test run varying throttle, roll and pitch. NOTE: A standard quad battery lasts 6-8 minutes
 5. When the test run has finished, move the .ulg file from the /Log/ folder on the pix hawk's sd card. The pix-hawk names the logs numerically, so you must rename the .ulg file to the same name as the F/T sensor file you just recorded
-6. Navigate to ~/Quadrotor_Thrust_Analysis/pyulog/pyulog and run: python ulog2csv /path/to/file.ulg -o .
+6. Navigate to the folder with the pix-hawk's .ulg file and run:
+    ```
+    ulog2csv filename.ulg
+    ```
+    - This will convert the binary .ulg file into .csv files containing all logged data during the flight
+    - NOTE: if you forgot to clone the repo with the recursive flag clone the submodule with:
+    ```
+    git submodule update --init --recursive
+    ```
 7. Now open matlab and set your working directory to the folder containing all of the files
 
 
