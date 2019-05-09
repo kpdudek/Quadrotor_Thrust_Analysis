@@ -58,11 +58,11 @@ Run QGroundContol and calibrate the sensors on the quadcopter before mounting to
 To get the coefficient matrix there are two scripts that must be run. The two scripts depend on if there is tachometer data in addition to the onboard/FT data.
 
 Without tachometer data run:
-    1. POC_tracks_alignment.m: parse .csv files, align timescales, save into .mat file
-    2. Load .mat file from POC_tracks_alignment.m and analyze
+     1. POC_tracks_alignment.m: parse .csv files, align timescales, save into .mat file
+     2. Load .mat file from POC_tracks_alignment.m and analyze
 With tachometer data, run:
-    1. Tachometer_VS_ActuatorOutput.m: parse .csv files, align timescales, save into .mat file
-    2. Process_Tachometer_Data.m: Load .mat file from Tachometer_VS_ActuatorOutput.m and analyze
+     1. Tachometer_VS_ActuatorOutput.m: parse .csv files, align timescales, save into .mat file
+     2. Process_Tachometer_Data.m: Load .mat file from Tachometer_VS_ActuatorOutput.m and analyze
 
 When running the analysis script, the name of the .mat file must be manually entered.
 
