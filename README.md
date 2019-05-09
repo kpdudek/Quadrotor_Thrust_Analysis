@@ -1,16 +1,20 @@
 # ATI_Log_Processor
 
-Matlab functions that process the data from the PixHawk and ATI Force Torque sensor. The results are  to find the coefficient of thrust of the motors
+Matlab functions that process the data from the PixHawk and a force torque sensor. The is to determine the coefficient of thrust and coefficient of torque for the motors.
+
+An ATI Axia80 was origionally used, but currently a JR3 30E12A4 is being set up as a replacement.
 
 
 ## Setup
 
-Before any test can occur clone the repository using the --recursive option so that the submodule is cloned as well:
+Before any test can occur, clone the repository using the --recursive option so that the submodule is cloned as well:
 ```
 git clone --recursive https://github.com/kpdudek/ATI_Log_Processor.git
 ```
 
 ### Now we will setup the dependencies:
+Instructions are written for a linux enviornment.
+
 First we need to setup the python enviornment:
 ```
 ~$ sudo apt-get install python-setuptools
@@ -18,42 +22,25 @@ First we need to setup the python enviornment:
 ```
 Now we can instal the ulog converter
 ```
-~$ cd ATI_Log_Processor/pyulog/
+~$ cd Quadrotor_Thrust_Analysis/pyulog/
 ~$ sudo python setup.py build install
-```
-Additionally ensure that the ATINetFT.jar application runs and can connect to the sensor using the ip address. First, navigate to the cloned repository and make the application executable as follows:
-```
-~$ cd ATI_Log_Processor
-~$ chmod +x ./ATINetFT.jar
-```
-Ensure that you have a version of java
-```
-~$ sudo apt-get install default-jre
-```
-
-Now launch the application and connect to the sensor using the static ip address of the sensor on the DRI network. Make sure to connect the ethernet cable to a switch before plugging the sensor into an outlet.
-```
-~/ATI_Log_Processor$ java -jar ATINetFT.jar
-
-ip address: 192.168.1.241
 ```
 
 ## Usage
 
-Now, run QGroundContol and calibrate the sensors on the quadcopter before mounting to the stand. Connect the sensor to the dri network before powering it on.
+Run QGroundContol and calibrate the sensors on the quadcopter before mounting to the stand.
 
-Data collection on the quad must follow this procedure:
-```
-0. Run ATINetFT.jar and connect to the sensor. Click on log data and create a new folder ~/ATI_Log_Processor/Test_Data/R2_Date_TestDescription_FlightMode to save the log file to.
-1. Arm the quadcopter and press "Collect Data" as close to simultaneously as possible. The analysis program can handle misalignemnt of a few seconds at max
-2. Move the throttle inbetween the 2nd and 3rd line then wait 3 seconds to let the motors equalize
-3. Provide three spikes of full roll right separated by ~1 second. These bumps show up on the sensor data and allow the analysis program to find the offset between plots
-4. Now, perform your test run varying throttle, roll and pitch
-5. When the test run has finished, move the .ulg file from the /Log/ folder on the pix hawk's sd card. The pix hawk names the logs numerically, so you must rename the .ulg file to the same name as the F/T sensor file you just recorded
-6. Navigate to ~/ATI_Log_Processor/pyulog/pyulog and run: python ulog2csv /path/to/file.ulg -o .
+### Data collection on the quad must follow this procedure:
+1. Arm the quadcopter and begin F/T data collection (as close to simultaneously as possible). The analysis program can handle misalignemnt of a few seconds at max
+2. Move the throttle to ~10% then wait 3 seconds to let the motors equalize
+3. Provide five spikes of full roll right separated by ~1 second. These bumps show up on the sensor data and allow the analysis program to find the offset between plots
+4. Now, perform your test run varying throttle, roll and pitch. NOTE: A standard quad battery lasts 6-8 minutes
+5. When the test run has finished, move the .ulg file from the /Log/ folder on the pix hawk's sd card. The pix-hawk names the logs numerically, so you must rename the .ulg file to the same name as the F/T sensor file you just recorded
+6. Navigate to ~/Quadrotor_Thrust_Analysis/pyulog/pyulog and run: python ulog2csv /path/to/file.ulg -o .
 7. Now open matlab and set your working directory to the folder containing all of the files
-```
 
+
+### MATLAB Analysis
 1. In POC_tracks_alignment.m type in the csv filename to read from on line 2, and the filename that the output will be saved to   in line 44
 2. Run POC_tracks_alignment.m
 
