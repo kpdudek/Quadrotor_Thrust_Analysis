@@ -59,7 +59,7 @@ To get the coefficient matrix there are two scripts that must be run. The two sc
 
 Without tachometer data run:
 1. POC_tracks_alignment.m: parse .csv files, align timescales, save into .mat file
-2. Load .mat file from POC_tracks_alignment.m and analyze
+2. POC_identification.m: Load .mat file from POC_tracks_alignment.m and analyze
 
 With tachometer data, run:
 1. Tachometer_VS_ActuatorOutput.m: parse .csv files, align timescales, save into .mat file
